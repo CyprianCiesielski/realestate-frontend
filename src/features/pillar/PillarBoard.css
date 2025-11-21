@@ -1,0 +1,81 @@
+.board-container {
+    display: flex; /* Kolumny obok siebie */
+    gap: 20px;
+    overflow-x: auto; /* Przewijanie w bok, jeśli się nie mieszczą */
+    padding-bottom: 20px;
+}
+
+.pillar-column {
+    min-width: 300px; /* Stała szerokość kolumny */
+    max-width: 300px;
+    background-color: #f4f5f7; /* Kolor tła kolumny (jak w Jira/Trello) */
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.pillar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.pillar-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #172b4d;
+}
+
+.item-count {
+    background: #dfe1e6;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.pillar-items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 100px;
+}
+
+/* Wygląd pojedynczego zadania (karteczka) */
+.item-card {
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.item-card:hover {
+    background-color: #fafafa;
+    transform: translateY(-2px);
+}
+
+.item-title {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.item-status {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.empty-state {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    font-size: 0.9em;
+}

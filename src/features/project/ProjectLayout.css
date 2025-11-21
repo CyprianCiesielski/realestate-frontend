@@ -1,0 +1,41 @@
+.projects-layout {
+    display: flex; /* Magia: Ustawia elementy obok siebie */
+    height: calc(100vh - 60px); /* Pełna wysokość ekranu (minus nagłówek App) */
+}
+
+.projects-sidebar {
+    width: 250px; /* Stała szerokość paska bocznego */
+    background-color: #f0f0f0; /* Jasnoszary jak w IntelliJ */
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto; /* Pasek przewijania, jeśli projektów jest dużo */
+}
+
+.projects-content {
+    flex: 1; /* Zajmij całą resztę miejsca */
+    padding: 20px;
+    overflow-y: auto;
+    background-color: white;
+}
+
+/* Styl pojedynczego linku */
+.project-link {
+    display: block;
+    padding: 10px;
+    margin-bottom: 5px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.project-link:hover {
+    background-color: #e0e0e0;
+}
+
+/* Styl aktywnego elementu (podświetlenie) */
+.project-link.active {
+    background-color: #007bff; /* Niebieski IntelliJ */
+    color: white;
+    font-weight: bold;
+}

@@ -7,26 +7,40 @@ import "./index.css"; // Globalne style
 
 // Importujemy nasze nowe strony
 import { DashboardPage } from "./pages/DashboardPage.tsx";
-import { ProjectListPage } from "./pages/ProjectListPage.tsx";
+import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
+import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
 
 // 1. Tworzymy definicję routera
 const router = createBrowserRouter([
   {
-    path: "/", // Główna ścieżka aplikacji
-    element: <App />, // <App /> jest teraz "layoutem" dla wszystkich pod-stron
-
-    // "Dzieci" to strony, które będą renderowane w <Outlet />
+    path: "/",
+    element: <App />, // Główny layout aplikacji (Header)
     children: [
       {
-        path: "/", // Gdy użytkownik jest na "/"
+        path: "/",
         element: <DashboardPage />,
       },
       {
-        path: "/projects", // Gdy użytkownik jest na "/projects"
-        element: <ProjectListPage />,
+        // 1. Wchodzimy do sekcji "/projects"
+        path: "/projects",
+        element: <ProjectsLayout />, // Ładujemy nasz nowy Layout z listą po lewej
+
+        // 2. Co ma być w prawej kolumnie (Outlet)?
+        children: [
+          {
+            index: true, // To się wyświetli, gdy adres to samo "/projects"
+            element: (
+              <div style={{ padding: 20, color: "#888" }}>
+                ← Wybierz projekt z listy po lewej
+              </div>
+            ),
+          },
+          {
+            path: ":projectId", // To się wyświetli, gdy adres to "/projects/5"
+            element: <ProjectDetailsPage />,
+          },
+        ],
       },
-      // W przyszłości dodasz tu np.:
-      // { path: '/projects/:id', element: <ProjectDetailsPage /> }
     ],
   },
 ]);

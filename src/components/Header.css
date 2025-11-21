@@ -1,0 +1,101 @@
+.header {
+    display: flex;             /* Włączamy Flexboxa -> elementy ustawiają się w linii */
+    justify-content: space-between; /* Rozsuwamy elementy: Lewo <-> Środek <-> Prawo */
+    align-items: center;       /* Wyrównujemy w pionie (żeby nic nie wisiało wyżej/niżej) */
+
+    height: 60px;              /* Wysokość paska */
+    padding: 0 20px;           /* Odstępy po bokach */
+    background-color: white;   /* Białe tło */
+    border-bottom: 1px solid #dfe1e6; /* Delikatna linia na dole */
+
+    /* Opcjonalnie: cień, żeby pasek się "odkleił" od tła */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    /* Żeby header był zawsze na wierzchu */
+    position: relative;
+    z-index: 10;
+}
+
+/* 2. LOGO (Lewa strona) */
+.logo-text {
+    font-size: 1.3rem;
+    font-weight: 800;      /* Gruby tekst */
+    color: #172b4d;        /* Ciemny granat */
+    text-decoration: none; /* Usuwamy podkreślenie linku */
+    letter-spacing: -0.5px;
+}
+
+/* 3. WYSZUKIWARKA (Środek) */
+.search-wrapper {
+    display: flex;        /* Żeby lupa była obok pola tekstowego */
+    align-items: center;
+
+    width: 400px;         /* Szerokość wyszukiwarki */
+    padding: 6px 12px;
+
+    background-color: #f4f5f7; /* Jasnoszare tło (jak w Jira/Trello) */
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;   /* Zaokrąglone rogi */
+    transition: border-color 0.2s;
+}
+
+/* Efekt po kliknięciu w wyszukiwarkę */
+.search-wrapper:focus-within {
+    border-color: #4c9aff; /* Niebieska ramka */
+    background-color: white;
+}
+
+.search-icon {
+    color: #6b778c;       /* Szary kolor lupy */
+    margin-right: 8px;
+}
+
+.search-input {
+    border: none;         /* Usuwamy domyślną ramkę inputa */
+    background: transparent; /* Przezroczyste tło inputa */
+    outline: none;        /* Usuwamy niebieską obwódkę przeglądarki */
+    width: 100%;
+    font-size: 0.9rem;
+    color: #172b4d;
+}
+
+/* 4. IKONY (Prawa strona) */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;            /* Odstępy między ikonami */
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #6b778c;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;        /* Centrowanie samej ikonki w przycisku */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.icon-btn:hover {
+    background-color: #f4f5f7;
+    color: #172b4d;
+}
+
+/* Awatar użytkownika */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #0052cc; /* Niebieskie tło */
+    color: white;
+    border-radius: 50%; /* Robi kółko */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+}
