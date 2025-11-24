@@ -57,3 +57,39 @@
 .board-section {
     margin-top: 40px;
 }
+
+.add-pillar-btn {
+    /* 1. Pozycjonowanie - to sprawia, że guzik "pływa" */
+    position: fixed;
+    bottom: 40px;  /* Odległość od dołu ekranu */
+    right: 40px;   /* Odległość od prawej krawędzi */
+    z-index: 100;  /* Zapewnia, że guzik jest nad innymi elementami */
+
+    /* 2. Wygląd i rozmiar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    width: auto;   /* 👈 WAŻNE: Zmieniamy 100% na auto, żeby był mały */
+    padding: 12px 24px; /* Trochę więcej oddechu w środku */
+
+    background-color: #2ea44f;
+    color: white;
+
+    border: none;
+    border-radius: 50px; /* 👈 Zmiana na 50px robi ładną "pastylkę" zamiast prostokąta */
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+
+    /* 3. Cień - kluczowy dla przycisków, które "pływają" nad treścią */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.add-pillar-btn:hover {
+    background-color: #2c974b;
+    transform: scale(1.05); /* Lekkie powiększenie po najechaniu */
+}

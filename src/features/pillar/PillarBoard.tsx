@@ -17,7 +17,7 @@ export function PillarBoard({ pillars }: PillarBoardProps) {
           {/* Nagłówek kolumny */}
           <div className="pillar-header">
             <h3>{pillar.name}</h3>
-            <span className="item-count">{pillar.items.length} zadań</span>
+            <span className="item-count">{pillar.items.length} items</span>
           </div>
 
           {/* Lista zadań (Items) */}

@@ -25,7 +25,7 @@ export function Header() {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Szukaj projektu..."
+            placeholder="Search for projects, pillars and items..."
             className="search-input"
           />
         </div>

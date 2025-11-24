@@ -10,3 +10,14 @@ export const getProjectById = async (id: string): Promise<Project> => {
   const response = await apiClient.get<Project>(`/projects/${id}`);
   return response.data;
 };
+
+// Typ pomocniczy: To są dane, które wysyłamy (Projekt bez ID i bez Filarów)
+// Backend sam nada ID i sam stworzy domyślne filary.
+export type CreateProjectDto = Omit<Project, "id" | "pillars">;
+
+export const createProject = async (
+  data: CreateProjectDto,
+): Promise<Project> => {
+  const response = await apiClient.post<Project>("/projects", data);
+  return response.data;
+};

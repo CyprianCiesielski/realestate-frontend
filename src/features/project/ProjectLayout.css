@@ -8,7 +8,16 @@
     background-color: #f0f0f0; /* Jasnoszary jak w IntelliJ */
     border-right: 1px solid #ccc;
     padding: 10px;
-    overflow-y: auto; /* Pasek przewijania, jeśli projektów jest dużo */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-nav {
+    /* To jest ta magia "Wypychania": */
+    flex: 1;  /* Zajmij całe dostępne wolne miejsce */
+
+    overflow-y: auto; /* Przewijaj TYLKO listę, a nie cały pasek */
+    margin-bottom: 10px; /* Mały odstęp od guzika */
 }
 
 .projects-content {
@@ -38,4 +47,29 @@
     background-color: #007bff; /* Niebieski IntelliJ */
     color: white;
     font-weight: bold;
+}
+
+.add-project-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Odstęp między tekstem a plusem */
+
+    width: 100%;
+    padding: 10px;
+
+    background-color: #2ea44f; /* GitHubowy zielony (ładny dla "Add") */
+    color: white;
+
+    border: none; /* Usuwamy domyślną ramkę */
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    margin-bottom: 20px;
+}
+
+.add-project-btn:hover {
+    background-color: #2c974b; /* Ciemniejszy zielony po najechaniu */
 }

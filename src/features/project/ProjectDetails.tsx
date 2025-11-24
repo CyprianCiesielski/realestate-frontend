@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import type { Project } from "./types";
 import { getProjectById } from "./api";
 import { PillarBoard } from "../pillar/PillarBoard";
-import "./ProjectDetails.css"; // 👈 IMPORTUJEMY STYLE
+import "./ProjectDetails.css";
+import { FaPlus } from "react-icons/fa"; // 👈 IMPORTUJEMY STYLE
 
 export function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -49,20 +50,24 @@ export function ProjectDetails() {
 
       {/* 2. Czysta siatka informacji */}
       <div className="project-info-grid">
-        <InfoItem label="Lokalizacja" value={project.place} />
-        <InfoItem label="Wykonawca" value={project.contractor} />
-        <InfoItem label="Data rozpoczęcia" value={project.startDate} />
+        <InfoItem label="Place" value={project.place} />
+        <InfoItem label="Contractor" value={project.contractor} />
+        <InfoItem label="Start date" value={project.startDate} />
         <InfoItem
-          label="Spółka odpowiedzialna"
+          label="Company responsilble"
           value={project.companyResposible}
         />
       </div>
 
       {/* 3. Sekcja tablicy */}
       <section className="board-section">
-        <h2>Tablica Zadań</h2>
+        <h2>Pillar Board</h2>
         <PillarBoard pillars={project.pillars || []} />
       </section>
+
+      <button className="add-pillar-btn">
+        Add Pillar <FaPlus />
+      </button>
     </div>
   );
 }
