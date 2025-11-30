@@ -1,4 +1,5 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { ProjectSidebarItem } from "./ProjectSidebarItem";
 import { useEffect, useState } from "react";
 import type { Project } from "./types";
 import { getProjects } from "./api";
@@ -22,15 +23,7 @@ export function ProjectsLayout() {
         <h3>Projects</h3>
         <nav className="sidebar-nav">
           {projects.map((project) => (
-            <NavLink
-              key={project.id}
-              to={`/projects/${project.id}`}
-              className={({ isActive }) =>
-                isActive ? "project-link active" : "project-link"
-              }
-            >
-              {project.name}
-            </NavLink>
+            <ProjectSidebarItem key={project.id} project={project} />
           ))}
         </nav>
         <button

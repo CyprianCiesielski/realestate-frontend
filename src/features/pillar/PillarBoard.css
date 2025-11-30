@@ -71,6 +71,12 @@
     transition: transform 0.2s;
 }
 
+.item-card-link {
+    text-decoration: none; /* Usuwa podkreślenie */
+    color: inherit;        /* Sprawia, że tekst ma kolor normalny (czarny/szary), a nie niebieski */
+    display: block;        /* Rozciąga link na całą szerokość kontenera */
+}
+
 .item-card:hover {
     background-color: #fafafa;
     transform: translateY(-2px);
@@ -152,6 +158,8 @@
     color: #3f7b2e; /* Ikona staje się ciemniejsza */
     transform: scale(1.1); /* Delikatnie powiększamy */
 }
+
+
 
 /* --- RESPONSYWNOŚĆ (Bonus) --- */
 /* Jeśli ekran jest mniejszy (np. laptop), 4 kolumny to za ciasno. */

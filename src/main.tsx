@@ -9,6 +9,7 @@ import "./index.css"; // Globalne style
 import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
 import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
+import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
 
 // 1. Tworzymy definicję routera
 const router = createBrowserRouter([
@@ -38,6 +39,11 @@ const router = createBrowserRouter([
           {
             path: ":projectId", // To się wyświetli, gdy adres to "/projects/5"
             element: <ProjectDetailsPage />,
+          },
+
+          {
+            path: ":projectId/items/:itemId",
+            element: <ItemDetailsPage />, // 👈 NOWY KOMPONENT
           },
         ],
       },

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { FaCog, FaPlus } from "react-icons/fa";
 import { EditPillarModal } from "./EditPillarModal";
 import type { Pillar } from "./types";
-import { archivePillar } from "./api"; // Do celów archiwizacji
+import { archivePillar } from "./api";
+import { CreateItemModal } from "../item/CreateItemModal.tsx";
+import type { Item } from "../item/types.ts";
+import { Link } from "react-router-dom"; // Do celów archiwizacji
 
 interface PillarColumnProps {
   pillar: Pillar;
@@ -16,6 +19,7 @@ export function PillarColumn({
   onPillarUpdated,
 }: PillarColumnProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
 
   // Logika archiwizacji (wywoływana z Modala)
   const handleArchive = async () => {
@@ -43,6 +47,14 @@ export function PillarColumn({
     }
   };
 
+  const handleItemCreationSuccess = (newItem: Item) => {
+    const updatedItems = [...pillar.items, newItem];
+    const updatedPillar = { ...pillar, items: updatedItems };
+    onPillarUpdated(updatedPillar);
+
+    setIsCreateItemModalOpen(false);
+  };
+
   return (
     <div key={pillar.id} className="pillar-column">
       {/* IKONA USTAWIEŃ - Zębatka */}
@@ -53,7 +65,10 @@ export function PillarColumn({
         <FaCog />
       </button>
 
-      <button className="add-item-btn" onClick={() => setIsEditModalOpen(true)}>
+      <button
+        className="add-item-btn"
+        onClick={() => setIsCreateItemModalOpen(true)}
+      >
         <FaPlus />
       </button>
 
@@ -69,10 +84,16 @@ export function PillarColumn({
           <div className="empty-state">No tasks</div>
         ) : (
           (pillar.items || []).map((item) => (
-            <div key={item.id} className="item-card">
-              <div className="item-title">{item.name}</div>
-              <div className="item-status">{item.status}</div>
-            </div>
+            <Link
+              key={item.id}
+              to={`/projects/${projectId}/items/${item.id}`} // Budujemy URL
+              className="item-card-link" // Klasa do usunięcia podkreślenia (CSS niżej)
+            >
+              <div className="item-card">
+                <div className="item-title">{item.name}</div>
+                <div className="item-status">{item.status}</div>
+              </div>
+            </Link>
           ))
         )}
       </div>
@@ -85,6 +106,15 @@ export function PillarColumn({
           onClose={() => setIsEditModalOpen(false)}
           onArchive={handleArchive}
           onSuccess={onPillarUpdated} // Przekazujemy zaktualizowany filar do góry
+        />
+      )}
+
+      {isCreateItemModalOpen && (
+        <CreateItemModal
+          projectId={projectId}
+          pillarId={String(pillar.id)}
+          onClose={() => setIsCreateItemModalOpen(false)}
+          onSuccess={handleItemCreationSuccess} // Przekazujemy zaktualizowany filar do góry
         />
       )}
     </div>

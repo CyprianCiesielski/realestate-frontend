@@ -6,6 +6,5 @@ export interface Item {
   description?: string;
   deadline?: string;
   startDate: string;
-  lastChangeDate: string;
   priority: number;
 }
