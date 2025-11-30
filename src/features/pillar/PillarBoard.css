@@ -1,19 +1,34 @@
 .board-container {
-    display: flex; /* Kolumny obok siebie */
+    /* 1. Ustawiamy Siatkę (Grid) */
+    display: grid;
+
+    /* 2. Magiczna linijka: Stwórz dokładnie 4 kolumny o równej szerokości */
+    grid-template-columns: repeat(4, 1fr);
+
+    /* Odstępy między kafelkami (pionowe i poziome) */
     gap: 20px;
-    overflow-x: auto; /* Przewijanie w bok, jeśli się nie mieszczą */
+
+    /* Ważne: Usuwamy przewijanie w bok, bo teraz idziemy w dół */
+    /* overflow-x: auto; <--- TO USUNĄŁEM */
     padding-bottom: 20px;
 }
 
 .pillar-column {
-    min-width: 300px; /* Stała szerokość kolumny */
-    max-width: 300px;
-    background-color: #f4f5f7; /* Kolor tła kolumny (jak w Jira/Trello) */
+    /* 3. Usuwamy sztywną szerokość, żeby dopasował się do siatki */
+    /* min-width: 300px; <--- TO USUNĄŁEM */
+    position: relative;
+    background-color: #f4f5f7;
     border-radius: 8px;
     padding: 10px;
     display: flex;
     flex-direction: column;
+
+    /* 4. To sprawia, że filar jest tylko tak wysoki jak jego zawartość */
+    /* Bez tego wszystkie filary w rzędzie rozciągnęłyby się do wysokości najwyższego */
+    height: fit-content;
 }
+
+/* --- Reszta stylów (nagłówki, karty) bez zmian --- */
 
 .pillar-header {
     display: flex;
@@ -36,6 +51,7 @@
     border-radius: 12px;
     font-size: 12px;
     font-weight: bold;
+    margin-right: 45px;
 }
 
 .pillar-items {
@@ -43,10 +59,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-height: 100px;
+    min-height: 50px; /* Minimalna wysokość, żeby dało się coś wrzucić */
 }
 
-/* Wygląd pojedynczego zadania (karteczka) */
 .item-card {
     background-color: white;
     padding: 10px;
@@ -78,4 +93,78 @@
     padding: 20px;
     font-style: italic;
     font-size: 0.9em;
+}
+
+.settings-pillar-btn {
+    position: absolute; /* Ustawienie absolutne */
+    top: 5px;          /* Odsunięcie od góry */
+    right: 5px;        /* Odsunięcie od prawej */
+
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 10;
+    color: #888;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+}
+
+.settings-pillar-btn:hover {
+    color: #172b4d;
+}
+
+.add-item-btn {
+    position: absolute; /* Ustawienie absolutne */
+    top: 7px;          /* Odsunięcie od góry */
+    right: 30px;
+    /* Ustawienie wyglądu podstawowego */
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    /* Kolor i rozmiar */
+    color: #5aac44; /* Subtelna zieleń */
+    font-size: 1.2rem;
+
+    /* Ułatwienie kliknięcia i animacje */
+    padding: 3px;
+    margin-left: 5px; /* Mały odstęp od nazwy filaru */
+    border-radius: 50%; /* Okrągły kształt dla hovera */
+    transition: all 0.2s ease-in-out;
+
+    /* Wyśrodkowanie SVG */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Styl dla samego elementu SVG (ikonki) */
+.add-item-btn svg {
+    width: 18px;
+    height: 18px;
+    /* Domyślnie użyjemy prostej ikonki FaPlus */
+}
+
+/* EFEKT PO NAJECHANIU (Hover) */
+.add-item-btn:hover {
+    background-color: #dfffe5; /* Bardzo jasne zielone tło */
+    color: #3f7b2e; /* Ikona staje się ciemniejsza */
+    transform: scale(1.1); /* Delikatnie powiększamy */
+}
+
+/* --- RESPONSYWNOŚĆ (Bonus) --- */
+/* Jeśli ekran jest mniejszy (np. laptop), 4 kolumny to za ciasno. */
+/* Zmieńmy na 3 kolumny */
+@media (max-width: 1400px) {
+    .board-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Na małych ekranach (np. tablet) - 2 kolumny */
+@media (max-width: 1000px) {
+    .board-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

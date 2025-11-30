@@ -4,12 +4,58 @@
 
 /* --- Nagłówek --- */
 .project-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
     display: flex;
-    align-items: baseline; /* Wyrównaj tekst do dołu */
-    gap: 15px; /* Odstęp między tytułem a statusem */
+    justify-content: space-between; /* 👈 KLUCZOWE: Wypycha Lewą i Prawą sekcję na krawędzie */
+    align-items: center;            /* Wyrównuje je w pionie (żeby były na tej samej wysokości) */
+
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    position: relative; /* Ważne dla dropdown menu */
+}
+
+/* 2. LEWA STRONA (Tytuł + Status) */
+.header-left {
+    display: flex;
+    align-items: baseline; /* Wyrównanie tekstu do linii bazowej */
+    gap: 15px;
+}
+
+/* 3. PRAWA STRONA (Kontener na przycisk) */
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative; /* Żeby dropdown "wiedział", gdzie się pojawić */
+}
+
+/* 4. STYL SAMEJ ZĘBATKI (Guzik) */
+.settings-btn {
+    background: transparent; /* Przezroczyste tło */
+    border: none;
+    cursor: pointer;
+
+    /* Rozmiar i kolor */
+    font-size: 1.3rem;
+    color: #6b778c; /* Szary, profesjonalny kolor */
+
+    /* Kształt klikalny */
+    padding: 8px;
+    border-radius: 50%; /* Okrągłe tło po najechaniu */
+
+    /* Centrowanie ikony wewnątrz guzika */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Animacja */
+    transition: all 0.3s ease;
+}
+
+/* EFEKT PO NAJECHANIU MYSZKĄ */
+.settings-btn:hover {
+    background-color: #ebecf0; /* Jasnoszare kółko */
+    color: #172b4d;            /* Ciemniejsza ikona */
+    transform: rotate(90deg);  /* Bajer: zębatka się obraca! ⚙️ */
 }
 
 .project-title {

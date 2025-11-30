@@ -7,6 +7,5 @@ export interface Item {
   deadline?: string;
   startDate: string;
   lastChangeDate: string;
-  webViewLink?: string;
-  googleFileId?: string;
+  priority: number;
 }

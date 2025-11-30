@@ -1,39 +1,30 @@
 import type { Pillar } from "./types";
-import "./PillarBoard.css"; // Zaraz stworzymy style
+import "./PillarBoard.css";
+import { PillarColumn } from "./PillarColumn.tsx"; // Zaraz stworzymy style
 
 interface PillarBoardProps {
   pillars: Pillar[];
+  projectId: string; // 👈 NOWOŚĆ
+  onPillarUpdated: (updatedPillar: Pillar) => void; // 👈 NOWOŚĆ
 }
 
-export function PillarBoard({ pillars }: PillarBoardProps) {
-  // Sortujemy filary po ID (żeby zawsze były w tej samej kolejności: Design -> Comm -> Sale)
-  // Możesz to zmienić, jeśli masz pole 'order' w bazie
+export function PillarBoard({
+  pillars,
+  projectId,
+  onPillarUpdated,
+}: PillarBoardProps) {
   const sortedPillars = [...pillars].sort((a, b) => a.id - b.id);
 
   return (
     <div className="board-container">
       {sortedPillars.map((pillar) => (
-        <div key={pillar.id} className="pillar-column">
-          {/* Nagłówek kolumny */}
-          <div className="pillar-header">
-            <h3>{pillar.name}</h3>
-            <span className="item-count">{pillar.items.length} items</span>
-          </div>
-
-          {/* Lista zadań (Items) */}
-          <div className="pillar-items">
-            {pillar.items.length === 0 ? (
-              <div className="empty-state">Brak zadań</div>
-            ) : (
-              pillar.items.map((item) => (
-                <div key={item.id} className="item-card">
-                  <div className="item-title">{item.name}</div>
-                  <div className="item-status">{item.status}</div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        // 2. Używamy nowego komponentu
+        <PillarColumn
+          key={pillar.id}
+          pillar={pillar}
+          projectId={projectId} // Przekazujemy ID projektu
+          onPillarUpdated={onPillarUpdated} // Przekazujemy funkcję aktualizującą
+        />
       ))}
     </div>
   );

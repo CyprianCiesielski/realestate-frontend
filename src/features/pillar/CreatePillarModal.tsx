@@ -1,25 +1,25 @@
 import { useState } from "react";
-import { createProject, type CreateProjectDto } from "./api";
-import type { Project } from "./types";
-import "./CreateProjectModal.css";
+import { createPillar, type CreatePillarDto } from "./api";
+import type { Pillar } from "./types";
+import "./CreatePillarModal.css";
 
-interface CreateProjectModalProps {
+interface CreatePillarModalProps {
+  projectId: string;
   onClose: () => void;
-  onSuccess: (newProject: Project) => void;
+  onSuccess: (newProject: Pillar) => void;
 }
 
-export function CreateProjectModal({
+export function CreatePillarModal({
+  projectId,
   onClose,
   onSuccess,
-}: CreateProjectModalProps) {
+}: CreatePillarModalProps) {
   // 1. Stan formularza
-  const [formData, setFormData] = useState<CreateProjectDto>({
+  const [formData, setFormData] = useState<CreatePillarDto>({
     name: "",
-    place: "",
-    contractor: "",
-    companyResposible: "",
     state: "active",
     startDate: new Date().toISOString().split("T")[0],
+    priority: 1,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,13 +41,13 @@ export function CreateProjectModal({
     setError(null);
 
     try {
-      const newProject = await createProject(formData);
-      onSuccess(newProject);
+      const newPillar = await createPillar(projectId, formData);
+      onSuccess(newPillar);
       onClose();
     } catch (err) {
       console.error(err);
       setError(
-        "Nie udało się utworzyć projektu. Sprawdź, czy nazwa nie jest duplikatem.",
+        "Nie udało się utworzyć filaru. Sprawdź, czy nazwa nie jest duplikatem.",
       );
     } finally {
       setIsSubmitting(false);
@@ -58,56 +58,47 @@ export function CreateProjectModal({
     <div className="modal-overlay" onClick={onClose}>
       {/* 👇 TUTAJ WKLEJASZ TREŚĆ, KTÓRĄ PODAŁEŚ */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Nowy Projekt</h2>
+        <h2>New pillar</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {/* Nazwa */}
           <div className="form-group">
-            <label>Nazwa projektu *</label>
+            <label>Pillar name *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="np. Osiedle Dębowe"
+              placeholder="np. Market"
             />
           </div>
 
-          {/* Lokalizacja */}
           <div className="form-group">
-            <label>Lokalizacja</label>
-            <input
-              name="place"
-              value={formData.place}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Wykonawca */}
-          <div className="form-group">
-            <label>Wykonawca</label>
-            <input
-              name="contractor"
-              value={formData.contractor}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Spółka (Pamiętaj o literówce z backendu jeśli jej nie poprawiłeś!) */}
-          <div className="form-group">
-            <label>Spółka odpowiedzialna</label>
-            <input
-              name="companyResposible"
-              value={formData.companyResposible}
-              onChange={handleChange}
-            />
+            <label>Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={(e) => {
+                const { name, value } = e.target;
+                setFormData((prev) => ({
+                  ...prev,
+                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
+                }));
+              }}
+            >
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+              <option value={3}>3 </option>
+              <option value={4}>4</option>
+              <option value={5}>5 </option>
+            </select>
           </div>
 
           {/* Data */}
           <div className="form-group">
-            <label>Data startu</label>
+            <label>Start Date</label>
             <input
               type="date"
               name="startDate"

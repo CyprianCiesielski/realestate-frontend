@@ -8,6 +8,7 @@ export interface Project {
   companyResposible?: string;
   state: string;
   startDate: string; // Daty z JSON przychodzą jako stringi
+  priority: number;
 
   pillars: Pillar[];
 }

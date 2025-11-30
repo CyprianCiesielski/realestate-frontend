@@ -21,3 +21,15 @@ export const createProject = async (
   const response = await apiClient.post<Project>("/projects", data);
   return response.data;
 };
+
+export const updateProject = async (
+  id: number,
+  data: CreateProjectDto,
+): Promise<Project> => {
+  const response = await apiClient.put<Project>(`/projects/${id}`, data);
+  return response.data;
+};
+
+export const archiveProject = async (id: number): Promise<void> => {
+  await apiClient.put(`/projects/${id}/archive`);
+};

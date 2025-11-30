@@ -20,6 +20,7 @@ export function CreateProjectModal({
     companyResposible: "",
     state: "active",
     startDate: new Date().toISOString().split("T")[0],
+    priority: 1,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,14 +59,14 @@ export function CreateProjectModal({
     <div className="modal-overlay" onClick={onClose}>
       {/* 👇 TUTAJ WKLEJASZ TREŚĆ, KTÓRĄ PODAŁEŚ */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Nowy Projekt</h2>
+        <h2>New Project</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {/* Nazwa */}
           <div className="form-group">
-            <label>Nazwa projektu *</label>
+            <label>Project name *</label>
             <input
               name="name"
               value={formData.name}
@@ -77,7 +78,7 @@ export function CreateProjectModal({
 
           {/* Lokalizacja */}
           <div className="form-group">
-            <label>Lokalizacja</label>
+            <label>Place</label>
             <input
               name="place"
               value={formData.place}
@@ -87,7 +88,7 @@ export function CreateProjectModal({
 
           {/* Wykonawca */}
           <div className="form-group">
-            <label>Wykonawca</label>
+            <label>Contractor</label>
             <input
               name="contractor"
               value={formData.contractor}
@@ -97,7 +98,7 @@ export function CreateProjectModal({
 
           {/* Spółka (Pamiętaj o literówce z backendu jeśli jej nie poprawiłeś!) */}
           <div className="form-group">
-            <label>Spółka odpowiedzialna</label>
+            <label>Company Responsible</label>
             <input
               name="companyResposible"
               value={formData.companyResposible}
@@ -105,9 +106,30 @@ export function CreateProjectModal({
             />
           </div>
 
+          <div className="form-group">
+            <label>Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={(e) => {
+                const { name, value } = e.target;
+                setFormData((prev) => ({
+                  ...prev,
+                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
+                }));
+              }}
+            >
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+              <option value={3}>3 </option>
+              <option value={4}>4</option>
+              <option value={5}>5 </option>
+            </select>
+          </div>
+
           {/* Data */}
           <div className="form-group">
-            <label>Data startu</label>
+            <label>Start date</label>
             <input
               type="date"
               name="startDate"

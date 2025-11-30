@@ -5,6 +5,7 @@ export interface Pillar {
   name: string;
   state: string;
   startDate: string;
+  priority: number;
 
   items: Item[];
 }
