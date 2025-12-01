@@ -29,7 +29,12 @@ export function PillarSidebarItem({
       {isExpanded && (
         <div className="sidebar-item-list">
           {(pillar.items || []).map((item) => (
-            <ItemSidebarLink key={item.id} item={item} projectId={projectId} />
+            <ItemSidebarLink
+              key={item.id}
+              item={item}
+              projectId={projectId}
+              pillarId={String(pillar.id)}
+            />
           ))}
         </div>
       )}

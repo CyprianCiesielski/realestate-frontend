@@ -6,11 +6,16 @@ import { FaCircle } from "react-icons/fa"; // 👈 ZMIEŃ Z div NA NavLink
 interface ItemSidebarLinkProps {
   item: Item;
   projectId: string; // Potrzebne do złożenia URL-a
+  pillarId: string;
 }
 
-export function ItemSidebarLink({ item, projectId }: ItemSidebarLinkProps) {
+export function ItemSidebarLink({
+  item,
+  projectId,
+  pillarId,
+}: ItemSidebarLinkProps) {
   // Tworzymy pełną ścieżkę do zadania
-  const itemPath = `/projects/${projectId}/items/${item.id}`;
+  const itemPath = `/projects/${projectId}/pillars/${pillarId}/items/${item.id}`;
 
   return (
     <NavLink

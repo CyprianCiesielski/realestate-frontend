@@ -1,3 +1,5 @@
+import { ItemDetails } from "../features/item/ItemDeatails.tsx";
+
 export function ItemDetailsPage() {
-  return <h1>Witaj na Dashboardzie!</h1>;
+  return <ItemDetails />;
 }

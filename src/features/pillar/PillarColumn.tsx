@@ -86,7 +86,7 @@ export function PillarColumn({
           (pillar.items || []).map((item) => (
             <Link
               key={item.id}
-              to={`/projects/${projectId}/items/${item.id}`} // Budujemy URL
+              to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`} // Budujemy URL
               className="item-card-link" // Klasa do usunięcia podkreślenia (CSS niżej)
             >
               <div className="item-card">

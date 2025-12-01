@@ -18,10 +18,11 @@ export const createItem = async (
 
 export const getItemById = async (
   projectId: string,
+  pillarId: string,
   itemId: string,
 ): Promise<Item> => {
   const response = await apiClient.get<Item>(
-    `/projects/${projectId}/pillars/items/${itemId}`,
-  ); // Zakładam, że Twoja ścieżka API to /items/{itemId}
+    `/projects/${projectId}/pillars/${pillarId}/items/${itemId}`,
+  );
   return response.data;
 };
