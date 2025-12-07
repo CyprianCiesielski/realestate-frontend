@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { updateProject, type CreateProjectDto } from "./api";
 import type { Project } from "./types";
-import "./CreateProjectModal.css"; // Użyjemy tych samych stylów + dodamy jeden nowy
+import "./CreateProjectModal.css";
+import { TagSelector } from "../tag/TagSelector.tsx";
+import type { Tag } from "../tag/types.ts"; // Użyjemy tych samych stylów + dodamy jeden nowy
 
 interface EditProjectModalProps {
   project: Project; // 👈 Musimy wiedzieć co edytujemy
@@ -27,6 +29,8 @@ export function EditProjectModal({
     priority: project.priority || 1,
   });
 
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(project.tags || []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 2. Obsługa zmian (taka sama jak przy tworzeniu)
@@ -42,7 +46,12 @@ export function EditProjectModal({
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const updated = await updateProject(project.id, formData);
+      const payload = {
+        ...formData,
+        tags: selectedTags.map((tag) => ({ id: tag.id })), // Backend chce same ID
+      };
+
+      const updated = await updateProject(project.id, payload);
       onSuccess(updated);
       onClose();
     } catch (err) {
@@ -60,7 +69,7 @@ export function EditProjectModal({
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nazwa projektu</label>
+            <label>Project name</label>
             <input
               name="name"
               value={formData.name}
@@ -70,7 +79,15 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Lokalizacja</label>
+            <label>Tags</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Place</label>
             <input
               name="place"
               value={formData.place}
@@ -79,7 +96,7 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Wykonawca</label>
+            <label>Contributor</label>
             <input
               name="contractor"
               value={formData.contractor}
@@ -88,7 +105,7 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Spółka odpowiedzialna</label>
+            <label>Company responsible</label>
             <input
               name="companyResposible"
               value={formData.companyResposible}
@@ -118,7 +135,7 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Data startu</label>
+            <label>Start date</label>
             <input
               type="date"
               name="startDate"

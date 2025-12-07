@@ -6,6 +6,7 @@ import { getProjects } from "./api";
 import { FaPlus } from "react-icons/fa";
 import { CreateProjectModal } from "./CreateProjectModal.tsx";
 import "./ProjectLayout.css";
+import { useRefresh } from "../../context/RefreshContext";
 
 export function ProjectsLayout() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,6 +16,12 @@ export function ProjectsLayout() {
   useEffect(() => {
     getProjects().then(setProjects).catch(console.error);
   }, []);
+
+  const { refreshTrigger, triggerRefresh } = useRefresh();
+
+  useEffect(() => {
+    getProjects().then(setProjects).catch(console.error);
+  }, [refreshTrigger]);
 
   return (
     <div className="projects-layout">
@@ -44,6 +51,7 @@ export function ProjectsLayout() {
           onSuccess={(newProject) => {
             setProjects([...projects, newProject]);
             setIsModalOpen(false);
+            triggerRefresh();
           }}
         />
       )}

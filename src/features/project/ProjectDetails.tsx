@@ -88,6 +88,15 @@ export function ProjectDetails() {
           >
             ● {project.state}
           </span>
+
+          <div className="project-tags-row">
+            {project.tags &&
+              project.tags.map((tag) => (
+                <span key={tag.id} className="tag-badge">
+                  #{tag.name}
+                </span>
+              ))}
+          </div>
         </div>
 
         <div className="header-right">

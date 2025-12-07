@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createProject, type CreateProjectDto } from "./api";
 import type { Project } from "./types";
 import "./CreateProjectModal.css";
+import type { Tag } from "../tag/types.ts";
+import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface CreateProjectModalProps {
   onClose: () => void;
@@ -23,6 +25,8 @@ export function CreateProjectModal({
     priority: 1,
   });
 
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +46,12 @@ export function CreateProjectModal({
     setError(null);
 
     try {
-      const newProject = await createProject(formData);
+      const payload = {
+        ...formData,
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
+      };
+
+      const newProject = await createProject(payload);
       onSuccess(newProject);
       onClose();
     } catch (err) {
@@ -73,6 +82,14 @@ export function CreateProjectModal({
               onChange={handleChange}
               required
               placeholder="np. Osiedle Dębowe"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Tags</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
             />
           </div>
 

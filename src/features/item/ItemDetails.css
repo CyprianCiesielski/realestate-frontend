@@ -1,169 +1,77 @@
+/* Główny kontener strony - zajmuje dokładnie 100% wysokości dostępnej pod headerem */
 .project-details-container {
-    padding: 0; /* Ewentualny padding kontenera */
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 64px); /* Odejmij wysokość głównego headera aplikacji */
+    overflow: hidden; /* Wyłącz scrollowanie całej strony */
+    padding: 0 20px; /* Margines boczny */
+    box-sizing: border-box;
 }
 
-/* --- Nagłówek --- */
-.project-header {
-    display: flex;
-    justify-content: space-between; /* 👈 KLUCZOWE: Wypycha Lewą i Prawą sekcję na krawędzie */
-    align-items: center;            /* Wyrównuje je w pionie (żeby były na tej samej wysokości) */
-
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-    position: relative; /* Ważne dla dropdown menu */
+/* Górna sekcja (Info) - Statyczna, zawsze widoczna */
+.item-info-section {
+    flex-shrink: 0; /* Nie kurcz się */
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ebecf0;
+    margin-bottom: 0;
 }
 
-/* 2. LEWA STRONA (Tytuł + Status) */
-.header-left {
+/* Sekcja Czatu - Wypełnia całą resztę ekranu */
+.chat-area {
+    flex: 1; /* Zajmij całe wolne miejsce */
     display: flex;
-    align-items: baseline; /* Wyrównanie tekstu do linii bazowej */
+    flex-direction: column; /* Układ pionowy */
+    min-height: 0; /* Kluczowe dla scrollowania we flexie */
+    margin-top: 20px;
+    position: relative;
+}
+
+/* Nagłówek sekcji czatu */
+.chat-section-header {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #44546f;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+/* Lista wiadomości - To jedyny element, który się scrolluje! */
+.message-list-scrollable {
+    flex: 1; /* Zajmij miejsce */
+    overflow-y: auto; /* Włącz scrollowanie */
+    padding-bottom: 20px; /* Margines na dole, żeby tekst nie dotykał inputa */
+    display: flex;
+    flex-direction: column-reverse; /* Najnowsze na dole */
     gap: 15px;
+
+    /* Ukrycie paska przewijania (opcjonalne, dla estetyki) */
+    scrollbar-width: thin;
+    scrollbar-color: #dfe1e6 transparent;
 }
 
-/* 3. PRAWA STRONA (Kontener na przycisk) */
-.header-right {
+/* Pasek Inputa - Statyczny na dole kontenera czatu */
+.chat-input-wrapper {
+    flex-shrink: 0;
+    background-color: #fff; /* Tło, żeby przykryć przewijane wiadomości */
+    border-top: 1px solid #ebecf0;
+}
+
+/* Kontener, żeby tagi były obok siebie */
+.project-tags-row {
     display: flex;
-    align-items: center;
-    position: relative; /* Żeby dropdown "wiedział", gdzie się pojawić */
+    gap: 8px;         /* Odstęp między tagami */
+    margin-top: 6px;  /* Odstęp od tytułu projektu */
+    flex-wrap: wrap;  /* Jeśli tagów jest dużo, zawiń do nowej linii */
 }
 
-/* 4. STYL SAMEJ ZĘBATKI (Guzik) */
-.settings-btn {
-    background: transparent; /* Przezroczyste tło */
-    border: none;
-    cursor: pointer;
-
-    /* Rozmiar i kolor */
-    font-size: 1.3rem;
-    color: #6b778c; /* Szary, profesjonalny kolor */
-
-    /* Kształt klikalny */
-    padding: 8px;
-    border-radius: 50%; /* Okrągłe tło po najechaniu */
-
-    /* Centrowanie ikony wewnątrz guzika */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    /* Animacja */
-    transition: all 0.3s ease;
-}
-
-/* EFEKT PO NAJECHANIU MYSZKĄ */
-.settings-btn:hover {
-    background-color: #ebecf0; /* Jasnoszare kółko */
-    color: #172b4d;            /* Ciemniejsza ikona */
-    transform: rotate(90deg);  /* Bajer: zębatka się obraca! ⚙️ */
-}
-
-.project-title {
-    margin: 0;
-    font-size: 2rem;
-}
-
-.project-status {
-    font-size: 0.9em;
-    text-transform: uppercase;
-    font-weight: bold;
-    color: gray; /* Domyślny kolor */
-}
-
-.project-status.active {
-    color: green;
-}
-
-/* --- Siatka z informacjami (Grid) --- */
-.project-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.info-box {
-    background-color: #fff;
-    /* Opcjonalnie: ramka lub tło, jeśli chcesz */
-}
-
-.info-label {
-    color: #888;
-    font-size: 0.85em;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.info-value {
-    font-size: 1.1em;
+/* Wygląd pojedynczego taga */
+.tag-badge {
+    font-size: 0.75rem;       /* Mały tekst (ok. 12px) */
+    color: #64748b;           /* Szary kolor tekstu */
+    background-color: #f1f5f9; /* Bardzo jasne szare tło (subtelne) */
+    padding: 2px 8px;         /* Odrobinę "powietrza" w środku */
+    border-radius: 12px;      /* Zaokrąglone rogi (kształt pigułki) */
     font-weight: 500;
-}
-
-/* --- Sekcja Tablicy --- */
-.board-section {
-    margin-top: 40px;
-}
-
-.add-pillar-btn {
-    /* 1. Pozycjonowanie - to sprawia, że guzik "pływa" */
-    position: fixed;
-    bottom: 40px;  /* Odległość od dołu ekranu */
-    right: 40px;   /* Odległość od prawej krawędzi */
-    z-index: 100;  /* Zapewnia, że guzik jest nad innymi elementami */
-
-    /* 2. Wygląd i rozmiar */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    width: auto;   /* 👈 WAŻNE: Zmieniamy 100% na auto, żeby był mały */
-    padding: 12px 24px; /* Trochę więcej oddechu w środku */
-
-    background-color: #2ea44f;
-    color: white;
-
-    border: none;
-    border-radius: 50px; /* 👈 Zmiana na 50px robi ładną "pastylkę" zamiast prostokąta */
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-
-    /* 3. Cień - kluczowy dla przycisków, które "pływają" nad treścią */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-
-    transition: transform 0.2s, background-color 0.2s;
-}
-
-.add-pillar-btn:hover {
-    background-color: #2c974b;
-    transform: scale(1.05); /* Lekkie powiększenie po najechaniu */
-}
-
-.description-section {
-    margin-top: 30px;
-    /* Usuwamy marginesy dolne, żeby było bardziej zwarte */
-}
-
-.section-title {
-    color: #888;
-    font-size: 0.85em;
-    font-weight: bold;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.description-content {
-    background-color: transparent; /* Przezroczyste tło */
-    border: none; /* Brak ramki dookoła */
-    border-left: 3px solid #dfe1e6; /* Tylko pionowa linia z lewej */
-    border-radius: 0; /* Kanciaste rogi (pasuje do linii) */
-
-    padding: 2px 0 2px 15px; /* Wcięcie tekstu od linii */
-
-    color: #172b4d;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
+    border: 1px solid #e2e8f0; /* Opcjonalnie: bardzo delikatna ramka */
 }

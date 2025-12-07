@@ -1,4 +1,5 @@
 import type { Pillar } from "../pillar/types";
+import type { Tag } from "../tag/types.ts";
 
 export interface Project {
   id: number;
@@ -11,4 +12,5 @@ export interface Project {
   priority: number;
 
   pillars: Pillar[];
+  tags: Tag[];
 }

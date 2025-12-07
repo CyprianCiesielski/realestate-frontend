@@ -1,37 +1,51 @@
 import { useState } from "react";
-import { updatePillar, type CreatePillarDto } from "./api"; // 👈 Używamy updatePillar
-import type { Pillar } from "./types";
-import "./CreatePillarModal.css";
+import { updateItem, type CreateItemDto } from "./api";
+import type { Item } from "./types";
+import "../project/CreateProjectModal.css";
+import { TagSelector } from "../tag/TagSelector.tsx";
 import type { Tag } from "../tag/types.ts";
-import { TagSelector } from "../tag/TagSelector.tsx"; // Używamy tych samych stylów
 
-interface EditPillarModalProps {
-  project_id: string; // ID projektu (potrzebne do URL API)
-  pillar: Pillar; // 👈 Aktualny obiekt filaru do pre-fillingu
+interface EditItemModalProps {
+  project_id: string;
+  pillar_id: string;
+  item: Item; // 👈 Musimy wiedzieć co edytujemy
   onClose: () => void;
-  onSuccess: (updatedPillar: Pillar) => void;
-  onArchive: () => void; // Funkcja do archiwizacji
+  onSuccess: (updatedItem: Item) => void;
+  onArchive: () => void; // Funkcja do archiwizacji przekazana z rodzica
 }
 
-export function EditPillarModal({
+export function EditItemModal({
   project_id,
-  pillar,
+  pillar_id,
+  item,
   onClose,
   onSuccess,
   onArchive,
-}: EditPillarModalProps) {
-  // Stan formularza inicjowany danymi z aktualnego filaru
-  const [formData, setFormData] = useState<CreatePillarDto>({
-    name: pillar.name,
-    state: pillar.state,
-    startDate: pillar.startDate || new Date().toISOString().split("T")[0],
-    priority: pillar.priority || 1,
+}: EditItemModalProps) {
+  // 1. Inicjalizacja stanu danymi z projektu
+  const [formData, setFormData] = useState<CreateItemDto>({
+    name: item.name || "",
+    status: item.status || "",
+    state: item.state || "active",
+    description: item.description || "",
+    deadline: item.deadline || "",
+    startDate: item.startDate || new Date().toISOString().split("T")[0],
+    priority: item.priority || 1,
   });
 
-  const [selectedTags, setSelectedTags] = useState<Tag[]>(pillar.tags || []);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(item.tags || []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 2. Obsługa zmian (taka sama jak przy tworzeniu)
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 3. Zapisywanie zmian (UPDATE)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -40,36 +54,32 @@ export function EditPillarModal({
         ...formData,
         tags: selectedTags.map((tag) => ({ id: tag.id })), // Backend chce same ID
       };
-      // Wywołujemy funkcję UPDATE z ID filaru!
-      const updated = await updatePillar(project_id, pillar.id, payload);
+      const updated = await updateItem(project_id, pillar_id, item.id, payload);
       onSuccess(updated);
       onClose();
     } catch (err) {
-      alert("Nie udało się zaktualizować filaru.");
+      console.error(err);
+      alert("Failed to edit item.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Edit Pillar: {pillar.name}</h2>
+        <h2>Edit Item: {item.name}</h2>
+
         <form onSubmit={handleSubmit}>
+          {/* Nazwa */}
           <div className="form-group">
-            <label>Nazwa filaru</label>
+            <label>Item name *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
+              placeholder="np. Umowa 1"
             />
           </div>
 
@@ -78,6 +88,37 @@ export function EditPillarModal({
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+            />
+          </div>
+
+          {/* Status */}
+          <div className="form-group">
+            <label>Status</label>
+            <input
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="form-group">
+            <label>Description</label>
+            <input
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/*deadline */}
+          <div className="form-group">
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
             />
           </div>
 
@@ -102,8 +143,9 @@ export function EditPillarModal({
             </select>
           </div>
 
+          {/* Data */}
           <div className="form-group">
-            <label>Data startu</label>
+            <label>Start date</label>
             <input
               type="date"
               name="startDate"
@@ -126,16 +168,29 @@ export function EditPillarModal({
             </select>
           </div>
 
+          {/* PRZYCISKI AKCJI */}
           <div
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            {/* LEWA STRONA: Przycisk Archiwizacji */}
-            <button type="button" className="btn-delete" onClick={onArchive}>
-              Archiwizuj Filar
+            {/* LEWA STRONA: Czerwony przycisk usuwania */}
+            <button
+              type="button"
+              className="btn-delete"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Czy na pewno chcesz zarchiwizować ten projekt?",
+                  )
+                ) {
+                  onArchive();
+                }
+              }}
+            >
+              Archive Item
             </button>
 
-            {/* PRAWA STRONA: Zapisz / Anuluj */}
+            {/* PRAWA STRONA: Anuluj / Zapisz */}
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">
                 Anuluj

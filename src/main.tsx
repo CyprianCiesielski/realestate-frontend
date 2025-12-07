@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { RefreshProvider } from "./context/RefreshContext";
 
 import App from "./App.tsx"; // Nasz główny layout
 import "./index.css"; // Globalne style
@@ -54,6 +55,8 @@ const router = createBrowserRouter([
 // 2. Renderujemy aplikację używając <RouterProvider />
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RefreshProvider>
+      <RouterProvider router={router} />
+    </RefreshProvider>
   </React.StrictMode>,
 );

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { createItem, type CreateItemDto } from "./api";
 import type { Item } from "./types";
 import "./CreateItemModal.css";
+import { useRefresh } from "../../context/RefreshContext";
+import type { Tag } from "../tag/types.ts";
+import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface CreateItemModalProps {
   projectId: string;
@@ -16,6 +19,8 @@ export function CreateItemModal({
   onClose,
   onSuccess,
 }: CreateItemModalProps) {
+  const { triggerRefresh } = useRefresh();
+
   // 1. Stan formularza
   const [formData, setFormData] = useState<CreateItemDto>({
     name: "",
@@ -26,6 +31,8 @@ export function CreateItemModal({
     startDate: new Date().toISOString().split("T")[0],
     priority: 1,
   });
+
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +53,12 @@ export function CreateItemModal({
     setError(null);
 
     try {
-      const newItem = await createItem(projectId, pillarId, formData);
+      const payload = {
+        ...formData,
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
+      };
+
+      const newItem = await createItem(projectId, pillarId, payload);
       onSuccess(newItem);
       onClose();
     } catch (err) {
@@ -55,6 +67,7 @@ export function CreateItemModal({
         "Nie udało się utworzyć itemu. Sprawdź, czy nazwa nie jest duplikatem.",
       );
     } finally {
+      triggerRefresh();
       setIsSubmitting(false);
     }
   };
@@ -77,6 +90,14 @@ export function CreateItemModal({
               onChange={handleChange}
               required
               placeholder="np. Umowa 1"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Tags</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
             />
           </div>
 

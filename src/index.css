@@ -1,0 +1,33 @@
+/* 1. Blokujemy przeglądarkę przed scrollowaniem całego okna */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* KLUCZOWE: to usuwa pasek przewijania z prawej krawędzi przeglądarki */
+}
+
+/* 2. Twój główny kontener z App.tsx */
+.app-layout {
+    display: flex;
+    flex-direction: column; /* Układ pionowy: Header nad Main */
+    height: 100vh;          /* Zajmij 100% widocznego ekranu */
+    background-color: white;
+}
+
+/* 3. Header nie może się zgniatać */
+/* Zakładam, że Twój komponent <Header /> zwraca tag <header> lub div z klasą.
+   Jeśli to div, dodaj mu klasę i podmień selektor poniżej. */
+.app-layout > header,
+.header-container {
+    flex-shrink: 0; /* Header ma stałą wysokość, nie kurczy się */
+    z-index: 10;    /* Niech będzie nad treścią */
+}
+
+/* 4. Main zajmuje całą wolną przestrzeń */
+main {
+    flex-grow: 1;           /* Rozciągnij się, żeby wypełnić dziurę między Headerem a dołem ekranu */
+    overflow: hidden;       /* Main sam w sobie nie scrolluje - scrollować będzie lista wiadomości w środku! */
+    display: flex;          /* To sprawia, że Outlet (czyli Twój ChatPage) też zajmie 100% maina */
+    flex-direction: column;
+}

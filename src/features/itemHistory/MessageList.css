@@ -1,0 +1,155 @@
+/* Kontener listy - bez tła, czysty */
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+/* Pojedynczy wpis (wrapper) */
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Dymki do lewej */
+    max-width: 100%;
+}
+
+/* Dane nad dymkiem (Autor • Data) */
+.message-meta {
+    margin-left: 12px;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+    color: #65676b; /* Szary tekst informacyjny */
+}
+
+.message-meta .author {
+    font-weight: 600;
+    color: #444;
+}
+
+.message-meta .date {
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+/* NIEBIESKI DYMEK */
+.chat-bubble {
+    background-color: #0084ff; /* Klasyczny Messenger Blue */
+    color: white;              /* Biały tekst na niebieskim tle */
+    padding: 8px 14px;
+    border-radius: 18px;       /* Pigułka */
+    border-bottom-left-radius: 4px; /* Opcjonalnie: mały "ogonek" z lewej */
+
+    font-size: 0.95rem;
+    line-height: 1.4;
+
+    max-width: 85%;            /* Nie zajmuje całej szerokości */
+    width: fit-content;        /* Dopasuj do tekstu */
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Treść wiadomości */
+.content {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* Link do załącznika wewnątrz niebieskiego dymka */
+.attachment-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: white;             /* Biały link */
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.2); /* Półprzezroczyste tło */
+    padding: 4px 10px;
+    border-radius: 12px;
+    transition: background-color 0.2s;
+}
+
+.attachment-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Pusty stan */
+.empty-message {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+}
+
+/* Kontener paska wpisywania (na dole) */
+.input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    /* Jeśli chcesz, żeby był przyklejony do dołu: */
+    /* position: sticky; bottom: 0; */
+}
+
+/* Sekcja z ikonkami po lewej */
+.input-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0084ff; /* Niebieski kolor ikonek */
+}
+
+.icon-btn:hover {
+    background-color: #f0f2f5;
+}
+
+/* Pole tekstowe (pigułka) */
+.input-wrapper {
+    flex-grow: 1;
+    background-color: #f0f2f5;
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+}
+
+.message-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.95rem;
+    color: #050505;
+}
+
+/* Przycisk wysyłania */
+.send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #0084ff;
+    font-size: 1.5rem;
+    padding: 5px;
+    transition: transform 0.1s;
+}
+
+.send-btn:disabled {
+    color: #bec3c9;
+    cursor: default;
+}
+
+.send-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+}

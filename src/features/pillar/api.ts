@@ -1,7 +1,7 @@
 import type { Pillar } from "./types.ts";
 import apiClient from "../../api/axios.ts";
 
-export type CreatePillarDto = Omit<Pillar, "id" | "items">;
+export type CreatePillarDto = Omit<Pillar, "id" | "items" | "tags">;
 
 export const createPillar = async (
   projectId: string,

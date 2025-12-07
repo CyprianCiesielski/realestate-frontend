@@ -13,7 +13,7 @@ export const getProjectById = async (id: string): Promise<Project> => {
 
 // Typ pomocniczy: To są dane, które wysyłamy (Projekt bez ID i bez Filarów)
 // Backend sam nada ID i sam stworzy domyślne filary.
-export type CreateProjectDto = Omit<Project, "id" | "pillars">;
+export type CreateProjectDto = Omit<Project, "id" | "pillars" | "tags">;
 
 export const createProject = async (
   data: CreateProjectDto,

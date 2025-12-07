@@ -139,3 +139,26 @@
     background-color: #2c974b;
     transform: scale(1.05); /* Lekkie powiększenie po najechaniu */
 }
+
+.projects-content {
+    padding-bottom: 90px; /* Dodatkowy padding, żeby zrobić miejsce na fixed footer (80px + odstęp) */
+}
+
+/* Kontener, żeby tagi były obok siebie */
+.project-tags-row {
+    display: flex;
+    gap: 8px;         /* Odstęp między tagami */
+    margin-top: 6px;  /* Odstęp od tytułu projektu */
+    flex-wrap: wrap;  /* Jeśli tagów jest dużo, zawiń do nowej linii */
+}
+
+/* Wygląd pojedynczego taga */
+.tag-badge {
+    font-size: 0.75rem;       /* Mały tekst (ok. 12px) */
+    color: #64748b;           /* Szary kolor tekstu */
+    background-color: #f1f5f9; /* Bardzo jasne szare tło (subtelne) */
+    padding: 2px 8px;         /* Odrobinę "powietrza" w środku */
+    border-radius: 12px;      /* Zaokrąglone rogi (kształt pigułki) */
+    font-weight: 500;
+    border: 1px solid #e2e8f0; /* Opcjonalnie: bardzo delikatna ramka */
+}

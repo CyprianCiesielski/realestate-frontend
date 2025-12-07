@@ -1,3 +1,6 @@
+import type { ItemHistory } from "../itemHistory/types.ts";
+import type { Tag } from "../tag/types.ts";
+
 export interface Item {
   id: number;
   name: string;
@@ -7,4 +10,7 @@ export interface Item {
   deadline?: string;
   startDate: string;
   priority: number;
+
+  historyEntries: ItemHistory[];
+  tags: Tag[];
 }

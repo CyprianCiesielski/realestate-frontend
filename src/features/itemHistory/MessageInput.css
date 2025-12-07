@@ -1,0 +1,84 @@
+/* --- COMPACT INPUT STYLES --- */
+
+/* Kontener paska - niski i zgrabny */
+.input-container {
+    display: flex;
+    align-items: center; /* Ważne: centruje elementy w pionie */
+    justify-content: space-between;
+    gap: 8px; /* Mniejszy odstęp między elementami */
+    padding: 8px 10px; /* Dużo mniejszy padding (było 20px lub 15px) */
+    background-color: white;
+    border-top: 1px solid #e5e7eb;
+    min-height: 50px; /* Zabezpieczenie, żeby nie był za niski */
+}
+
+/* Sekcja z ikonkami (spinacz/folder) */
+.input-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Ikonki blisko siebie */
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px; /* Mniejsze pole kliknięcia */
+    border-radius: 50%;
+    font-size: 1.1rem; /* Mniejsze ikonki */
+    color: #0084ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.icon-btn:hover {
+    background-color: #f0f2f5;
+}
+
+/* Szara pigułka z tekstem */
+.input-wrapper {
+    flex-grow: 1; /* Rozciągnij się maksymalnie */
+    background-color: #f0f2f5;
+    border-radius: 20px;
+    padding: 6px 12px; /* Węższa pigułka */
+    display: flex;
+    align-items: center;
+    height: 36px; /* Ustawiamy sztywną, małą wysokość pigułki */
+}
+
+.message-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.9rem; /* Nieco mniejsza czcionka */
+    color: #050505;
+    padding: 0;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Przycisk wysyłania (strzałka) */
+.send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #0084ff;
+    font-size: 1.2rem; /* Dopasowany rozmiar */
+    padding: 6px;
+    display: flex; /* Żeby łatwiej wycentrować */
+    align-items: center;
+    justify-content: center;
+}
+
+.send-btn:disabled {
+    color: #bec3c9; /* Jasnoszary gdy nie ma tekstu */
+    cursor: default;
+}
+
+.send-btn:hover:not(:disabled) {
+    background-color: #f0f2f5;
+    border-radius: 50%;
+}

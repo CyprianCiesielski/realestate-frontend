@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createPillar, type CreatePillarDto } from "./api";
 import type { Pillar } from "./types";
 import "./CreatePillarModal.css";
+import type { Tag } from "../tag/types.ts";
+import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface CreatePillarModalProps {
   projectId: string;
@@ -22,6 +24,8 @@ export function CreatePillarModal({
     priority: 1,
   });
 
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +45,12 @@ export function CreatePillarModal({
     setError(null);
 
     try {
-      const newPillar = await createPillar(projectId, formData);
+      const payload = {
+        ...formData,
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
+      };
+
+      const newPillar = await createPillar(projectId, payload);
       onSuccess(newPillar);
       onClose();
     } catch (err) {
@@ -72,6 +81,14 @@ export function CreatePillarModal({
               onChange={handleChange}
               required
               placeholder="np. Market"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Tags</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
             />
           </div>
 
