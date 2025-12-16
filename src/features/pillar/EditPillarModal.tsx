@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { updatePillar, type CreatePillarDto } from "./api"; // 👈 Używamy updatePillar
+import { useState, useEffect } from "react";
+import { updatePillar, type CreatePillarDto } from "./api";
 import type { Pillar } from "./types";
 import "./CreatePillarModal.css";
 import type { Tag } from "../tag/types.ts";
-import { TagSelector } from "../tag/TagSelector.tsx"; // Używamy tych samych stylów
+import { getAllTags } from "../tag/api"; // 👈 1. Import API
+import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface EditPillarModalProps {
-  project_id: string; // ID projektu (potrzebne do URL API)
-  pillar: Pillar; // 👈 Aktualny obiekt filaru do pre-fillingu
+  project_id: string;
+  pillar: Pillar;
   onClose: () => void;
   onSuccess: (updatedPillar: Pillar) => void;
-  onArchive: () => void; // Funkcja do archiwizacji
+  onArchive: () => void;
 }
 
 export function EditPillarModal({
@@ -20,7 +21,16 @@ export function EditPillarModal({
   onSuccess,
   onArchive,
 }: EditPillarModalProps) {
-  // Stan formularza inicjowany danymi z aktualnego filaru
+  // 2. Stan na tagi z bazy
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 3. Pobieranie tagów
+  useEffect(() => {
+    getAllTags()
+      .then((data) => setAllAvailableTags(data))
+      .catch((err) => console.error(err));
+  }, []);
+
   const [formData, setFormData] = useState<CreatePillarDto>({
     name: pillar.name,
     state: pillar.state,
@@ -29,7 +39,6 @@ export function EditPillarModal({
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(pillar.tags || []);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,9 +47,9 @@ export function EditPillarModal({
     try {
       const payload = {
         ...formData,
-        tags: selectedTags.map((tag) => ({ id: tag.id })), // Backend chce same ID
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
-      // Wywołujemy funkcję UPDATE z ID filaru!
+
       const updated = await updatePillar(project_id, pillar.id, payload);
       onSuccess(updated);
       onClose();
@@ -73,11 +82,16 @@ export function EditPillarModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* 4. TAG SELECTOR POPRAWIONY */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazanie tagów
             />
           </div>
 
@@ -90,7 +104,7 @@ export function EditPillarModal({
                 const { name, value } = e.target;
                 setFormData((prev) => ({
                   ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
+                  [name]: Number(value),
                 }));
               }}
             >
@@ -130,12 +144,10 @@ export function EditPillarModal({
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            {/* LEWA STRONA: Przycisk Archiwizacji */}
             <button type="button" className="btn-delete" onClick={onArchive}>
               Archiwizuj Filar
             </button>
 
-            {/* PRAWA STRONA: Zapisz / Anuluj */}
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">
                 Anuluj

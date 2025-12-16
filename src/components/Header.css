@@ -1,17 +1,16 @@
 .header {
-    display: flex;             /* Włączamy Flexboxa -> elementy ustawiają się w linii */
-    justify-content: space-between; /* Rozsuwamy elementy: Lewo <-> Środek <-> Prawo */
-    align-items: center;       /* Wyrównujemy w pionie (żeby nic nie wisiało wyżej/niżej) */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    height: 60px;              /* Wysokość paska */
-    padding: 0 20px;           /* Odstępy po bokach */
-    background-color: white;   /* Białe tło */
-    border-bottom: 1px solid #dfe1e6; /* Delikatna linia na dole */
+    height: 3.75rem;       /* 60px -> 3.75rem */
+    padding: 0 1.25rem;    /* 20px -> 1.25rem */
+    background-color: white;
+    border-bottom: 1px solid #dfe1e6;
 
-    /* Opcjonalnie: cień, żeby pasek się "odkleił" od tła */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* Cień */
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.05); /* 2px 4px -> rem */
 
-    /* Żeby header był zawsze na wierzchu */
     position: relative;
     z-index: 10;
 }
@@ -19,41 +18,40 @@
 /* 2. LOGO (Lewa strona) */
 .logo-text {
     font-size: 1.3rem;
-    font-weight: 800;      /* Gruby tekst */
-    color: #172b4d;        /* Ciemny granat */
-    text-decoration: none; /* Usuwamy podkreślenie linku */
-    letter-spacing: -0.5px;
+    font-weight: 800;
+    color: #172b4d;
+    text-decoration: none;
+    letter-spacing: -0.03125rem; /* -0.5px -> rem */
 }
 
 /* 3. WYSZUKIWARKA (Środek) */
 .search-wrapper {
-    display: flex;        /* Żeby lupa była obok pola tekstowego */
+    display: flex;
     align-items: center;
 
-    width: 400px;         /* Szerokość wyszukiwarki */
-    padding: 6px 12px;
+    width: 25rem;          /* 400px -> 25rem */
+    padding: 0.375rem 0.75rem; /* 6px 12px -> rem */
 
-    background-color: #f4f5f7; /* Jasnoszare tło (jak w Jira/Trello) */
+    background-color: #f4f5f7;
     border: 1px solid #dfe1e6;
-    border-radius: 4px;   /* Zaokrąglone rogi */
+    border-radius: 0.25rem; /* 4px -> 0.25rem */
     transition: border-color 0.2s;
 }
 
-/* Efekt po kliknięciu w wyszukiwarkę */
 .search-wrapper:focus-within {
-    border-color: #4c9aff; /* Niebieska ramka */
+    border-color: #4c9aff;
     background-color: white;
 }
 
 .search-icon {
-    color: #6b778c;       /* Szary kolor lupy */
-    margin-right: 8px;
+    color: #6b778c;
+    margin-right: 0.5rem; /* 8px -> 0.5rem */
 }
 
 .search-input {
-    border: none;         /* Usuwamy domyślną ramkę inputa */
-    background: transparent; /* Przezroczyste tło inputa */
-    outline: none;        /* Usuwamy niebieską obwódkę przeglądarki */
+    border: none;
+    background: transparent;
+    outline: none;
     width: 100%;
     font-size: 0.9rem;
     color: #172b4d;
@@ -63,7 +61,7 @@
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;            /* Odstępy między ikonami */
+    gap: 0.9375rem; /* 15px -> 0.9375rem */
 }
 
 .icon-btn {
@@ -72,9 +70,9 @@
     cursor: pointer;
     font-size: 1.2rem;
     color: #6b778c;
-    padding: 5px;
+    padding: 0.3125rem; /* 5px -> 0.3125rem */
     border-radius: 50%;
-    display: flex;        /* Centrowanie samej ikonki w przycisku */
+    display: flex;
     transition: background-color 0.2s, color 0.2s;
 }
 
@@ -85,16 +83,14 @@
 
 /* Awatar użytkownika */
 .user-avatar {
-    width: 32px;
-    height: 32px;
-    background-color: #0052cc; /* Niebieskie tło */
+    width: 2rem;          /* 32px -> 2rem */
+    height: 2rem;
+    background-color: #0052cc;
     color: white;
-    border-radius: 50%; /* Robi kółko */
-
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-
     font-size: 0.8rem;
     font-weight: bold;
     cursor: pointer;

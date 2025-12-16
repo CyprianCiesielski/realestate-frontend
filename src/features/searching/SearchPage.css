@@ -1,0 +1,80 @@
+.search-page-container {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    /* 👇 TO JEST WAŻNE, jeśli rodzic ma zablokowany scroll */
+    height: 100%;
+    overflow-y: auto;
+
+    /* Drobny margines na dole, żeby ostatni element nie był przyklejony */
+    padding-bottom: 100px;
+}
+
+.search-results-grid {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap; /* Żeby zawijało na mobilkach */
+}
+
+.result-column {
+    flex: 1; /* Każda kolumna zajmuje tyle samo miejsca */
+    min-width: 300px;
+    background-color: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-card {
+    display: block; /* Żeby Link zachowywał się jak blok */
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-color: #cbd5e1;
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.card-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Kolorowe akcenty dla typów */
+.project-card { border-left: 4px solid #3b82f6; }
+.pillar-card  { border-left: 4px solid #10b981; }
+.item-card    { border-left: 4px solid #f59e0b; }
+
+.status-tag {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #eee;
+    margin-left: auto;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

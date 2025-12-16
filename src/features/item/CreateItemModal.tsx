@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createItem, type CreateItemDto } from "./api";
 import type { Item } from "./types";
 import "./CreateItemModal.css";
 import { useRefresh } from "../../context/RefreshContext";
 import type { Tag } from "../tag/types.ts";
+import { getAllTags } from "../tag/api"; // 👈 1. Import API
 import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface CreateItemModalProps {
@@ -21,7 +22,16 @@ export function CreateItemModal({
 }: CreateItemModalProps) {
   const { triggerRefresh } = useRefresh();
 
-  // 1. Stan formularza
+  // 2. Stan na tagi z bazy
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 3. Pobieranie tagów przy otwarciu
+  useEffect(() => {
+    getAllTags()
+      .then((data) => setAllAvailableTags(data))
+      .catch((err) => console.error("Błąd pobierania tagów:", err));
+  }, []);
+
   const [formData, setFormData] = useState<CreateItemDto>({
     name: "",
     status: "",
@@ -33,11 +43,9 @@ export function CreateItemModal({
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Obsługa pisania (zbiorcza)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -46,7 +54,6 @@ export function CreateItemModal({
     }));
   };
 
-  // 3. Obsługa wysyłki
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -63,9 +70,7 @@ export function CreateItemModal({
       onClose();
     } catch (err) {
       console.error(err);
-      setError(
-        "Nie udało się utworzyć itemu. Sprawdź, czy nazwa nie jest duplikatem.",
-      );
+      setError("Nie udało się utworzyć itemu.");
     } finally {
       triggerRefresh();
       setIsSubmitting(false);
@@ -74,14 +79,12 @@ export function CreateItemModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {/* 👇 TUTAJ WKLEJASZ TREŚĆ, KTÓRĄ PODAŁEŚ */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>New Item</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Nazwa */}
           <div className="form-group">
             <label>Item name *</label>
             <input
@@ -93,15 +96,19 @@ export function CreateItemModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* 4. TAG SELECTOR Z DANYMI I STYLEM */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazujemy tagi
             />
           </div>
 
-          {/* Status */}
           <div className="form-group">
             <label>Status</label>
             <input
@@ -111,7 +118,6 @@ export function CreateItemModal({
             />
           </div>
 
-          {/* Description */}
           <div className="form-group">
             <label>Description</label>
             <input
@@ -121,7 +127,6 @@ export function CreateItemModal({
             />
           </div>
 
-          {/*deadline */}
           <div className="form-group">
             <label>Deadline</label>
             <input
@@ -139,21 +144,17 @@ export function CreateItemModal({
               value={formData.priority}
               onChange={(e) => {
                 const { name, value } = e.target;
-                setFormData((prev) => ({
-                  ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
-                }));
+                setFormData((prev) => ({ ...prev, [name]: Number(value) }));
               }}
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
           </div>
 
-          {/* Data */}
           <div className="form-group">
             <label>Start date</label>
             <input
@@ -164,14 +165,12 @@ export function CreateItemModal({
             />
           </div>
 
-          {/* Przyciski */}
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Anuluj
             </button>
-
             <button type="submit" className="btn-save" disabled={isSubmitting}>
-              {isSubmitting ? "Zapisywanie..." : "Utwórz"}
+              Utwórz
             </button>
           </div>
         </form>

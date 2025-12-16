@@ -2,10 +2,11 @@
 import { Link } from "react-router-dom";
 
 // 2. Importujemy ikony (jeśli nie zainstalowałeś jeszcze, wpisz w terminalu: npm install react-icons)
-import { FaSearch, FaCalendarAlt, FaBell } from "react-icons/fa";
+import { FaCalendarAlt, FaBell } from "react-icons/fa";
 
 // 3. Importujemy plik CSS (który zaraz stworzysz/uzupełnisz)
 import "./Header.css";
+import { SearchBar } from "../features/searching/SearchBar.tsx";
 
 export function Header() {
   return (
@@ -20,16 +21,7 @@ export function Header() {
       </div>
 
       {/* --- SEKCJA ŚRODKOWA: Wyszukiwarka --- */}
-      <div className="header-center">
-        <div className="search-wrapper">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search for projects, pillars and items..."
-            className="search-input"
-          />
-        </div>
-      </div>
+      <SearchBar />
 
       {/* --- SEKCJA PRAWA: Ikony --- */}
       <div className="header-right">

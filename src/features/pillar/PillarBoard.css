@@ -6,25 +6,18 @@
     grid-template-columns: repeat(4, 1fr);
 
     /* Odstępy między kafelkami (pionowe i poziome) */
-    gap: 20px;
+    gap: 1.25rem; /* 20px -> 1.25rem */
 
-    /* Ważne: Usuwamy przewijanie w bok, bo teraz idziemy w dół */
-    /* overflow-x: auto; <--- TO USUNĄŁEM */
-    padding-bottom: 20px;
+    padding-bottom: 1.25rem; /* 20px -> 1.25rem */
 }
 
 .pillar-column {
-    /* 3. Usuwamy sztywną szerokość, żeby dopasował się do siatki */
-    /* min-width: 300px; <--- TO USUNĄŁEM */
     position: relative;
     background-color: #f4f5f7;
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    padding: 0.625rem; /* 10px -> 0.625rem */
     display: flex;
     flex-direction: column;
-
-    /* 4. To sprawia, że filar jest tylko tak wysoki jak jego zawartość */
-    /* Bez tego wszystkie filary w rzędzie rozciągnęłyby się do wysokości najwyższego */
     height: fit-content;
 }
 
@@ -34,61 +27,61 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 0.625rem; /* 10px -> 0.625rem */
+    padding-bottom: 0.625rem; /* 10px -> 0.625rem */
+    border-bottom: 0.125rem solid #e0e0e0; /* 2px -> 0.125rem */
 }
 
 .pillar-header h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 1rem; /* 16px -> 1rem */
     color: #172b4d;
 }
 
 .item-count {
     background: #dfe1e6;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 0.125rem 0.5rem; /* 2px 8px -> rem */
+    border-radius: 0.75rem; /* 12px -> 0.75rem */
+    font-size: 0.75rem; /* 12px -> 0.75rem */
     font-weight: bold;
-    margin-right: 45px;
+    margin-right: 2.8125rem; /* 45px -> 2.8125rem */
 }
 
 .pillar-items {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    min-height: 50px; /* Minimalna wysokość, żeby dało się coś wrzucić */
+    gap: 0.625rem; /* 10px -> 0.625rem */
+    min-height: 3.125rem; /* 50px -> 3.125rem */
 }
 
 .item-card {
     background-color: white;
-    padding: 10px;
-    border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    padding: 0.625rem; /* 10px -> 0.625rem */
+    border-radius: 0.25rem; /* 4px -> 0.25rem */
+    box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1); /* 1px 2px -> rem */
     cursor: pointer;
     transition: transform 0.2s;
 }
 
 .item-card-link {
-    text-decoration: none; /* Usuwa podkreślenie */
-    color: inherit;        /* Sprawia, że tekst ma kolor normalny (czarny/szary), a nie niebieski */
-    display: block;        /* Rozciąga link na całą szerokość kontenera */
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .item-card:hover {
     background-color: #fafafa;
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem); /* 2px -> 0.125rem */
 }
 
 .item-title {
     font-weight: 500;
-    margin-bottom: 5px;
+    margin-bottom: 0.3125rem; /* 5px -> 0.3125rem */
 }
 
 .item-status {
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px -> 0.6875rem */
     color: #888;
     text-transform: uppercase;
 }
@@ -96,20 +89,20 @@
 .empty-state {
     color: #888;
     text-align: center;
-    padding: 20px;
+    padding: 1.25rem; /* 20px -> 1.25rem */
     font-style: italic;
     font-size: 0.9em;
 }
 
 .settings-pillar-btn {
-    position: absolute; /* Ustawienie absolutne */
-    top: 5px;          /* Odsunięcie od góry */
-    right: 5px;        /* Odsunięcie od prawej */
+    position: absolute;
+    top: 0.3125rem; /* 5px -> 0.3125rem */
+    right: 0.3125rem; /* 5px -> 0.3125rem */
 
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
+    padding: 0.3125rem; /* 5px -> 0.3125rem */
     z-index: 10;
     color: #888;
     font-size: 1.1rem;
@@ -121,25 +114,22 @@
 }
 
 .add-item-btn {
-    position: absolute; /* Ustawienie absolutne */
-    top: 7px;          /* Odsunięcie od góry */
-    right: 30px;
-    /* Ustawienie wyglądu podstawowego */
+    position: absolute;
+    top: 0.4375rem; /* 7px -> 0.4375rem */
+    right: 1.875rem; /* 30px -> 1.875rem */
+
     background: none;
     border: none;
     cursor: pointer;
 
-    /* Kolor i rozmiar */
-    color: #5aac44; /* Subtelna zieleń */
+    color: #5aac44;
     font-size: 1.2rem;
 
-    /* Ułatwienie kliknięcia i animacje */
-    padding: 3px;
-    margin-left: 5px; /* Mały odstęp od nazwy filaru */
-    border-radius: 50%; /* Okrągły kształt dla hovera */
+    padding: 0.1875rem; /* 3px -> 0.1875rem */
+    margin-left: 0.3125rem; /* 5px -> 0.3125rem */
+    border-radius: 50%;
     transition: all 0.2s ease-in-out;
 
-    /* Wyśrodkowanie SVG */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -147,31 +137,27 @@
 
 /* Styl dla samego elementu SVG (ikonki) */
 .add-item-btn svg {
-    width: 18px;
-    height: 18px;
-    /* Domyślnie użyjemy prostej ikonki FaPlus */
+    width: 1.125rem; /* 18px -> 1.125rem */
+    height: 1.125rem; /* 18px -> 1.125rem */
 }
 
 /* EFEKT PO NAJECHANIU (Hover) */
 .add-item-btn:hover {
-    background-color: #dfffe5; /* Bardzo jasne zielone tło */
-    color: #3f7b2e; /* Ikona staje się ciemniejsza */
-    transform: scale(1.1); /* Delikatnie powiększamy */
+    background-color: #dfffe5;
+    color: #3f7b2e;
+    transform: scale(1.1);
 }
 
 
-
 /* --- RESPONSYWNOŚĆ (Bonus) --- */
-/* Jeśli ekran jest mniejszy (np. laptop), 4 kolumny to za ciasno. */
-/* Zmieńmy na 3 kolumny */
-@media (max-width: 1400px) {
+/* Media query też przeliczamy na rem: 1400px -> 87.5rem, 1000px -> 62.5rem */
+@media (max-width: 87.5rem) {
     .board-container {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-/* Na małych ekranach (np. tablet) - 2 kolumny */
-@media (max-width: 1000px) {
+@media (max-width: 62.5rem) {
     .board-container {
         grid-template-columns: repeat(2, 1fr);
     }

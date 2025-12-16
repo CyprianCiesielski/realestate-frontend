@@ -2,51 +2,41 @@
 .message-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 10px 0;
+    gap: 0.75rem; /* 12px -> 0.75rem */
+    padding: 0.625rem 0; /* 10px 0 -> rem */
 }
 
 /* Pojedynczy wpis (wrapper) */
 .message-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Dymki do lewej */
+    align-items: flex-start;
     max-width: 100%;
 }
 
 /* Dane nad dymkiem (Autor • Data) */
 .message-meta {
-    margin-left: 12px;
-    margin-bottom: 4px;
+    margin-left: 0.75rem; /* 12px -> 0.75rem */
+    margin-bottom: 0.25rem; /* 4px -> 0.25rem */
     font-size: 0.75rem;
-    color: #65676b; /* Szary tekst informacyjny */
-}
-
-.message-meta .author {
-    font-weight: 600;
-    color: #444;
-}
-
-.message-meta .date {
-    font-weight: 400;
-    opacity: 0.8;
+    color: #65676b;
 }
 
 /* NIEBIESKI DYMEK */
 .chat-bubble {
-    background-color: #0084ff; /* Klasyczny Messenger Blue */
-    color: white;              /* Biały tekst na niebieskim tle */
-    padding: 8px 14px;
-    border-radius: 18px;       /* Pigułka */
-    border-bottom-left-radius: 4px; /* Opcjonalnie: mały "ogonek" z lewej */
+    background-color: #0084ff;
+    color: white;
+    padding: 0.5rem 0.875rem; /* 8px 14px -> rem */
+    border-radius: 1.125rem; /* 18px -> 1.125rem */
+    border-bottom-left-radius: 0.25rem; /* 4px -> 0.25rem */
 
     font-size: 0.95rem;
     line-height: 1.4;
 
-    max-width: 85%;            /* Nie zajmuje całej szerokości */
-    width: fit-content;        /* Dopasuj do tekstu */
+    max-width: 85%;
+    width: fit-content;
     word-wrap: break-word;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1); /* 1px 2px -> rem */
 }
 
 /* Treść wiadomości */
@@ -58,69 +48,61 @@
 /* Link do załącznika wewnątrz niebieskiego dymka */
 .attachment-link {
     display: inline-block;
-    margin-top: 8px;
+    margin-top: 0.5rem; /* 8px -> 0.5rem */
     font-size: 0.85rem;
-    color: white;             /* Biały link */
+    color: white;
     text-decoration: none;
-    background-color: rgba(255, 255, 255, 0.2); /* Półprzezroczyste tło */
-    padding: 4px 10px;
-    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.625rem; /* 4px 10px -> rem */
+    border-radius: 0.75rem; /* 12px -> 0.75rem */
     transition: background-color 0.2s;
-}
-
-.attachment-link:hover {
-    background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Pusty stan */
 .empty-message {
     text-align: center;
     color: #888;
-    padding: 20px;
+    padding: 1.25rem; /* 20px -> 1.25rem */
 }
 
-/* Kontener paska wpisywania (na dole) */
+/* --- KONTENER PASKU PISANIA (INPUT) --- */
+
 .input-container {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 0.625rem; /* 10px -> 0.625rem */
+    padding: 0.625rem; /* 10px -> 0.625rem */
     background-color: white;
     border-top: 1px solid #ddd;
-    /* Jeśli chcesz, żeby był przyklejony do dołu: */
     /* position: sticky; bottom: 0; */
 }
 
 /* Sekcja z ikonkami po lewej */
 .input-actions {
     display: flex;
-    gap: 5px;
+    gap: 0.3125rem; /* 5px -> 0.3125rem */
 }
 
 .icon-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
+    padding: 0.5rem; /* 8px -> 0.5rem */
     border-radius: 50%;
     font-size: 1.2rem;
+    color: #0084ff;
     transition: background-color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0084ff; /* Niebieski kolor ikonek */
-}
-
-.icon-btn:hover {
-    background-color: #f0f2f5;
 }
 
 /* Pole tekstowe (pigułka) */
 .input-wrapper {
     flex-grow: 1;
     background-color: #f0f2f5;
-    border-radius: 20px;
-    padding: 8px 15px;
+    border-radius: 1.25rem; /* 20px -> 1.25rem */
+    padding: 0.5rem 0.9375rem; /* 8px 15px -> rem */
     display: flex;
     align-items: center;
 }
@@ -141,7 +123,7 @@
     cursor: pointer;
     color: #0084ff;
     font-size: 1.5rem;
-    padding: 5px;
+    padding: 0.3125rem; /* 5px -> 0.3125rem */
     transition: transform 0.1s;
 }
 

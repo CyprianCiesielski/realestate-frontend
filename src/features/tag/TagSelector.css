@@ -1,0 +1,109 @@
+/* Kontener główny - potrzebny do pozycjonowania relatywnego dla dropdowna */
+.tag-selector-component {
+    position: relative;
+    width: 100%;
+}
+
+/* Ramka udająca input */
+.tag-selector-wrapper {
+    display: flex;             /* Tagi i input w jednym rzędzie */
+    flex-wrap: wrap;           /* Zawijanie wierszy */
+    align-items: center;       /* Centrowanie w pionie */
+    gap: 6px;                  /* Odstęp między elementami */
+
+    min-height: 42px;          /* Standardowa wysokość inputa */
+    padding: 4px 8px;
+
+    background-color: #fff;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+    cursor: text;
+    transition: border-color 0.2s;
+}
+
+.tag-selector-wrapper.focused {
+    border-color: #4c9aff; /* Niebieska ramka przy aktywności */
+    background-color: #fff;
+}
+
+/* Input wewnątrz wrappera - BEZ WŁASNEJ RAMKI */
+.tag-selector-input-field {
+    flex-grow: 1;              /* Zajmij resztę miejsca */
+    min-width: 80px;           /* Minimalna szerokość */
+    border: none !important;   /* Usuń domyślną ramkę */
+    outline: none !important;  /* Usuń obrys focusa */
+    background: transparent;
+    font-size: 0.95rem;
+    padding: 4px 0;
+    margin: 0;
+    color: #172b4d;
+}
+
+/* Wygląd wybranego taga (Pigułka) */
+.selected-tag-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap; /* Nie łam tekstu w tagu */
+    border: 1px solid transparent;
+}
+
+/* Przycisk usuwania X */
+.remove-tag-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0;
+    margin-left: 2px;
+}
+
+.remove-tag-btn:hover {
+    color: #fff;
+}
+
+/* --- LISTA ROZWIJANA --- */
+.tag-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+
+    margin-top: 4px;
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 9999; /* Bardzo wysoki indeks, żeby być nad modalem */
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.tag-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #172b4d;
+}
+
+.tag-dropdown-item:hover {
+    background-color: #f4f5f7;
+}
+
+.dropdown-tag-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}

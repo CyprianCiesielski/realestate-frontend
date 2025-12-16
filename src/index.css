@@ -1,33 +1,59 @@
-/* 1. Blokujemy przeglądarkę przed scrollowaniem całego okna */
+/* css */
+:root {
+    /* responsive base font-size: scales with viewport but clamped to a sensible range */
+    --base-font-size: clamp(14px, 0.9vw + 12px, 18px);
+    font-size: var(--base-font-size);
+
+    /* spacing scale (based on 16px baseline; use rem to be responsive) */
+    --space-xs: 0.25rem;   /* 4px */
+    --space-sm: 0.5rem;    /* 8px */
+    --space-md: 1rem;      /* 16px */
+    --space-lg: 1.5rem;    /* 24px */
+    --space-xl: 2rem;      /* 32px */
+
+    /* header reference height previously 60px -> 3.75rem (60/16) */
+    --header-height: 3.75rem;
+}
+
+/* 1. Prevent whole-window scrolling */
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow: hidden; /* KLUCZOWE: to usuwa pasek przewijania z prawej krawędzi przeglądarki */
+    overflow: hidden; /* keep app-controlled scrolling */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* 2. Twój główny kontener z App.tsx */
+/* 2. Main app layout */
 .app-layout {
     display: flex;
-    flex-direction: column; /* Układ pionowy: Header nad Main */
-    height: 100vh;          /* Zajmij 100% widocznego ekranu */
+    flex-direction: column;
+    min-height: 100vh;  /* use min-height to adapt better on very small/large viewports */
+    height: 100vh;
     background-color: white;
 }
 
-/* 3. Header nie może się zgniatać */
-/* Zakładam, że Twój komponent <Header /> zwraca tag <header> lub div z klasą.
-   Jeśli to div, dodaj mu klasę i podmień selektor poniżej. */
+/* 3. Header must not shrink */
 .app-layout > header,
 .header-container {
-    flex-shrink: 0; /* Header ma stałą wysokość, nie kurczy się */
-    z-index: 10;    /* Niech będzie nad treścią */
+    flex-shrink: 0;
+    z-index: 10;
+    height: var(--header-height); /* use variable so other CSS can reference exact header space */
 }
 
-/* 4. Main zajmuje całą wolną przestrzeń */
+/* 4. Main fills remaining space and delegates scrolling to inner scrollable elements */
 main {
-    flex-grow: 1;           /* Rozciągnij się, żeby wypełnić dziurę między Headerem a dołem ekranu */
-    overflow: hidden;       /* Main sam w sobie nie scrolluje - scrollować będzie lista wiadomości w środku! */
-    display: flex;          /* To sprawia, że Outlet (czyli Twój ChatPage) też zajmie 100% maina */
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
     flex-direction: column;
+    padding: 0; /* use components' padding using rem vars */
+}
+
+/* helpful utility: container horizontal padding aligned to spacing scale */
+.container-padding {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
 }

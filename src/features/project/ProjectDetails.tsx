@@ -92,7 +92,15 @@ export function ProjectDetails() {
           <div className="project-tags-row">
             {project.tags &&
               project.tags.map((tag) => (
-                <span key={tag.id} className="tag-badge">
+                <span
+                  key={tag.id}
+                  className="tag-badge"
+                  style={{
+                    backgroundColor: tag.color || "#94a3b8",
+                    color: "#ffffff", // Biały tekst wygląda najlepiej na kolorowych tagach
+                    borderColor: tag.color || "#94a3b8",
+                  }}
+                >
                   #{tag.name}
                 </span>
               ))}

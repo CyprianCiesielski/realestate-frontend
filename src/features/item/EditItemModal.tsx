@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateItem, type CreateItemDto } from "./api";
 import type { Item } from "./types";
 import "../project/CreateProjectModal.css";
+import { getAllTags } from "../tag/api"; // 👈 1. Import API
 import { TagSelector } from "../tag/TagSelector.tsx";
 import type { Tag } from "../tag/types.ts";
 
 interface EditItemModalProps {
   project_id: string;
   pillar_id: string;
-  item: Item; // 👈 Musimy wiedzieć co edytujemy
+  item: Item;
   onClose: () => void;
   onSuccess: (updatedItem: Item) => void;
-  onArchive: () => void; // Funkcja do archiwizacji przekazana z rodzica
+  onArchive: () => void;
 }
 
 export function EditItemModal({
@@ -22,7 +23,16 @@ export function EditItemModal({
   onSuccess,
   onArchive,
 }: EditItemModalProps) {
-  // 1. Inicjalizacja stanu danymi z projektu
+  // 2. Stan na tagi z bazy
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 3. Pobieranie tagów
+  useEffect(() => {
+    getAllTags()
+      .then((data) => setAllAvailableTags(data))
+      .catch((err) => console.error(err));
+  }, []);
+
   const [formData, setFormData] = useState<CreateItemDto>({
     name: item.name || "",
     status: item.status || "",
@@ -34,10 +44,8 @@ export function EditItemModal({
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(item.tags || []);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 2. Obsługa zmian (taka sama jak przy tworzeniu)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -45,14 +53,13 @@ export function EditItemModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 3. Zapisywanie zmian (UPDATE)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const payload = {
         ...formData,
-        tags: selectedTags.map((tag) => ({ id: tag.id })), // Backend chce same ID
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
       const updated = await updateItem(project_id, pillar_id, item.id, payload);
       onSuccess(updated);
@@ -71,7 +78,6 @@ export function EditItemModal({
         <h2>Edit Item: {item.name}</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Nazwa */}
           <div className="form-group">
             <label>Item name *</label>
             <input
@@ -83,15 +89,19 @@ export function EditItemModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* 4. TAG SELECTOR Z DANYMI */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazujemy tagi
             />
           </div>
 
-          {/* Status */}
           <div className="form-group">
             <label>Status</label>
             <input
@@ -101,7 +111,6 @@ export function EditItemModal({
             />
           </div>
 
-          {/* Description */}
           <div className="form-group">
             <label>Description</label>
             <input
@@ -111,7 +120,6 @@ export function EditItemModal({
             />
           </div>
 
-          {/*deadline */}
           <div className="form-group">
             <label>Deadline</label>
             <input
@@ -129,21 +137,17 @@ export function EditItemModal({
               value={formData.priority}
               onChange={(e) => {
                 const { name, value } = e.target;
-                setFormData((prev) => ({
-                  ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
-                }));
+                setFormData((prev) => ({ ...prev, [name]: Number(value) }));
               }}
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
           </div>
 
-          {/* Data */}
           <div className="form-group">
             <label>Start date</label>
             <input
@@ -168,12 +172,10 @@ export function EditItemModal({
             </select>
           </div>
 
-          {/* PRZYCISKI AKCJI */}
           <div
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            {/* LEWA STRONA: Czerwony przycisk usuwania */}
             <button
               type="button"
               className="btn-delete"
@@ -189,8 +191,6 @@ export function EditItemModal({
             >
               Archive Item
             </button>
-
-            {/* PRAWA STRONA: Anuluj / Zapisz */}
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">
                 Anuluj

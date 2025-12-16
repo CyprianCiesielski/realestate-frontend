@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createProject, type CreateProjectDto } from "./api";
+import { getAllTags } from "../tag/api"; // 👈 IMPORTUJEMY API TAGÓW
 import type { Project } from "./types";
 import "./CreateProjectModal.css";
 import type { Tag } from "../tag/types.ts";
@@ -8,13 +9,27 @@ import { TagSelector } from "../tag/TagSelector.tsx";
 interface CreateProjectModalProps {
   onClose: () => void;
   onSuccess: (newProject: Project) => void;
+  // Usunęliśmy allAvailableTags z propsów, modal sam sobie je pobierze
 }
 
 export function CreateProjectModal({
   onClose,
   onSuccess,
 }: CreateProjectModalProps) {
-  // 1. Stan formularza
+  // 1. Stan na listę wszystkich tagów z bazy
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 2. Pobieramy tagi od razu po otwarciu modala
+  useEffect(() => {
+    getAllTags()
+      .then((data) => {
+        console.log("Tagi pobrane z bazy:", data);
+        setAllAvailableTags(data);
+      })
+      .catch((err) => console.error("Błąd pobierania tagów:", err));
+  }, []);
+
+  // --- Reszta stanu formularza bez zmian ---
   const [formData, setFormData] = useState<CreateProjectDto>({
     name: "",
     place: "",
@@ -26,20 +41,19 @@ export function CreateProjectModal({
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Obsługa pisania (zbiorcza)
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "priority" ? Number(value) : value,
     }));
   };
 
-  // 3. Obsługa wysyłki
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -56,9 +70,7 @@ export function CreateProjectModal({
       onClose();
     } catch (err) {
       console.error(err);
-      setError(
-        "Nie udało się utworzyć projektu. Sprawdź, czy nazwa nie jest duplikatem.",
-      );
+      setError("Nie udało się utworzyć projektu.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,10 +78,8 @@ export function CreateProjectModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {/* 👇 TUTAJ WKLEJASZ TREŚĆ, KTÓRĄ PODAŁEŚ */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>New Project</h2>
-
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
@@ -85,15 +95,20 @@ export function CreateProjectModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
             />
           </div>
 
-          {/* Lokalizacja */}
+          {/* Reszta pól... */}
           <div className="form-group">
             <label>Place</label>
             <input
@@ -102,8 +117,6 @@ export function CreateProjectModal({
               onChange={handleChange}
             />
           </div>
-
-          {/* Wykonawca */}
           <div className="form-group">
             <label>Contractor</label>
             <input
@@ -112,8 +125,6 @@ export function CreateProjectModal({
               onChange={handleChange}
             />
           </div>
-
-          {/* Spółka (Pamiętaj o literówce z backendu jeśli jej nie poprawiłeś!) */}
           <div className="form-group">
             <label>Company Responsible</label>
             <input
@@ -122,29 +133,20 @@ export function CreateProjectModal({
               onChange={handleChange}
             />
           </div>
-
           <div className="form-group">
             <label>Priority</label>
             <select
               name="priority"
               value={formData.priority}
-              onChange={(e) => {
-                const { name, value } = e.target;
-                setFormData((prev) => ({
-                  ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
-                }));
-              }}
+              onChange={handleChange}
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
           </div>
-
-          {/* Data */}
           <div className="form-group">
             <label>Start date</label>
             <input
@@ -155,14 +157,12 @@ export function CreateProjectModal({
             />
           </div>
 
-          {/* Przyciski */}
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Anuluj
             </button>
-
             <button type="submit" className="btn-save" disabled={isSubmitting}>
-              {isSubmitting ? "Zapisywanie..." : "Utwórz"}
+              Utwórz
             </button>
           </div>
         </form>

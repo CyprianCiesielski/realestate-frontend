@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Item } from "./types";
 import { archiveItem, getItemById } from "./api";
-import { addHistoryEntry } from "../itemHistory/api"; // Import funkcji API
+import { addHistoryEntry } from "../itemHistory/api";
 import { MessageList } from "../itemHistory/MessageList.tsx";
 import { MessageInput } from "../itemHistory/MessageInput.tsx";
 import "./ItemDetails.css";
@@ -18,12 +18,10 @@ export function ItemDetails() {
   }>();
 
   const navigate = useNavigate();
-
   const [item, setItem] = useState<Item | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
   const { triggerRefresh } = useRefresh();
 
   const handleArchive = async () => {
@@ -31,16 +29,17 @@ export function ItemDetails() {
     try {
       await archiveItem(projectId, pillarId, item.id);
 
+      // Odświeżamy kontekst globalny (żeby zniknęło z menu)
       triggerRefresh();
+
+      // Przekierowujemy do widoku projektu
       navigate(`/projects/${projectId}`);
-      window.location.reload();
     } catch (err) {
       console.error(err);
       alert("Archive Error.");
     }
   };
 
-  // 1. Pobieranie danych przy starcie
   useEffect(() => {
     if (itemId && projectId && pillarId) {
       setIsLoading(true);
@@ -58,22 +57,17 @@ export function ItemDetails() {
     }
   }, [itemId, projectId, pillarId]);
 
-  // 2. Logika wysyłania wiadomości
   const handleSendMessage = async (text: string) => {
     if (!item || !projectId || !pillarId || !itemId) return;
-
     try {
-      // Tworzymy obiekt zgodny z Twoim typem CreateHistoryDto
+      // 👇 ZMIANA: Usunąłem changeDate. Backend sam ustawia datę.
       const historyDto = {
         description: text,
-        changeDate: new Date().toISOString(), // Backend wymaga daty
-        author: "User", // TODO: Podmień to na dane z logowania (np. user.name)
-        // Opcjonalne pola (jeśli będziesz robić upload plików):
-        // googleFileId: ...,
-        // webViewLink: ...
+        author: "User", // Tutaj w przyszłości wepniesz dane zalogowanego usera
+        // webViewLink: ... (opcjonalnie)
+        // googleFileId: ... (opcjonalnie)
       };
 
-      // Wysyłamy do API
       const newEntry = await addHistoryEntry(
         projectId,
         pillarId,
@@ -81,7 +75,7 @@ export function ItemDetails() {
         historyDto,
       );
 
-      // Aktualizujemy stan lokalny (dodajemy wpis do listy bez odświeżania strony)
+      // Aktualizujemy stan lokalny, żeby wiadomość pojawiła się natychmiast
       setItem((prevItem) => {
         if (!prevItem) return null;
         return {
@@ -95,14 +89,12 @@ export function ItemDetails() {
     }
   };
 
-  // 3. Stany ładowania/błędu
   if (isLoading) return <div className="loading">Ładowanie danych...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!item) return <div className="not-found">Nie znaleziono zadania.</div>;
 
   return (
     <div className="project-details-container">
-      {/* --- GÓRNA SEKCJA: INFO O ZADANIU --- */}
       <div className="item-info-section">
         <header className="project-header">
           <div className="header-left">
@@ -113,11 +105,20 @@ export function ItemDetails() {
               ● {item.state}
             </span>
 
+            {/* Wyświetlanie tagów */}
             <div className="project-tags-row">
               {item.tags &&
                 item.tags.map((tag) => (
-                  <span key={tag.id} className="tag-badge">
-                    #{tag.name}
+                  <span
+                    key={tag.id}
+                    className="tag-badge"
+                    style={{
+                      backgroundColor: tag.color || "#94a3b8",
+                      color: "#fff",
+                      borderColor: tag.color || "#94a3b8",
+                    }}
+                  >
+                    {tag.name}
                   </span>
                 ))}
             </div>
@@ -127,7 +128,7 @@ export function ItemDetails() {
             <button
               className="settings-btn"
               onClick={() => setIsEditModalOpen(true)}
-              title="Edytuj projekt"
+              title="Edytuj zadanie"
             >
               <FaCog />
             </button>
@@ -140,21 +141,17 @@ export function ItemDetails() {
           <InfoItem label="Deadline" value={item.deadline} />
           <InfoItem label="Priorytet" value={`${item.priority}`} />
         </div>
-
-        {/* Miejsce na opis, jeśli masz takie pole w itemie */}
-        {/* <div className="description-section">{item.description}</div> */}
       </div>
 
-      {/* --- DOLNA SEKCJA: CZAT / HISTORIA --- */}
       <div className="chat-area">
-        <div className="chat-section-header">Chat</div>
+        <div className="chat-section-header">Chat / Historia</div>
 
-        {/* Lista wiadomości (Scrollowana) */}
+        {/* Kontener z wiadomościami */}
         <div className="message-list-scrollable">
           <MessageList historyEntries={item.historyEntries || []} />
         </div>
 
-        {/* Input (Przyklejony do dołu) */}
+        {/* Input na dole */}
         <div className="chat-input-wrapper">
           <MessageInput onSendMessage={handleSendMessage} />
         </div>
@@ -162,8 +159,8 @@ export function ItemDetails() {
 
       {isEditModalOpen && item && (
         <EditItemModal
-          project_id={projectId!} // Używamy projectId z URL
-          pillar_id={pillarId!} // 👈 ZMIANA: nazwa propsa musi pasować do definicji w modalu
+          project_id={projectId!}
+          pillar_id={pillarId!}
           item={item}
           onClose={() => setIsEditModalOpen(false)}
           onArchive={() => {
@@ -171,7 +168,6 @@ export function ItemDetails() {
             setIsEditModalOpen(false);
           }}
           onSuccess={(updatedItem) => {
-            // Aktualizujemy lokalny stan Itemu nowymi danymi (w tym tagami)
             setItem((prev) => (prev ? { ...prev, ...updatedItem } : null));
             setIsEditModalOpen(false);
           }}
@@ -181,7 +177,6 @@ export function ItemDetails() {
   );
 }
 
-// Pomocniczy komponent do wyświetlania pól w gridzie
 function InfoItem({ label, value }: { label: string; value?: string }) {
   return (
     <div className="info-box">

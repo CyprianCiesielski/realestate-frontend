@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateProject, type CreateProjectDto } from "./api";
 import type { Project } from "./types";
+import { getAllTags } from "../tag/api"; // 👈 1. IMPORT API
 import "./CreateProjectModal.css";
 import { TagSelector } from "../tag/TagSelector.tsx";
-import type { Tag } from "../tag/types.ts"; // Użyjemy tych samych stylów + dodamy jeden nowy
+import type { Tag } from "../tag/types.ts";
 
 interface EditProjectModalProps {
-  project: Project; // 👈 Musimy wiedzieć co edytujemy
+  project: Project;
   onClose: () => void;
   onSuccess: (updatedProject: Project) => void;
-  onArchive: () => void; // Funkcja do archiwizacji przekazana z rodzica
+  onArchive: () => void;
 }
 
 export function EditProjectModal({
@@ -18,7 +19,18 @@ export function EditProjectModal({
   onSuccess,
   onArchive,
 }: EditProjectModalProps) {
-  // 1. Inicjalizacja stanu danymi z projektu
+  // 2. STAN NA POBRANE TAGI Z BAZY
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 3. POBIERANIE TAGÓW PRZY OTWARCIU
+  useEffect(() => {
+    getAllTags()
+      .then((data) => {
+        setAllAvailableTags(data);
+      })
+      .catch((err) => console.error("Błąd pobierania tagów w edycji:", err));
+  }, []);
+
   const [formData, setFormData] = useState<CreateProjectDto>({
     name: project.name,
     place: project.place || "",
@@ -29,26 +41,28 @@ export function EditProjectModal({
     priority: project.priority || 1,
   });
 
+  // Inicjalizacja wybranych tagów tymi, które projekt już ma
   const [selectedTags, setSelectedTags] = useState<Tag[]>(project.tags || []);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 2. Obsługa zmian (taka sama jak przy tworzeniu)
+  // Obsługa zmian w polach
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "priority" ? Number(value) : value,
+    }));
   };
 
-  // 3. Zapisywanie zmian (UPDATE)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const payload = {
         ...formData,
-        tags: selectedTags.map((tag) => ({ id: tag.id })), // Backend chce same ID
+        tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
 
       const updated = await updateProject(project.id, payload);
@@ -78,11 +92,16 @@ export function EditProjectModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* 4. TAG SELECTOR Z DANYMI Z BAZY */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Teraz zmienna istnieje i ma dane
             />
           </div>
 
@@ -96,7 +115,7 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Contributor</label>
+            <label>Contractor</label>
             <input
               name="contractor"
               value={formData.contractor}
@@ -118,13 +137,7 @@ export function EditProjectModal({
             <select
               name="priority"
               value={formData.priority}
-              onChange={(e) => {
-                const { name, value } = e.target;
-                setFormData((prev) => ({
-                  ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
-                }));
-              }}
+              onChange={handleChange}
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
@@ -158,12 +171,10 @@ export function EditProjectModal({
             </select>
           </div>
 
-          {/* PRZYCISKI AKCJI */}
           <div
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            {/* LEWA STRONA: Czerwony przycisk usuwania */}
             <button
               type="button"
               className="btn-delete"
@@ -180,7 +191,6 @@ export function EditProjectModal({
               Archiwizuj Projekt
             </button>
 
-            {/* PRAWA STRONA: Anuluj / Zapisz */}
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">
                 Anuluj

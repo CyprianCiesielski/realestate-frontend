@@ -1,21 +1,19 @@
 /* 1. TŁO (Overlay) - Przykrywa całą stronę */
 .modal-overlay {
-    position: fixed; /* "Przyklejone" do okna przeglądarki */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
 
-    /* Półprzezroczyste, ciemne tło */
     background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px); /* Rozmycie tego co pod spodem (efekt szkła) */
+    backdrop-filter: blur(2px);
 
-    /* Wycentrowanie okienka na środku ekranu */
     display: flex;
     justify-content: center;
     align-items: center;
 
-    z-index: 1000; /* Bardzo wysoko, żeby przykryło wszystko inne */
+    z-index: 1000;
     animation: fadeIn 0.2s ease-out;
 }
 
@@ -23,50 +21,49 @@
 .modal-content {
     background-color: white;
     width: 100%;
-    max-width: 450px; /* Nie za szerokie na dużych ekranach */
-    padding: 24px;
-    border-radius: 8px; /* Zaokrąglone rogi */
+    /* 450px -> 28.125rem */
+    max-width: 28.125rem;
+    padding: 1.5rem;      /* 24px -> 1.5rem */
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
 
-    /* Cień, który unosi okienko */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    /* Cień */
+    box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.2); /* 10px 25px -> rem */
 
-    /* Animacja wjazdu */
     animation: slideUp 0.3s ease-out;
-
-    /* Zapobieganie klikaniu "pod spodem" */
     position: relative;
 }
 
 /* Nagłówek modala */
 .modal-content h2 {
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem; /* 20px -> 1.25rem */
     font-size: 1.5rem;
     color: #172b4d;
     border-bottom: 1px solid #ebecf0;
-    padding-bottom: 15px;
+    padding-bottom: 0.9375rem; /* 15px -> 0.9375rem */
 }
 
 /* 3. FORMULARZ - Pola i etykiety */
 .form-group {
-    margin-bottom: 16px; /* Odstęp między polami */
+    margin-bottom: 1rem; /* 16px -> 1rem */
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .form-group label {
     font-size: 0.85rem;
     font-weight: 600;
     color: #44546f;
-    margin-bottom: 6px;
+    margin-bottom: 0.375rem; /* 6px -> 0.375rem */
 }
 
 .form-group input,
 .form-group select {
-    padding: 10px 12px;
+    padding: 0.625rem 0.75rem; /* 10px 12px -> rem */
     font-size: 0.95rem;
-    border: 2px solid #dfe1e6; /* Jasnoszara ramka */
-    border-radius: 4px;
+    border: 2px solid #dfe1e6;
+    border-radius: 0.25rem; /* 4px -> 0.25rem */
     transition: border-color 0.2s;
     color: #172b4d;
 }
@@ -75,29 +72,24 @@
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #4c9aff; /* Niebieski kolor po kliknięciu */
+    border-color: #4c9aff;
     background-color: #fff;
-}
-
-/* Placeholder (podpowiedź w polu) */
-.form-group input::placeholder {
-    color: #97a0af;
 }
 
 /* 4. PRZYCISKI (Actions) */
 .modal-actions {
-    margin-top: 30px;
+    margin-top: 1.875rem; /* 30px -> 1.875rem */
     display: flex;
-    justify-content: flex-end; /* Przesuń do prawej */
-    gap: 12px; /* Odstęp między guzikami */
+    justify-content: flex-end;
+    gap: 0.75rem; /* 12px -> 0.75rem */
 }
 
-/* Wspólny styl dla guzików (resetowanie domyślnych stylów przeglądarki) */
+/* Wspólny styl dla guzików */
 .modal-actions button {
-    padding: 8px 16px;
+    padding: 0.5rem 1rem; /* 8px 16px -> rem */
     font-size: 0.95rem;
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: 0.25rem; /* 4px -> 0.25rem */
     cursor: pointer;
     border: none;
     transition: background-color 0.2s;
@@ -110,23 +102,23 @@
 }
 
 .btn-cancel:hover {
-    background-color: #ebecf0; /* Szary po najechaniu */
+    background-color: #ebecf0;
     text-decoration: none;
 }
 
 /* Guzik Zapisz (Zielony) */
 .btn-save {
-    background-color: #2ea44f; /* GitHub Green */
+    background-color: #2ea44f;
     color: white;
     font-weight: 600;
 }
 
 .btn-save:hover {
-    background-color: #2c974b; /* Ciemniejszy zielony */
+    background-color: #2c974b;
 }
 
 .btn-save:disabled {
-    background-color: #94d3a2; /* Blady zielony, gdy wysyła */
+    background-color: #94d3a2;
     cursor: not-allowed;
 }
 
@@ -134,9 +126,9 @@
 .error-msg {
     background-color: #ffebe6;
     color: #bf2600;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+    padding: 0.75rem; /* 12px -> 0.75rem */
+    border-radius: 0.25rem; /* 4px -> 0.25rem */
+    margin-bottom: 1.25rem; /* 20px -> 1.25rem */
     font-size: 0.9rem;
     border: 1px solid #ffbdad;
 }
@@ -153,6 +145,7 @@
     background-color: #ffbdad;
     color: #bf2600;
 }
+
 /* --- ANIMACJE --- */
 
 @keyframes fadeIn {
@@ -161,6 +154,7 @@
 }
 
 @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
+    /* 20px -> 1.25rem */
+    from { transform: translateY(1.25rem); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }

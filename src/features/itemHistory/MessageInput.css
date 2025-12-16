@@ -3,29 +3,29 @@
 /* Kontener paska - niski i zgrabny */
 .input-container {
     display: flex;
-    align-items: center; /* Ważne: centruje elementy w pionie */
+    align-items: center;
     justify-content: space-between;
-    gap: 8px; /* Mniejszy odstęp między elementami */
-    padding: 8px 10px; /* Dużo mniejszy padding (było 20px lub 15px) */
+    gap: 0.5rem; /* 8px -> 0.5rem */
+    padding: 0.5rem 0.625rem; /* 8px 10px -> rem */
     background-color: white;
     border-top: 1px solid #e5e7eb;
-    min-height: 50px; /* Zabezpieczenie, żeby nie był za niski */
+    min-height: 3.125rem; /* 50px -> 3.125rem */
 }
 
 /* Sekcja z ikonkami (spinacz/folder) */
 .input-actions {
     display: flex;
     align-items: center;
-    gap: 4px; /* Ikonki blisko siebie */
+    gap: 0.25rem; /* 4px -> 0.25rem */
 }
 
 .icon-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px; /* Mniejsze pole kliknięcia */
+    padding: 0.375rem; /* 6px -> 0.375rem */
     border-radius: 50%;
-    font-size: 1.1rem; /* Mniejsze ikonki */
+    font-size: 1.1rem;
     color: #0084ff;
     display: flex;
     align-items: center;
@@ -39,13 +39,13 @@
 
 /* Szara pigułka z tekstem */
 .input-wrapper {
-    flex-grow: 1; /* Rozciągnij się maksymalnie */
+    flex-grow: 1;
     background-color: #f0f2f5;
-    border-radius: 20px;
-    padding: 6px 12px; /* Węższa pigułka */
+    border-radius: 1.25rem; /* 20px -> 1.25rem */
+    padding: 0.375rem 0.75rem; /* 6px 12px -> rem */
     display: flex;
     align-items: center;
-    height: 36px; /* Ustawiamy sztywną, małą wysokość pigułki */
+    height: 2.25rem; /* 36px -> 2.25rem */
 }
 
 .message-input {
@@ -53,7 +53,7 @@
     border: none;
     background: transparent;
     outline: none;
-    font-size: 0.9rem; /* Nieco mniejsza czcionka */
+    font-size: 0.9rem;
     color: #050505;
     padding: 0;
     margin: 0;
@@ -66,15 +66,15 @@
     border: none;
     cursor: pointer;
     color: #0084ff;
-    font-size: 1.2rem; /* Dopasowany rozmiar */
-    padding: 6px;
-    display: flex; /* Żeby łatwiej wycentrować */
+    font-size: 1.2rem;
+    padding: 0.375rem; /* 6px -> 0.375rem */
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .send-btn:disabled {
-    color: #bec3c9; /* Jasnoszary gdy nie ma tekstu */
+    color: #bec3c9;
     cursor: default;
 }
 

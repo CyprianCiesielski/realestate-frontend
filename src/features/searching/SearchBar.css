@@ -1,0 +1,144 @@
+/* --- KONTENER GŁÓWNY --- */
+/* To jest element, który SearchBar "zwraca" jako korzeń */
+.header-center {
+    position: relative; /* KLUCZOWE: Dzięki temu dropdown pozycjonuje się względem tego elementu */
+    flex: 1; /* Zajmij dostępną przestrzeń w Headerze */
+    max-width: 600px; /* Nie rozciągaj się w nieskończoność */
+    margin: 0 20px; /* Odstępy od logo i ikon po prawej */
+}
+
+/* --- PASEK WYSZUKIWANIA (Input + Ikona) --- */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #f1f5f9; /* Jasnoszary kolor tła (Slate-100) */
+    border-radius: 8px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Efekt po kliknięciu w input (Focus) */
+.search-wrapper:focus-within {
+    background-color: #ffffff;
+    border-color: #3b82f6; /* Niebieska ramka */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Delikatna poświata */
+}
+
+.search-icon {
+    color: #94a3b8; /* Szary kolor ikony */
+    font-size: 1.1rem;
+    margin-right: 12px;
+}
+
+.search-input {
+    flex: 1; /* Rozciągnij input na całą szerokość wrapper'a */
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.95rem;
+    color: #334155; /* Ciemnoszary tekst */
+}
+
+.search-input::placeholder {
+    color: #cbd5e1;
+}
+
+/* --- DROPDOWN Z WYNIKAMI (To, co się rozwija) --- */
+.search-results-dropdown {
+    position: absolute; /* KLUCZOWE: Wyjmij z normalnego przepływu dokumentu */
+    top: 100%; /* Przesuń pod spód inputa */
+    left: 0;
+    right: 0; /* Rozciągnij na szerokość .header-center */
+    margin-top: 8px; /* Mały odstęp od paska */
+
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Cień */
+    border: 1px solid #e2e8f0;
+
+    max-height: 450px; /* Maksymalna wysokość */
+    overflow-y: auto; /* Scrolluj, jeśli wyników jest za dużo */
+    z-index: 1000; /* Musi być wyżej niż reszta strony */
+}
+
+/* --- SEKCJE WYNIKÓW (Nagłówki Project, Items itp.) --- */
+.search-section h4 {
+    margin: 0;
+    padding: 10px 16px;
+    background-color: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Usuń górną linię dla pierwszej sekcji */
+.search-section:first-child h4 {
+    border-top: none;
+}
+
+.search-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- POJEDYNCZY WYNIK --- */
+.search-section li {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #1e293b;
+    transition: background-color 0.2s;
+}
+
+.search-section li:hover {
+    background-color: #eff6ff; /* Jasnoniebieskie tło po najechaniu */
+    color: #2563eb; /* Niebieski tekst */
+}
+
+/* --- BADGE STATUSU (np. Active, Finished) --- */
+.status-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: capitalize;
+}
+
+/* Kolory statusów */
+.status-badge.active {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.finished {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.archived {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+/* --- STOPKA DROPDOWNU (Press Enter...) --- */
+.search-footer {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    background-color: #fafafa;
+    border-top: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.search-footer:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}

@@ -1,98 +1,175 @@
-import { useEffect, useState } from "react";
-import CreatableSelect from "react-select/creatable";
-import { getAllTags, createTag } from "./api";
-import type { Tag } from "./types.ts";
-
-interface Option {
-  label: string;
-  value: number; // ID taga
-  __isNew__?: boolean;
-}
+import React, { useState, useRef, useEffect } from "react";
+import type { Tag } from "./types";
+import { CreateTagModal } from "./CreateTagModal";
+// Jeśli nie masz react-icons, zamień <FaTimes /> na zwykły tekst "x"
+import { FaTimes } from "react-icons/fa";
+import "./TagSelector.css";
 
 interface TagSelectorProps {
-  selectedTags: Tag[]; // Aktualnie wybrane tagi (przekazane z formularza rodzica)
-  onChange: (newTags: Tag[]) => void; // Funkcja do aktualizacji stanu w rodzicu
-  isDisabled?: boolean;
+  selectedTags: Tag[];
+  onChange: (tags: Tag[]) => void;
+  allTags: Tag[];
 }
 
 export function TagSelector({
   selectedTags,
   onChange,
-  isDisabled,
+  allTags,
 }: TagSelectorProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [options, setOptions] = useState<Option[]>([]);
+  console.log("TAGI W SELECTORZE:", allTags);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [isFocused, setIsFocused] = useState(false); // Czy kliknięto w pole?
 
-  // 1. Przy montowaniu komponentu pobierz wszystkie dostępne tagi z bazy
+  // Ref do wykrywania kliknięcia poza komponentem (zamykanie dropdowna)
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const tagsToCheck = allTags || [];
+
+  // Obsługa zamykania listy po kliknięciu gdzieś indziej
   useEffect(() => {
-    setIsLoading(true);
-    getAllTags()
-      .then((tags) => {
-        // Mapujemy Twój obiekt Tag na format react-select (label/value)
-        const formattedOptions = tags.map((t) => ({
-          label: t.name,
-          value: t.id,
-        }));
-        setOptions(formattedOptions);
-      })
-      .catch((err) => console.error("Błąd pobierania tagów:", err))
-      .finally(() => setIsLoading(false));
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setIsFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  // 2. Obsługa tworzenia nowego taga
-  const handleCreate = async (inputValue: string) => {
-    setIsLoading(true);
-    try {
-      // Strzał do backendu: POST /api/tags
-      const newTag = await createTag(inputValue);
+  const handleSelectExistingTag = (tag: Tag) => {
+    if (!selectedTags.some((t) => t.id === tag.id)) {
+      onChange([...selectedTags, tag]);
+    }
+    setNewTagName("");
+    // Utrzymujemy focus, żeby można było dodać kolejny
+    setIsFocused(true);
+  };
 
-      // Dodajemy nowy tag do listy opcji
-      const newOption = { label: newTag.name, value: newTag.id };
-      setOptions((prev) => [...prev, newOption]);
+  const handleRemoveTag = (tagId: number) => {
+    onChange(selectedTags.filter((tag) => tag.id !== tagId));
+  };
 
-      // I od razu go zaznaczamy (aktualizujemy rodzica)
-      onChange([...selectedTags, newTag]);
-    } catch (error) {
-      console.error("Nie udało się utworzyć taga:", error);
-      alert("Błąd podczas tworzenia taga.");
-    } finally {
-      setIsLoading(false);
+  const handleNewTagCreated = (newTag: Tag) => {
+    setIsModalOpen(false);
+    setNewTagName("");
+    onChange([...selectedTags, newTag]);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Zapobiegamy wysłaniu formularza głównego (ProjectModal) po wciśnięciu Enter
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      if (newTagName.trim() === "") return;
+
+      const trimmedName = newTagName.trim();
+      const existingTag = tagsToCheck.find(
+        (tag) => tag.name.toLowerCase() === trimmedName.toLowerCase(),
+      );
+
+      if (!existingTag) {
+        setIsModalOpen(true); // Otwórz modal tworzenia
+      } else {
+        handleSelectExistingTag(existingTag); // Wybierz istniejący
+      }
+    }
+
+    // Opcjonalnie: Usuwanie ostatniego taga backspacem
+    if (e.key === "Backspace" && newTagName === "" && selectedTags.length > 0) {
+      handleRemoveTag(selectedTags[selectedTags.length - 1].id);
     }
   };
 
-  // 3. Obsługa zmiany wyboru (dodanie istniejącego lub usunięcie)
-  const handleChange = (newValue: any) => {
-    // react-select zwraca tablicę Option[], musimy to zamienić z powrotem na Tag[]
-    const selectedOptions = newValue as Option[];
-
-    const tagsToSave: Tag[] = selectedOptions.map((opt) => ({
-      id: opt.value,
-      name: opt.label,
-      state: "active", // domyślnie
-    }));
-
-    onChange(tagsToSave);
-  };
-
-  // Konwersja aktualnie wybranych tagów na format dla react-select
-  const valueForSelect = selectedTags.map((t) => ({
-    label: t.name,
-    value: t.id,
-  }));
+  // Filtrowanie: Pokaż tagi pasujące do tekstu, które nie są jeszcze wybrane
+  // Jeśli tekst pusty, pokaż wszystkie dostępne (niewybrane)
+  const filteredTags = tagsToCheck.filter(
+    (tag) =>
+      (newTagName === "" ||
+        tag.name.toLowerCase().includes(newTagName.toLowerCase())) &&
+      !selectedTags.some((t) => t.id === tag.id),
+  );
 
   return (
-    <CreatableSelect
-      isMulti // Pozwala wybrać wiele
-      isDisabled={isDisabled || isLoading}
-      isLoading={isLoading}
-      onChange={handleChange}
-      onCreateOption={handleCreate} // To magiczna funkcja od "tworzenia w locie"
-      options={options}
-      value={valueForSelect}
-      placeholder="Wybierz tagi lub wpisz nowy..."
-      formatCreateLabel={(inputValue) => `Utwórz tag: "${inputValue}"`}
-      className="tag-select-container"
-      classNamePrefix="react-select"
-    />
+    <div className="tag-selector-component" ref={wrapperRef}>
+      {/* 1. KONTENER UDAJĄCY INPUT (Tagi + Pole tekstowe w środku) */}
+      <div
+        className={`tag-selector-wrapper ${isFocused ? "focused" : ""}`}
+        onClick={() => setIsFocused(true)} // Kliknięcie gdziekolwiek w ramkę aktywuje input
+      >
+        {selectedTags.map((tag) => (
+          <span
+            key={tag.id}
+            className="selected-tag-badge"
+            style={{
+              backgroundColor: tag.color || "#e0e0e0",
+              color: "#fff", // Możesz tu dodać logikę kontrastu
+              borderColor: tag.color,
+            }}
+          >
+            {tag.name}
+            <button
+              type="button"
+              className="remove-tag-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // Żeby nie otwierać listy przy usuwaniu
+                handleRemoveTag(tag.id);
+              }}
+            >
+              <FaTimes />
+            </button>
+          </span>
+        ))}
+
+        {/* Input bez ramki, wypełnia resztę miejsca */}
+        <input
+          type="text"
+          className="tag-selector-input-field"
+          value={newTagName}
+          onChange={(e) => setNewTagName(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+          onFocus={() => setIsFocused(true)}
+          placeholder={
+            selectedTags.length === 0 ? "Wybierz lub wpisz tag..." : ""
+          }
+        />
+      </div>
+
+      {/* 2. LISTA ROZWIJANA (DROPDOWN) */}
+      {isFocused && filteredTags.length > 0 && (
+        <div className="tag-dropdown">
+          {filteredTags.map((tag) => (
+            <div
+              key={tag.id}
+              className="tag-dropdown-item"
+              onMouseDown={(e) => {
+                e.preventDefault(); // Zapobiega utracie focusa przed klikiem
+                handleSelectExistingTag(tag);
+              }}
+            >
+              <span
+                className="dropdown-tag-color"
+                style={{ backgroundColor: tag.color }}
+              />
+              {tag.name}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 3. MODAL TWORZENIA */}
+      {isModalOpen && (
+        <CreateTagModal
+          initialName={newTagName}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleNewTagCreated}
+        />
+      )}
+    </div>
   );
 }

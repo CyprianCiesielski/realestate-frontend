@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPillar, type CreatePillarDto } from "./api";
 import type { Pillar } from "./types";
 import "./CreatePillarModal.css";
 import type { Tag } from "../tag/types.ts";
+import { getAllTags } from "../tag/api"; // 👈 1. Importujemy API tagów
 import { TagSelector } from "../tag/TagSelector.tsx";
 
 interface CreatePillarModalProps {
@@ -16,7 +17,18 @@ export function CreatePillarModal({
   onClose,
   onSuccess,
 }: CreatePillarModalProps) {
-  // 1. Stan formularza
+  // 2. Stan na wszystkie dostępne tagi
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+
+  // 3. Pobieranie tagów przy otwarciu
+  useEffect(() => {
+    getAllTags()
+      .then((data) => {
+        setAllAvailableTags(data);
+      })
+      .catch((err) => console.error("Błąd pobierania tagów:", err));
+  }, []);
+
   const [formData, setFormData] = useState<CreatePillarDto>({
     name: "",
     state: "active",
@@ -25,11 +37,9 @@ export function CreatePillarModal({
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Obsługa pisania (zbiorcza)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -38,7 +48,6 @@ export function CreatePillarModal({
     }));
   };
 
-  // 3. Obsługa wysyłki
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -55,9 +64,7 @@ export function CreatePillarModal({
       onClose();
     } catch (err) {
       console.error(err);
-      setError(
-        "Nie udało się utworzyć filaru. Sprawdź, czy nazwa nie jest duplikatem.",
-      );
+      setError("Nie udało się utworzyć filaru.");
     } finally {
       setIsSubmitting(false);
     }
@@ -65,14 +72,12 @@ export function CreatePillarModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {/* 👇 TUTAJ WKLEJASZ TREŚĆ, KTÓRĄ PODAŁEŚ */}
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>New pillar</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Nazwa */}
           <div className="form-group">
             <label>Pillar name *</label>
             <input
@@ -84,11 +89,16 @@ export function CreatePillarModal({
             />
           </div>
 
-          <div className="form-group">
+          {/* 4. TAG SELECTOR Z DANYMI I STYLEM */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }} // Ważne dla dropdowna
+          >
             <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazujemy pobrane tagi
             />
           </div>
 
@@ -101,7 +111,7 @@ export function CreatePillarModal({
                 const { name, value } = e.target;
                 setFormData((prev) => ({
                   ...prev,
-                  [name]: Number(value), // KONWERSJA NA LICZBĘ jest KLUCZOWA dla 'priority'
+                  [name]: Number(value),
                 }));
               }}
             >
@@ -113,7 +123,6 @@ export function CreatePillarModal({
             </select>
           </div>
 
-          {/* Data */}
           <div className="form-group">
             <label>Start Date</label>
             <input
@@ -124,12 +133,10 @@ export function CreatePillarModal({
             />
           </div>
 
-          {/* Przyciski */}
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Anuluj
             </button>
-
             <button type="submit" className="btn-save" disabled={isSubmitting}>
               {isSubmitting ? "Zapisywanie..." : "Utwórz"}
             </button>

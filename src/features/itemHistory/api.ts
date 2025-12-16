@@ -2,7 +2,6 @@ import apiClient from "../../api/axios";
 import type { ItemHistory } from "./types";
 
 export type CreateHistoryDto = {
-  changeDate: string;
   webViewLink?: string;
   googleFileId?: string;
   description: string;
@@ -29,6 +28,12 @@ export const addHistoryEntry = async (
   const response = await apiClient.post<ItemHistory>(
     `/projects/${projectId}/pillars/${pillarId}/items/${itemId}/history`,
     data,
+    {
+      // 👇 DODAJ TĘ KONFIGURACJĘ - to wymusza na przeglądarce informację: "Wysyłam JSON"
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
   );
   return response.data;
 };

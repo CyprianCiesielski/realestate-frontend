@@ -11,6 +11,7 @@ import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
 import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
 import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
+import { SearchingPage } from "./pages/SearchingPage.tsx";
 
 // 1. Tworzymy definicję routera
 const router = createBrowserRouter([
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <DashboardPage />,
+      },
+      {
+        path: "/search",
+        element: <SearchingPage />,
       },
       {
         // 1. Wchodzimy do sekcji "/projects"
