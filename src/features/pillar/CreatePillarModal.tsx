@@ -5,7 +5,6 @@ import "./CreatePillarModal.css";
 import type { Tag } from "../tag/types.ts";
 import { getAllTags } from "../tag/api"; // 👈 1. Importujemy API tagów
 import { TagSelector } from "../tag/TagSelector.tsx";
-import { useRefresh } from "../../context/RefreshContext.tsx";
 
 interface CreatePillarModalProps {
   projectId: string;
@@ -18,7 +17,6 @@ export function CreatePillarModal({
   onClose,
   onSuccess,
 }: CreatePillarModalProps) {
-  const { triggerRefresh } = useRefresh();
   // 2. Stan na wszystkie dostępne tagi
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
 
@@ -68,7 +66,6 @@ export function CreatePillarModal({
       console.error(err);
       setError("Nie udało się utworzyć filaru.");
     } finally {
-      triggerRefresh();
       setIsSubmitting(false);
     }
   };

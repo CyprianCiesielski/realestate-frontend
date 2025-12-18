@@ -4,8 +4,8 @@ import type { Tag } from "../tag/types.ts";
 export interface Project {
   id: number;
   name: string;
-  deadline?: string; // '?' oznacza, że pole może być nullem (opcjonalne)
-  personResponsible?: string;
+  place?: string; // '?' oznacza, że pole może być nullem (opcjonalne)
+  contractor?: string;
   companyResposible?: string;
   state: string;
   startDate: string; // Daty z JSON przychodzą jako stringi

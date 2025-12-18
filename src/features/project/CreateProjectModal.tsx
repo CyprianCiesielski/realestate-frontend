@@ -32,8 +32,8 @@ export function CreateProjectModal({
   // --- Reszta stanu formularza bez zmian ---
   const [formData, setFormData] = useState<CreateProjectDto>({
     name: "",
-    deadline: new Date().toISOString(),
-    personResponsible: "",
+    place: "",
+    contractor: "",
     companyResposible: "",
     state: "active",
     startDate: new Date().toISOString().split("T")[0],
@@ -79,13 +79,13 @@ export function CreateProjectModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Nowy Projekt</h2>
+        <h2>New Project</h2>
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {/* Nazwa */}
           <div className="form-group">
-            <label>Nazwa projektu *</label>
+            <label>Project name *</label>
             <input
               name="name"
               value={formData.name}
@@ -100,7 +100,7 @@ export function CreateProjectModal({
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
           >
-            <label>Tagi</label>
+            <label>Tags</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
@@ -110,43 +110,29 @@ export function CreateProjectModal({
 
           {/* Reszta pól... */}
           <div className="form-group">
-            <label>Osoba odpowiedzialna</label>
+            <label>Place</label>
             <input
-              name="personResponsible"
-              value={formData.personResponsible}
+              name="place"
+              value={formData.place}
               onChange={handleChange}
             />
           </div>
-
           <div className="form-group">
-            <label>Firma Odpowiedzialna</label>
+            <label>Contractor</label>
+            <input
+              name="contractor"
+              value={formData.contractor}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Company Responsible</label>
             <input
               name="companyResposible"
               value={formData.companyResposible}
               onChange={handleChange}
             />
           </div>
-
-          <div className="form-group">
-            <label>Deadline</label>
-            <input
-              type="date"
-              name="deadline"
-              value={formData.deadline}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Data Startu</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
-          </div>
-
           <div className="form-group">
             <label>Priority</label>
             <select
@@ -160,6 +146,15 @@ export function CreateProjectModal({
               <option value={4}>4</option>
               <option value={5}>5</option>
             </select>
+          </div>
+          <div className="form-group">
+            <label>Start date</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="modal-actions">

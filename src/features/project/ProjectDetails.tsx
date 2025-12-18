@@ -83,6 +83,11 @@ export function ProjectDetails() {
       <header className="project-header">
         <div className="header-left">
           <h1 className="project-title">{project.name}</h1>
+          <span
+            className={`project-status ${project.state === "active" ? "active" : ""}`}
+          >
+            ● {project.state}
+          </span>
 
           <div className="project-tags-row">
             {project.tags &&
@@ -115,22 +120,19 @@ export function ProjectDetails() {
 
       {/* INFO */}
       <div className="project-info-grid">
+        <InfoItem label="Place" value={project.place} />
+        <InfoItem label="Contractor" value={project.contractor} />
+        <InfoItem label="Start date" value={project.startDate} />
         <InfoItem
-          label="Osoba odpowiedzialna"
-          value={project.personResponsible}
-        />
-        <InfoItem
-          label="Firma odpowiedzialna"
+          label="Company responsible"
           value={project.companyResposible}
         />
-        <InfoItem label="Data startu" value={project.startDate} />
-        <InfoItem label="Deadline" value={project.deadline} />
-
-        <InfoItem label="Priorytet" value={`${project.priority}`} />
+        <InfoItem label="Priority" value={`${project.priority}`} />
       </div>
 
       {/* BOARD */}
       <section className="board-section">
+        <h2>Pillar Table</h2>
         <PillarBoard
           pillars={project.pillars || []}
           projectId={projectId!} // 👈 Przekazujemy ID projektu

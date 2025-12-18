@@ -75,6 +75,7 @@ export function PillarColumn({
       {/* Nagłówek kolumny */}
       <div className="pillar-header">
         <h3>{pillar.name}</h3>
+        <span className="item-count">Priority: {pillar.priority}</span>
       </div>
 
       {/* Lista zadań (Items) */}

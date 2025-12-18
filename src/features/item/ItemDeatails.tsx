@@ -99,6 +99,11 @@ export function ItemDetails() {
         <header className="project-header">
           <div className="header-left">
             <h1 className="project-title">{item.name}</h1>
+            <span
+              className={`project-status ${item.state === "active" ? "active" : ""}`}
+            >
+              ● {item.state}
+            </span>
 
             {/* Wyświetlanie tagów */}
             <div className="project-tags-row">
@@ -139,6 +144,8 @@ export function ItemDetails() {
       </div>
 
       <div className="chat-area">
+        <div className="chat-section-header">Chat / Historia</div>
+
         {/* Kontener z wiadomościami */}
         <div className="message-list-scrollable">
           <MessageList historyEntries={item.historyEntries || []} />

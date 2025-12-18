@@ -33,8 +33,8 @@ export function EditProjectModal({
 
   const [formData, setFormData] = useState<CreateProjectDto>({
     name: project.name,
-    place: project.place || "",
-    contractor: project.contractor || "",
+    personResponsible: project.personResponsible || "",
+    deadline: project.deadline || "",
     companyResposible: project.companyResposible || "",
     state: project.state,
     startDate: project.startDate || "",
@@ -106,28 +106,64 @@ export function EditProjectModal({
           </div>
 
           <div className="form-group">
-            <label>Place</label>
+            <label>Nazwa projektu *</label>
             <input
-              name="place"
-              value={formData.place}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              placeholder="np. Osiedle Dębowe"
+            />
+          </div>
+
+          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
+            <label>Tagi</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
+            />
+          </div>
+
+          {/* Reszta pól... */}
+          <div className="form-group">
+            <label>Osoba odpowiedzialna</label>
+            <input
+              name="personResponsible"
+              value={formData.personResponsible}
               onChange={handleChange}
             />
           </div>
 
           <div className="form-group">
-            <label>Contractor</label>
-            <input
-              name="contractor"
-              value={formData.contractor}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Company responsible</label>
+            <label>Firma Odpowiedzialna</label>
             <input
               name="companyResposible"
               value={formData.companyResposible}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data Startu</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
               onChange={handleChange}
             />
           </div>
@@ -141,20 +177,10 @@ export function EditProjectModal({
             >
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
-          </div>
-
-          <div className="form-group">
-            <label>Start date</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
           </div>
 
           <div className="form-group">

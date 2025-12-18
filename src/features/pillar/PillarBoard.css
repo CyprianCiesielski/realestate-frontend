@@ -1,12 +1,14 @@
 .board-container {
+    /* 1. Ustawiamy Siatkę (Grid) */
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-    padding-bottom: 1.25rem;
 
-    /* Allow grid to be constrained by parent overflow */
-    min-height: 0;
-    min-width: 0;
+    /* 2. Magiczna linijka: Stwórz dokładnie 4 kolumny o równej szerokości */
+    grid-template-columns: repeat(4, 1fr);
+
+    /* Odstępy między kafelkami (pionowe i poziome) */
+    gap: 1.25rem; /* 20px -> 1.25rem */
+
+    padding-bottom: 1.25rem; /* 20px -> 1.25rem */
 }
 
 .pillar-column {
