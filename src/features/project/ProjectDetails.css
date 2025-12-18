@@ -1,5 +1,8 @@
 .project-details-container {
-    padding: 0;
+    padding: 0 1.25rem;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 /* --- Nagłówek --- */
@@ -96,7 +99,8 @@
 
 /* --- Sekcja Tablicy --- */
 .board-section {
-    margin-top: 2.5rem; /* 40px -> 2.5rem */
+
+    overflow-y: auto;
 }
 
 .add-pillar-btn {
