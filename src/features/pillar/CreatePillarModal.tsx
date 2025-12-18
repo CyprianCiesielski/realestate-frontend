@@ -5,6 +5,7 @@ import "./CreatePillarModal.css";
 import type { Tag } from "../tag/types.ts";
 import { getAllTags } from "../tag/api"; // 👈 1. Importujemy API tagów
 import { TagSelector } from "../tag/TagSelector.tsx";
+import { useRefresh } from "../../context/RefreshContext.tsx";
 
 interface CreatePillarModalProps {
   projectId: string;
@@ -17,6 +18,8 @@ export function CreatePillarModal({
   onClose,
   onSuccess,
 }: CreatePillarModalProps) {
+  const { triggerRefresh } = useRefresh();
+
   // 2. Stan na wszystkie dostępne tagi
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
 
@@ -32,8 +35,10 @@ export function CreatePillarModal({
   const [formData, setFormData] = useState<CreatePillarDto>({
     name: "",
     state: "active",
+    companyResposible: "",
+    deadline: new Date().toISOString(),
     startDate: new Date().toISOString().split("T")[0],
-    priority: 1,
+    priority: 0,
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -60,12 +65,19 @@ export function CreatePillarModal({
       };
 
       const newPillar = await createPillar(projectId, payload);
-      onSuccess(newPillar);
+
+      const safePillar = {
+        ...newPillar,
+        items: newPillar.items || [],
+      };
+
+      onSuccess(safePillar);
       onClose();
     } catch (err) {
       console.error(err);
       setError("Nie udało się utworzyć filaru.");
     } finally {
+      triggerRefresh();
       setIsSubmitting(false);
     }
   };
@@ -73,32 +85,61 @@ export function CreatePillarModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>New pillar</h2>
+        <h2>Nowy filar</h2>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Pillar name *</label>
+            <label>Nazwa filaru *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="np. Market"
+              placeholder="np. Osiedle Dębowe"
             />
           </div>
 
-          {/* 4. TAG SELECTOR Z DANYMI I STYLEM */}
+          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
-            style={{ position: "relative", zIndex: 101 }} // Ważne dla dropdowna
+            style={{ position: "relative", zIndex: 101 }}
           >
-            <label>Tags</label>
+            <label>Tagi</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazujemy pobrane tagi
+              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
+            />
+          </div>
+
+          {/* Reszta pól... */}
+          <div className="form-group">
+            <label>Firma Odpowiedzialna</label>
+            <input
+              name="companyResposible"
+              value={formData.companyResposible}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data Startu</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
             />
           </div>
 
@@ -115,22 +156,13 @@ export function CreatePillarModal({
                 }));
               }}
             >
+              <option value={0}></option>
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
-          </div>
-
-          <div className="form-group">
-            <label>Start Date</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
           </div>
 
           <div className="modal-actions">

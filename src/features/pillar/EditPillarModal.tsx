@@ -34,8 +34,10 @@ export function EditPillarModal({
   const [formData, setFormData] = useState<CreatePillarDto>({
     name: pillar.name,
     state: pillar.state,
+    deadline: pillar.deadline || new Date().toISOString(),
+    companyResposible: pillar.companyResposible,
     startDate: pillar.startDate || new Date().toISOString().split("T")[0],
-    priority: pillar.priority || 1,
+    priority: pillar.priority || 0,
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(pillar.tags || []);
@@ -70,28 +72,58 @@ export function EditPillarModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Edit Pillar: {pillar.name}</h2>
+        <h2>Edytuj Filar: {pillar.name}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nazwa filaru</label>
+            <label>Nazwa filaru *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
+              placeholder="np. Osiedle Dębowe"
             />
           </div>
 
-          {/* 4. TAG SELECTOR POPRAWIONY */}
+          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
           >
-            <label>Tags</label>
+            <label>Tagi</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazanie tagów
+              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
+            />
+          </div>
+
+          {/* Reszta pól... */}
+          <div className="form-group">
+            <label>Firma Odpowiedzialna</label>
+            <input
+              name="companyResposible"
+              value={formData.companyResposible}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data Startu</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
             />
           </div>
 
@@ -108,22 +140,13 @@ export function EditPillarModal({
                 }));
               }}
             >
+              <option value={0}></option>
               <option value={1}>1</option>
               <option value={2}>2</option>
-              <option value={3}>3 </option>
+              <option value={3}>3</option>
               <option value={4}>4</option>
-              <option value={5}>5 </option>
+              <option value={5}>5</option>
             </select>
-          </div>
-
-          <div className="form-group">
-            <label>Data startu</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
           </div>
 
           <div className="form-group">

@@ -1,4 +1,23 @@
 /* css */
+html {
+    font-size: 16px; /* 1rem = 16px */
+}
+
+/* 2. Dla laptopów (ekrany mniejsze niż np. 1440px) */
+/* To sprawi, że cały Twój interfejs zmniejszy się o ok. 12% */
+@media (max-width: 1440px) {
+    html {
+        font-size: 14px; /* Teraz 1rem = 14px */
+    }
+}
+
+/* 3. Dla mniejszych laptopów / tabletów */
+@media (max-width: 1024px) {
+    html {
+        font-size: 12px; /* Teraz 1rem = 12px -> wszystko jest jeszcze mniejsze */
+    }
+}
+
 :root {
     /* responsive base font-size: scales with viewport but clamped to a sensible range */
     --base-font-size: clamp(14px, 0.9vw + 12px, 18px);

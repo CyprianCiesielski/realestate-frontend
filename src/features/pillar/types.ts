@@ -4,6 +4,8 @@ import type { Tag } from "../tag/types.ts";
 export interface Pillar {
   id: number;
   name: string;
+  companyResposible: string;
+  deadline: string;
   state: string;
   startDate: string;
   priority: number;

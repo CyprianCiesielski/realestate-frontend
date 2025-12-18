@@ -35,12 +35,12 @@ export function EditItemModal({
 
   const [formData, setFormData] = useState<CreateItemDto>({
     name: item.name || "",
-    status: item.status || "",
     state: item.state || "active",
-    description: item.description || "",
+    companyResposible: item.companyResposible || "",
+    personResponsible: item.personResponsible || "",
     deadline: item.deadline || "",
     startDate: item.startDate || new Date().toISOString().split("T")[0],
-    priority: item.priority || 1,
+    priority: item.priority || 0,
   });
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(item.tags || []);
@@ -75,57 +75,66 @@ export function EditItemModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Edit Item: {item.name}</h2>
+        <h2>Edytuj Item: {item.name}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Item name *</label>
+            <label>Nazwa itemu *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="np. Umowa 1"
+              placeholder="np. Osiedle Dębowe"
             />
           </div>
 
-          {/* 4. TAG SELECTOR Z DANYMI */}
+          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
           >
-            <label>Tags</label>
+            <label>Tagi</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazujemy tagi
+              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
             />
           </div>
 
+          {/* Reszta pól... */}
           <div className="form-group">
-            <label>Status</label>
+            <label>Osoba odpowiedzialna</label>
             <input
-              name="status"
-              value={formData.status}
+              name="personResponsible"
+              value={formData.personResponsible}
               onChange={handleChange}
             />
           </div>
-
           <div className="form-group">
-            <label>Description</label>
+            <label>Firma Odpowiedzialna</label>
             <input
-              name="description"
-              value={formData.description}
+              name="companyResposible"
+              value={formData.companyResposible}
               onChange={handleChange}
             />
           </div>
-
           <div className="form-group">
             <label>Deadline</label>
             <input
               type="date"
               name="deadline"
               value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data Startu</label>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
               onChange={handleChange}
             />
           </div>
@@ -140,35 +149,12 @@ export function EditItemModal({
                 setFormData((prev) => ({ ...prev, [name]: Number(value) }));
               }}
             >
+              <option value={0}></option>
               <option value={1}>1</option>
               <option value={2}>2</option>
               <option value={3}>3</option>
               <option value={4}>4</option>
               <option value={5}>5</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Start date</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Status</label>
-            <select
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              style={{ padding: 10, borderRadius: 4, border: "1px solid #ccc" }}
-            >
-              <option value="active">Aktywny</option>
-              <option value="finished">Zakończony</option>
-              <option value="archived">Zarchiwizowany</option>
             </select>
           </div>
 

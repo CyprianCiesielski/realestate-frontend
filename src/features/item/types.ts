@@ -4,11 +4,11 @@ import type { Tag } from "../tag/types.ts";
 export interface Item {
   id: number;
   name: string;
-  status: string;
+  deadline?: string; // '?' oznacza, że pole może być nullem (opcjonalne)
+  personResponsible?: string;
+  companyResposible?: string;
   state: string;
-  description?: string;
-  deadline?: string;
-  startDate: string;
+  startDate: string; // Daty z JSON przychodzą jako stringi
   priority: number;
 
   historyEntries: ItemHistory[];
