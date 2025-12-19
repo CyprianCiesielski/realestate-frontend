@@ -2,66 +2,84 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RefreshProvider } from "./context/RefreshContext";
+import { AuthProvider } from "./context/AuthContext";
 
-import App from "./App.tsx"; // Nasz główny layout
-import "./index.css"; // Globalne style
+import App from "./App.tsx";
+import "./index.css";
 
-// Importujemy nasze nowe strony
+// Import stron
 import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
 import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
 import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
 import { SearchingPage } from "./pages/SearchingPage.tsx";
+import { AdminPage } from "./pages/AdminPage.tsx";
+import { LoginPage } from "./pages/LoginPage.tsx";
+import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 
-// 1. Tworzymy definicję routera
 const router = createBrowserRouter([
+  // 1. TRASA PUBLICZNA (Dostępna bez logowania)
+  // Jest poza <App>, więc nie będzie miała Headera (co jest pożądane na Loginie)
   {
-    path: "/",
-    element: <App />, // Główny layout aplikacji (Header)
+    path: "/login",
+    element: <LoginPage />,
+  },
+
+  // 2. TRASY CHRONIONE (Wymagają zalogowania)
+  {
+    // Wszystko co jest wewnątrz tego elementu, przechodzi przez sprawdzenie "czy jest user?"
+    element: <ProtectedRoute />, 
     children: [
       {
         path: "/",
-        element: <DashboardPage />,
-      },
-      {
-        path: "/search",
-        element: <SearchingPage />,
-      },
-      {
-        // 1. Wchodzimy do sekcji "/projects"
-        path: "/projects",
-        element: <ProjectsLayout />, // Ładujemy nasz nowy Layout z listą po lewej
-
-        // 2. Co ma być w prawej kolumnie (Outlet)?
+        element: <App />, // App ma Header i Outlet
         children: [
           {
-            index: true, // To się wyświetli, gdy adres to samo "/projects"
-            element: (
-              <div style={{ padding: 20, color: "#888" }}>
-                ← Wybierz projekt z listy po lewej
-              </div>
-            ),
+            index: true, // To samo co path: "/"
+            element: <DashboardPage />,
           },
           {
-            path: ":projectId", // To się wyświetli, gdy adres to "/projects/5"
-            element: <ProjectDetailsPage />,
+            path: "/search",
+            element: <SearchingPage />,
           },
-
           {
-            path: ":projectId/pillars/:pillarId/items/:itemId",
-            element: <ItemDetailsPage />, // 👈 NOWY KOMPONENT
+            path: "/projects",
+            element: <ProjectsLayout />,
+            children: [
+              {
+                index: true,
+                element: (
+                  <div style={{ padding: 20, color: "#888" }}>
+                    ← Wybierz projekt z listy po lewej
+                  </div>
+                ),
+              },
+              {
+                path: ":projectId",
+                element: <ProjectDetailsPage />,
+              },
+              {
+                path: ":projectId/pillars/:pillarId/items/:itemId",
+                element: <ItemDetailsPage />,
+              },
+            ],
           },
+          // Tutaj możesz dodać trasę dla Admina
+          { path: "/admin", 
+            element: <AdminPage /> }
         ],
       },
     ],
   },
 ]);
 
-// 2. Renderujemy aplikację używając <RouterProvider />
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RefreshProvider>
-      <RouterProvider router={router} />
-    </RefreshProvider>
+    {/* AuthProvider musi otaczać wszystko, żeby Router wiedział czy jesteś zalogowany */}
+    <AuthProvider>
+      <RefreshProvider>
+        <RouterProvider router={router} />
+      </RefreshProvider>
+    </AuthProvider>
   </React.StrictMode>,
 );

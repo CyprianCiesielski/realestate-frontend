@@ -9,5 +9,20 @@ const apiClient = axios.create({
   },
 });
 
+
+// dodaje token do kazdego zadania jesli istnieje
+apiClient.interceptors.request.use(
+  (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+      }
+      return config;
+  },
+  (error) => {
+      return Promise.reject(error);
+  }
+);
+
 // 2. Eksportujemy tę instancję, aby używać jej w całym projekcie
 export default apiClient;
