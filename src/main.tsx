@@ -13,9 +13,10 @@ import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
 import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
 import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
 import { SearchingPage } from "./pages/SearchingPage.tsx";
-import { AdminPage } from "./pages/AdminPage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
+import { AdminDashboardLayout } from "./features/admin/AdminDashboardLayout.tsx";
+import { AdminDashboardDetails } from "./features/admin/AdminDashboardDetails.tsx";
 
 const router = createBrowserRouter([
   // 1. TRASA PUBLICZNA (Dostępna bez logowania)
@@ -65,10 +66,19 @@ const router = createBrowserRouter([
             ],
           },
           // Tutaj możesz dodać trasę dla Admina
-          { path: "/admin", 
-            element: <AdminPage /> }
+          
         ],
       },
+      {
+        path: "/admin",
+        element: <AdminDashboardLayout />, // Header + Kontener
+        children: [
+            {
+                index: true,
+                element: <AdminDashboardDetails /> // Tablica z kolumnami
+            }
+        ]
+    }
     ],
   },
 ]);

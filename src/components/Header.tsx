@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 
 // 2. Importujemy ikony (jeśli nie zainstalowałeś jeszcze, wpisz w terminalu: npm install react-icons)
-import { FaCalendarAlt, FaBell } from "react-icons/fa";
+import { FaCalendarAlt, FaBell, FaAddressCard } from "react-icons/fa";
 
 // 3. Importujemy plik CSS (który zaraz stworzysz/uzupełnisz)
 import "./Header.css";
@@ -11,12 +11,6 @@ import { useAuth } from '../context/AuthContext';
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
-
-  // --- DIAGNOSTYKA ---
-  console.log("=== DEBUG HEADER ===");
-  console.log("User object:", user);
-  console.log("Is Admin?:", isAdmin);
-  // -------------------
 
   if (!user) return null; // Nie pokazuj nagłówka na stronie logowania
   return (
@@ -44,14 +38,15 @@ export function Header() {
         </button>
 
         {/* Udawany awatar użytkownika */}
-        <div className="user-avatar">CC</div>
+        <div className="user-avatar">{user.initial}</div>
 
-        <span>{user.email}</span>
-        <button onClick={logout}>Wyloguj</button>
+        <button onClick={logout} className="logout-btn">
+                    Wyloguj
+                </button>
 
         {isAdmin && (
-            <Link to="/admin" style={{ color: 'red', marginRight: '15px', fontWeight: 'bold' }}>
-                Panel Admina
+            <Link to="/admin" className="admin-btn">
+            <FaAddressCard />
             </Link>
         )}
       </div>
