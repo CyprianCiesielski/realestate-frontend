@@ -17,6 +17,7 @@ import { LoginPage } from "./pages/LoginPage.tsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { AdminDashboardLayout } from "./features/admin/AdminDashboardLayout.tsx";
 import { AdminDashboardDetails } from "./features/admin/AdminDashboardDetails.tsx";
+import { UserDetails } from "./features/user/UserDetails.tsx";
 
 const router = createBrowserRouter([
   // 1. TRASA PUBLICZNA (Dostępna bez logowania)
@@ -69,16 +70,23 @@ const router = createBrowserRouter([
           
         ],
       },
-      {
-        path: "/admin",
-        element: <AdminDashboardLayout />, // Header + Kontener
-        children: [
-            {
-                index: true,
-                element: <AdminDashboardDetails /> // Tablica z kolumnami
-            }
-        ]
-    }
+      {element: <ProtectedRoute requireAdmin/>,
+      children: [
+        {
+          path: "/admin",
+          element: <AdminDashboardLayout />, // Header + Kontener
+          children: [
+              {
+                  index: true,
+                  element: <AdminDashboardDetails /> // Tablica z kolumnami
+              },
+              {
+                path: "users/:userId", 
+                element: <UserDetails />,
+              }
+          ]
+        }
+      ]}
     ],
   },
 ]);

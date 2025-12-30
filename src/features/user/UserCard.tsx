@@ -1,6 +1,7 @@
 import { FaCog } from 'react-icons/fa'; // Import ikonki
 import { type AdminViewUser } from '../admin/types';
 import './UserCard.css';
+import { useNavigate } from 'react-router-dom';
 
 interface UserCardProps {
     user: AdminViewUser;
@@ -8,8 +9,18 @@ interface UserCardProps {
 }
 
 export const UserCard = ({ user, onEdit }: UserCardProps) => {
+    const navigate = useNavigate(); // <--- HOOK
+
+    const handleCardClick = () => {
+        navigate(`/admin/users/${user.id}`);
+    };
+
     return (
-        <div className="user-card">
+        <div 
+                className="user-card"
+                onClick={handleCardClick} // <--- OBSŁUGA KLIKNIĘCIA
+                style={{ cursor: 'pointer' }}>
+                    
             <div className="user-card-header-row">
                 <span className="user-name">
                     {user.firstname} {user.lastname}

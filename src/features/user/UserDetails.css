@@ -1,0 +1,173 @@
+.user-details-container {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #172b4d;
+}
+
+.user-details-header {
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #6b778c;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #0052cc;
+    text-decoration: underline;
+}
+
+/* KARTA PROFILOWA */
+.user-profile-card {
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    background-color: #0052cc;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    color: #172b4d;
+}
+
+.profile-email {
+    color: #6b778c;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    border-top: 1px solid #dfe1e6;
+    padding-top: 1.5rem;
+}
+
+.meta-item label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b778c;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.meta-item span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* SEKCJA PROJEKTÓW */
+.projects-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #172b4d;
+}
+
+.projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    overflow: hidden; /* Zaokrąglenie rogów tabeli */
+}
+
+.projects-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background-color: #fafbfc;
+    color: #5e6c84;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid #dfe1e6;
+}
+
+.projects-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #dfe1e6;
+    vertical-align: middle;
+}
+
+.projects-table tr:last-child td {
+    border-bottom: none;
+}
+
+.project-name-cell {
+    font-weight: 600;
+    color: #172b4d;
+}
+
+.permission-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: #eae6ff;
+    color: #403294;
+}
+
+/* Kolor badge'a w zależności od roli w projekcie */
+.permission-badge[data-role="ADMIN"] {
+    background-color: #ffebe6;
+    color: #de350b;
+}
+.permission-badge[data-role="EDITOR"] {
+    background-color: #e3fcef;
+    color: #006644;
+}
+
+.empty-projects {
+    padding: 3rem;
+    text-align: center;
+    background-color: #f4f5f7;
+    border-radius: 8px;
+    color: #6b778c;
+    font-style: italic;
+    border: 1px dashed #dfe1e6;
+}
+
+.error-msg {
+    color: #de350b;
+    background-color: #ffebe6;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
