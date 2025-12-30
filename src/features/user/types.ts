@@ -7,8 +7,8 @@ export interface UserProjectAccess {
 export interface UserDetailData {
     id: number;
     email: string;
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     company: string | null;
     role: string;
     assignedProjects: UserProjectAccess[];

@@ -1,5 +1,8 @@
 /* css */
 :root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     /* responsive base font-size: scales with viewport but clamped to a sensible range */
     --base-font-size: clamp(14px, 0.9vw + 12px, 18px);
     font-size: var(--base-font-size);
@@ -19,9 +22,9 @@
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    min-height: 100vh;
     width: 100%;
-    overflow: hidden; /* keep app-controlled scrolling */
+    overflow-x: hidden; /* Opcjonalnie: chroni przed paskiem poziomym */ /* keep app-controlled scrolling */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
 }

@@ -1,13 +1,28 @@
-import { Outlet } from "react-router-dom";
-import { Header } from "../../components/Header";
+import { Outlet } from 'react-router-dom';
+import { Header } from '../../components/Header';
+// import Sidebar...
 
 export const AdminDashboardLayout = () => {
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Header />
-            <main style={{ flex: 1, overflow: 'hidden', padding: '20px', backgroundColor: 'white' }}>
-                <Outlet />
-            </main>
+        <div style={{ minHeight: '100vh', display: 'flex' }}>
+
+            {/* 2. GŁÓWNY KONTENER TREŚCI */}
+            <div style={{ 
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+            }}>
+                
+                <Header /> {/* Header przewija się razem ze stroną */}
+
+                {/* Treść (Outlet) rośnie naturalnie w dół */}
+                <main style={{ 
+                    padding: '2rem',
+                    flex: 1 
+                }}>
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };

@@ -1,3 +1,5 @@
+/* src/features/user/UserDetails.css */
+
 .user-details-container {
     padding: 2rem;
     max-width: 1000px;
@@ -6,6 +8,7 @@
     color: #172b4d;
 }
 
+/* ... (Style nagłówka i karty profilowej bez zmian) ... */
 .user-details-header {
     margin-bottom: 2rem;
 }
@@ -26,7 +29,6 @@
     text-decoration: underline;
 }
 
-/* KARTA PROFILOWA */
 .user-profile-card {
     background: white;
     border: 1px solid #dfe1e6;
@@ -35,7 +37,7 @@
     display: flex;
     gap: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .profile-avatar-large {
@@ -90,21 +92,46 @@
     font-weight: 500;
 }
 
-/* SEKCJA PROJEKTÓW */
+/* --- GŁÓWNA ZMIANA: TABELA --- */
+
 .projects-section h3 {
     font-size: 1.25rem;
     margin-bottom: 1rem;
     color: #172b4d;
 }
 
-.projects-table {
+.projects-table-container {
     width: 100%;
-    border-collapse: collapse;
-    background: white;
+
+    /* Włącz scrollowanie w obu osiach w razie potrzeby */
+    overflow-y: auto;
+    overflow-x: auto;
+
+    /* Przenosimy ramkę z tabeli na kontener dla estetyki */
     border: 1px solid #dfe1e6;
     border-radius: 4px;
-    overflow: hidden; /* Zaokrąglenie rogów tabeli */
+    background: white;
+
+    /* Płynne scrollowanie */
+    scroll-behavior: smooth;
 }
+
+.projects-table {
+    width: 100%;
+    border-collapse: separate; /* Wymagane dla sticky header w niektórych przeglądarkach */
+    border-spacing: 0;
+    
+    /* Zachowujemy fixed layout, żeby kolumny nie skakały */
+    table-layout: fixed; 
+    
+    /* Usuwamy border z samej tabeli, bo jest teraz na kontenerze */
+    border: none;
+}
+
+/* Definicja szerokości kolumn */
+.projects-table th:nth-child(1) { width: 80px; }
+.projects-table th:nth-child(2) { width: 30%; }
+.projects-table th:nth-child(3) { width: auto; }
 
 .projects-table th {
     text-align: left;
@@ -114,43 +141,156 @@
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
+    
+    /* border-bottom przenosimy niżej (box-shadow) */
     border-bottom: 1px solid #dfe1e6;
+    
+    /* 🔥 STICKY HEADER - Nagłówek przypięty do góry podczas scrollowania */
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Musi być wyżej niż treść (np. dropdowny) */
+    
+    /* Fix: Jeśli sticky zasłania border, używamy shadow */
+    box-shadow: 0 1px 0 #dfe1e6;
 }
 
 .projects-table td {
     padding: 1rem;
     border-bottom: 1px solid #dfe1e6;
-    vertical-align: middle;
+    vertical-align: top;
+    background-color: white; /* Ważne: żeby tekst nie prześwitywał pod sticky headerem */
 }
 
+/* Ostatni rząd nie potrzebuje dolnej linii */
 .projects-table tr:last-child td {
     border-bottom: none;
 }
 
-.project-name-cell {
-    font-weight: 600;
-    color: #172b4d;
+/* --- ZMIANA: KAFELEK I ANIMACJA KRZYŻYKA --- */
+
+.permissions-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    /* Pozwalamy kafelkom spadać do nowej linii, zamiast rozpychać tabelę */
+    position: relative;
 }
 
 .permission-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    /* Usunięto gap: 6px, bo margines załatwimy w animacji przycisku */
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     background-color: #eae6ff;
     color: #403294;
+    white-space: nowrap;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
 }
 
-/* Kolor badge'a w zależności od roli w projekcie */
-.permission-badge[data-role="ADMIN"] {
-    background-color: #ffebe6;
+.remove-permission-btn {
+    /* Początkowy stan: ukryty i ściśnięty */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 0;
+    /* Szerokość 0 */
+    opacity: 0;
+    /* Niewidoczny */
+    margin-right: 0;
+    /* Brak odstępu */
+    overflow: hidden;
+    /* Ukryj treść, która się nie mieści */
+
+    cursor: pointer;
     color: #de350b;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    padding: 0;
+
+    /* Płynna animacja rozszerzania */
+    transition: max-width 0.3s ease, opacity 0.2s ease, margin-right 0.3s ease;
 }
-.permission-badge[data-role="EDITOR"] {
-    background-color: #e3fcef;
-    color: #006644;
+
+.remove-permission-btn:hover {
+    color: #bf2600;
+}
+
+/* HOVER NA KAFELEK: Rozszerzamy krzyżyk */
+.permission-badge:hover .remove-permission-btn {
+    max-width: 20px;
+    /* Docelowa szerokość krzyżyka */
+    opacity: 1;
+    /* Pełna widoczność */
+    margin-right: 6px;
+    /* Odstęp od tekstu (zamiast gap w rodzicu) */
+}
+
+/* --- Reszta (plusik, dropdown) --- */
+
+.add-permission-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #5aac44;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    /* Ważne: żeby plusik się nie zgniatał */
+}
+
+.add-permission-btn:hover {
+    background-color: #dfffe5;
+    color: #3f7b2e;
+    border-color: #0052cc;
+}
+
+.permissions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    min-width: 150px;
+    margin-top: 4px;
+}
+
+.permission-option {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: #172b4d;
+    cursor: pointer;
+    transition: background 0.1s;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.permission-option:hover {
+    background-color: #f4f5f7;
+    color: #0052cc;
+}
+
+.no-options {
+    padding: 8px 12px;
+    color: #97a0af;
+    font-style: italic;
+    font-size: 0.8rem;
 }
 
 .empty-projects {
