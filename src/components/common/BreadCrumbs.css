@@ -1,0 +1,48 @@
+.breadcrumbs-container {
+    padding: 0.5rem 1rem;
+    background-color: #f7f8fa; /* Ten sam kolor co tło body */
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+}
+
+.breadcrumbs-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    color: #65676b;
+}
+
+/* Dodajemy separator (slash / lub strzałkę >) po każdym elemencie oprócz ostatniego */
+.breadcrumb-item:not(:last-child)::after {
+    content: "/";
+    margin: 0 0.5rem;
+    color: #bcc0c4;
+    font-weight: 300;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #0084ff; /* Twój kolor wiodący */
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Ostatni element (aktywny) jest czarny i nieklikalny */
+.breadcrumb-item.active span {
+    color: #050505;
+    font-weight: 600;
+    cursor: default;
+}

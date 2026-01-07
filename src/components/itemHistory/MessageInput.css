@@ -1,0 +1,184 @@
+/* --- PLIK: MessageInput.css --- */
+
+/* Główny kontener paska */
+.input-container {
+
+    display: flex;
+    align-items: flex-end; /* IKONY I GUZIK NA DOLE, gdy tekst rośnie */
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    background-color: white;
+    border-top: 1px solid #e5e7eb;
+    min-height: 3.5rem; /* Minimalna wysokość paska */
+    margin-bottom: 1.2rem;
+}
+
+/* Sekcja z ikonkami */
+.input-actions {
+    display: flex;
+    align-items: center;
+    padding-bottom: 0.5rem; /* Wyrównanie do dołu */
+    gap: 0.25rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    color: #0084ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.icon-btn:hover {
+    background-color: #f0f2f5;
+}
+
+/* Szara pigułka (Wrapper) */
+.input-wrapper {
+    flex-grow: 1; /* Zajmij całą dostępną szerokość */
+    display: flex; /* KLUCZOWE! */
+    align-items: center;
+
+    background-color: #f0f2f5;
+    border-radius: 1.25rem;
+    padding: 0.5rem 1rem; /* Padding wewnątrz szarego pola */
+
+    min-height: 2.5rem; /* Startowa wysokość */
+    height: auto !important; /* Pozwól wrapperowi rosnąć razem z tekstem */
+}
+
+/* Pole tekstowe (textarea) */
+.message-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+
+    font-size: 0.95rem;
+    color: #050505;
+    line-height: 1.4;
+    font-family: inherit;
+
+    padding: 0;
+    margin: 0;
+
+    resize: none; /* Wyłączamy ręczne rozciąganie */
+    box-sizing: border-box;
+
+    /* TO SĄ WARTOŚCI ODPOWIEDZIALNE ZA LIMIT */
+    max-height: 30rem !important;
+    overflow-y: auto !important;
+
+    /* Zapobieganie problemom z długimi słowami */
+    word-break: break-word;
+}
+
+/* Styl paska przewijania */
+.message-input::-webkit-scrollbar {
+    width: 6px;
+}
+.message-input::-webkit-scrollbar-thumb {
+    background-color: #bcc0c4;
+    border-radius: 4px;
+}
+
+/* Guzik Wyślij */
+.send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #0084ff;
+    font-size: 1.4rem;
+    padding: 0.5rem;
+    padding-bottom: 0.6rem; /* Lekka korekta optyczna */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    border-radius: 50%;
+}
+
+.send-btn:disabled {
+    color: #bec3c9;
+    cursor: default;
+}
+
+.send-btn:hover:not(:disabled) {
+    background-color: #f0f2f5;
+}
+
+/* --- MessageInput.css --- */
+
+/* Wrapper na całość (pasek edycji + input) */
+.input-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Styl dla trybu edycji (opcjonalnie niebieska ramka u góry) */
+.input-container-wrapper.editing-mode .input-container {
+    border-top: 2px solid #0084ff;
+    background-color: #f9f9f9;
+}
+
+/* PASEK "Edytujesz wiadomość" */
+.editing-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f2f5;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: #0084ff;
+    border-top: 1px solid #e5e7eb;
+    animation: slideUp 0.2s ease-out;
+}
+
+.editing-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.cancel-edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #65676b;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #e4e6eb;
+    color: #ff4d4d;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- RESZTA TWOJEGO CSS BEZ ZMIAN (input-container, input-wrapper, itp.) --- */
+.input-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    background-color: white;
+    border-top: 1px solid #e5e7eb;
+    min-height: 3.5rem;
+    margin-bottom: 0; /* Zmieniamy margin na 0, bo wrapper zarządza layoutem */
+}
+/* ... (reszta Twoich stylów: input-actions, icon-btn, input-wrapper, message-input, send-btn) ... */

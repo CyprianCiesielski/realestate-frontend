@@ -1,0 +1,274 @@
+/* --- GŁÓWNY UKŁAD --- */
+.projects-layout {
+    display: flex;
+    /* 60px -> 3.75rem */
+    flex: 1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* [NOWE] Potrzebne do animacji i pozycjonowania */
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- SIDEBAR --- */
+.projects-sidebar {
+    width: 16.25rem;       /* 260px -> 16.25rem */
+    background-color: #f7f8fa;
+    border-right: 0.0625rem solid #ebecf0; /* 1px -> 0.0625rem */
+    padding: 1rem 0;       /* 16px -> 1rem */
+
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    height: 100vh;
+
+    /* [NOWE] Ważne do animacji i przycisku */
+    position: relative;
+    transition: width 0.3s ease, padding 0.3s ease;
+}
+
+/* [NOWE] Wrapper treści, aby tekst się nie "zgniatał" podczas animacji */
+.sidebar-content-wrapper {
+    width: 16.25rem; /* Sztywna szerokość wewnątrz, żeby tekst nie zawijał */
+    opacity: 1;
+    transition: opacity 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Zajmuje całą dostępną przestrzeń w sidebarze */
+    height: 100%; /* Wypełnia rodzica */
+    min-height: 0; /* Magiczna sztuczka dla Flexboxa, pozwalająca na scrollowanie dziecka */
+    overflow: hidden; /* Ukrywa to co wystaje poza wrapper */
+}
+
+/* [NOWE] Przycisk (Strzałeczka) */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 1.25rem;          /* 20px */
+    right: -0.75rem;       /* -12px (połowa guzika wystaje) */
+
+    width: 1.5rem;         /* 24px */
+    height: 1.5rem;        /* 24px */
+
+    border-radius: 50%;
+    background-color: white;
+    border: 0.0625rem solid #dfe1e6;
+    color: #5e6c84;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
+    transition: background-color 0.2s, transform 0.3s ease;
+    font-size: 0.75rem;    /* 12px */
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: #0052cc;
+    color: white;
+    border-color: #0052cc;
+}
+
+/* --- LOGIKA ZWINIĘTEGO PASKA --- */
+
+/* 1. Zwężamy pasek */
+.projects-layout.sidebar-collapsed .projects-sidebar {
+    width: 1.25rem; /* Zostawiamy wąski pasek (20px) */
+    padding: 1rem 0; /* Padding pionowy zostaje, poziomy 0 */
+}
+
+/* 2. Ukrywamy treść */
+.projects-layout.sidebar-collapsed .sidebar-content-wrapper {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* 3. Obracamy strzałkę */
+.projects-layout.sidebar-collapsed .sidebar-toggle-btn {
+    transform: rotate(180deg);
+}
+
+
+/* --- STYLIZACJA TREŚCI WEWNĄTRZ SIDEBARA (Twoje oryginalne style) --- */
+
+.projects-sidebar h3 {
+    margin: 0 0 0.75rem 1rem; /* 12px -> 0.75rem, 16px -> 1rem */
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6b778c;
+    letter-spacing: 0.03rem; /* 0.5px -> ~0.03rem */
+    white-space: nowrap; /* [NOWE] Żeby nagłówek nie skakał przy animacji */
+}
+
+.sidebar-nav {
+    flex: 1; /* Rozpycha się w dostępnym miejscu */
+
+    /* 👇 KLUCZOWE ZMIANY */
+    overflow-y: auto; /* Włącza scrollowanie w pionie */
+    overflow-x: hidden;
+
+    padding: 0 0.5rem;
+    margin-bottom: 0.625rem;
+
+    /* Opcjonalnie: ładniejszy scrollbar dla Webkit (Chrome/Safari) */
+    scrollbar-width: thin;
+    scrollbar-color: #dfe1e6 transparent;
+}
+
+.projects-content {
+    flex: 1;
+    padding: 1.25rem;      /* 20px -> 1.25rem */
+    overflow-y: auto;
+    background-color: white;
+    /* [NOWE] Płynne rozszerzanie treści gdy sidebar znika */
+    transition: margin-left 0.3s ease;
+}
+
+/* --- STYLE DLA LISTY PROJEKTÓW --- */
+
+/* Podstawowy link projektu */
+.project-link,
+.project-link-root {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem; /* 8px -> 0.5rem, 12px -> 0.75rem */
+    margin-bottom: 0.125rem; /* 2px -> 0.125rem */
+    text-decoration: none;
+    color: #172b4d;
+    border-radius: 0.25rem;  /* 4px -> 0.25rem */
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background 0.1s;
+    white-space: nowrap; /* [NOWE] Zapobiega łamaniu tekstu przy zwężaniu */
+}
+
+.project-link:hover,
+.project-link-root:hover {
+    background-color: #ebecf0;
+}
+
+/* Aktywny projekt */
+.project-link.active,
+.project-link-root.active {
+    background-color: #e9f2ff;
+    color: #0052cc;
+}
+
+/* Kontener dla aktywnego drzewa projektu */
+.project-sidebar-container.active-tree {
+    margin-bottom: 0.5rem;   /* 8px -> 0.5rem */
+}
+
+/* --- POZIOM 2: FILAR (PILLAR) --- */
+
+/* Kontener listy filarów */
+.pillar-list-nested {
+    margin-top: 0.25rem;     /* 4px -> 0.25rem */
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;           /* 2px -> 0.125rem */
+    padding-left: 0.5rem;    /* [NOWE] Opcjonalnie: lekkie wcięcie */
+}
+
+/* Nagłówek Filaru */
+.sidebar-toggle-header {
+    display: flex;
+    align-items: center;
+    /* 6px 12px 6px 24px -> rem */
+    padding: 0.375rem 0.75rem 0.375rem 1.5rem;
+    cursor: pointer;
+    color: #42526e;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 0.25rem;  /* 4px -> 0.25rem */
+    user-select: none;
+    white-space: nowrap; /* [NOWE] */
+}
+
+.sidebar-toggle-header:hover {
+    background-color: #ebecf0;
+    color: #172b4d;
+}
+
+/* Strzałka przy filarze */
+.toggle-icon {
+    margin-right: 0.5rem;    /* 8px -> 0.5rem */
+    font-size: 0.7rem;
+    color: #6b778c;
+    transition: transform 0.2s ease;
+}
+
+.toggle-icon.expanded {
+    transform: rotate(90deg);
+}
+
+/* --- POZIOM 3: ZADANIE (ITEM) --- */
+
+.sidebar-item-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.125rem;    /* 2px -> 0.125rem */
+}
+
+/* Link do Itemu */
+.sidebar-item-link {
+    display: flex;
+    align-items: center;
+    /* 6px 12px 6px 44px -> rem */
+    padding: 0.375rem 0.75rem 0.375rem 2.75rem;
+    text-decoration: none;
+    color: #6b778c;
+    font-size: 0.85rem;
+    border-radius: 0.25rem;  /* 4px -> 0.25rem */
+    transition: all 0.1s;
+    white-space: nowrap; /* [NOWE] */
+}
+
+.sidebar-item-link:hover {
+    background-color: #ebecf0;
+    color: #172b4d;
+}
+
+/* Aktywny Item */
+.sidebar-item-link.item-selected {
+    background-color: #e9f2ff;
+    color: #0052cc;
+    font-weight: 500;
+}
+
+/* Kropka statusu */
+.status-dot {
+    font-size: 0.375rem;     /* 6px -> 0.375rem */
+    margin-right: 0.5rem;    /* 8px -> 0.5rem */
+    opacity: 0.7;
+    flex-shrink: 0; /* [NOWE] Żeby kropka się nie zgniatała */
+}
+
+/* --- GUZIK DODAWANIA --- */
+.add-project-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;             /* 8px -> 0.5rem */
+
+    margin: 0 0.5rem 1.25rem 0.5rem; /* 0 8px 20px 8px -> rem */
+    padding: 0.625rem;       /* 10px -> 0.625rem */
+
+    background-color: #2ea44f;
+    color: white;
+
+    border: none;
+    border-radius: 0.375rem; /* 6px -> 0.375rem */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap; /* [NOWE] */
+}
+
+.add-project-btn:hover {
+    background-color: #2c974b;
+}

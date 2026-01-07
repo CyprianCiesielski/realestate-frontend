@@ -1,0 +1,261 @@
+/* Overlay i Content bez zmian */
+.tag-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(9, 30, 66, 0.54);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.tag-modal-content {
+    background: white;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 80vh; /* Ograniczenie wysokości */
+}
+
+.tag-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #dfe1e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f4f5f7;
+}
+
+.tag-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Scrollowanie body */
+}
+
+/* --- SEKCJA TWORZENIA --- */
+.create-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b778c;
+}
+
+.add-input-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.add-input-wrapper input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.add-input-wrapper input:focus {
+    border-color: #4c9aff;
+}
+
+.add-btn {
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.2s;
+}
+.add-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.add-btn:disabled { background-color: #dfe1e6 !important; cursor: default; }
+
+/* Wybór kolorów (Kółeczka) */
+.color-picker-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+    padding: 0;
+}
+
+.color-dot:hover { transform: scale(1.15); }
+.color-dot.selected {
+    border-color: #172b4d;
+    box-shadow: 0 0 0 2px #fff inset;
+    transform: scale(1.1);
+}
+
+.check-icon {
+    font-size: 0.7rem;
+    color: white;
+}
+
+
+/* --- SEKCJA LISTY --- */
+.tags-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tag-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f4f5f7;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.tag-row:hover { background-color: #ebecf0; }
+
+.tag-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tag-color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.tag-text {
+    font-weight: 500;
+    color: #172b4d;
+    font-size: 0.9rem;
+}
+
+/* Przyciski akcji */
+.actions { display: flex; gap: 6px; }
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: #6b778c;
+    transition: color 0.2s;
+}
+.action-btn.edit:hover { color: #0052cc; }
+.action-btn.delete:hover { color: #de350b; }
+
+.edit-mode-wrapper {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+}
+.edit-input {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #4c9aff;
+    border-radius: 4px;
+}
+.save-btn, .cancel-btn {
+    background: none; border: none; cursor: pointer;
+}
+.save-btn { color: #00875a; }
+.cancel-btn { color: #de350b; }
+
+.empty-tags {
+    text-align: center; color: #6b778c; font-style: italic; font-size: 0.9rem;
+}
+
+/* Reszta stylów (close-btn itp) bez zmian */
+.close-btn { background: none; border: none; cursor: pointer; font-size: 1rem; color: #6b778c; }
+.close-btn:hover { color: #de350b; }
+.header-icon { color: #0052cc; margin-right: 8px; }
+
+.tag-row.editing {
+    background-color: white;
+    border: 1px solid #4c9aff; /* Niebieska ramka w trybie edycji */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.edit-mode-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.edit-top-row {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    align-items: center;
+}
+
+.edit-color-row {
+    display: flex;
+    gap: 6px;
+    padding-left: 2px; /* Lekkie wcięcie */
+}
+
+/* Mniejsze kropki w trybie edycji */
+.color-dot.small {
+    width: 18px;
+    height: 18px;
+    border: 1px solid transparent;
+}
+
+.color-dot.small:hover {
+    transform: scale(1.2);
+}
+
+.color-dot.small.selected {
+    border-color: #172b4d;
+    box-shadow: 0 0 0 1px #fff inset;
+    transform: scale(1.1);
+}
+
+/* Upewnij się, że input w edycji wygląda dobrze */
+.edit-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+.edit-input:focus {
+    border-color: #4c9aff;
+    outline: none;
+}

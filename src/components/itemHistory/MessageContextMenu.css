@@ -1,0 +1,117 @@
+/* Overlay na cały ekran (żeby zablokować inne kliknięcia) */
+.context-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    /* Opcjonalnie: lekkie przyciemnienie tła jak na iOS */
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.context-menu-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: popIn 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Zabezpieczenie na bardzo małe ekrany */
+    max-height: 98vh;
+}
+
+.action-list {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    width: 220px;
+    overflow: hidden; /* To ukrywa rogi */
+
+    /* Dodaj to, żeby pojawił się pasek przewijania jeśli menu jest za wysokie */
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- PASEK REAKCJI --- */
+.reaction-bar {
+    background: rgba(30, 30, 30, 0.95); /* Ciemne tło */
+    backdrop-filter: blur(10px);        /* Rozmycie tła */
+    padding: 8px 12px;
+    border-radius: 50px;                /* Kształt pigułki */
+    display: flex;
+    gap: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.reaction-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+}
+
+.reaction-btn:hover {
+    transform: scale(1.3); /* Powiększenie przy najechaniu */
+    background: rgba(255,255,255,0.1);
+}
+
+.add-reaction {
+    font-size: 1rem;
+    color: #888;
+    background: rgba(255,255,255,0.05);
+    width: 36px;
+    height: 36px;
+}
+
+/* --- LISTA AKCJI --- */
+
+.action-list button {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between; /* Tekst po lewej, ikona po prawej */
+    align-items: center;
+    transition: background 0.1s;
+}
+
+.action-list button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.action-list button svg {
+    color: #ccc;
+}
+
+.divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 10px;
+}
+
+.delete-btn {
+    color: #ff4d4d !important; /* Czerwony kolor dla usuwania */
+}
+
+.delete-btn svg {
+    color: #ff4d4d !important;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}

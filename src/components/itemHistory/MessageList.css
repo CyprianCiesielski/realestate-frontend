@@ -1,0 +1,157 @@
+/* features/item/history/MessageList.css */
+
+/* --- 1. KONTENER LISTY --- */
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    width: 100%; /* Ważne */
+}
+
+/* --- 2. WRAPPER WIADOMOŚCI --- */
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 100%; /* Zapobiega wyciekaniu w bok */
+    margin-bottom: 20px; /* Miejsce na reakcje pod spodem */
+
+    /* To jest ważne dla scrollowania - element musi mieć "ciało" */
+    scroll-margin-top: 100px; /* Opcjonalnie: bufor przy scrollowaniu */
+}
+
+/* --- 3. DANE META (Autor, data) --- */
+.message-meta {
+    margin-left: 0.75rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    color: #65676b;
+}
+
+/* --- 4. DYMEK WIADOMOŚCI (Tu dzieje się magia zawijania) --- */
+.chat-bubble {
+    background-color: #007aff;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+
+    /* 👇 KLUCZOWE DLA ZAWIJANIA I UKŁADU 👇 */
+    max-width: 85%;          /* Zostaw trochę miejsca, nie rozciągaj na maxa */
+    width: fit-content;      /* Dopasuj do treści, ale nie przekraczaj max-width */
+
+    /* Te 3 linie naprawiają długi tekst i brak spacji: */
+    white-space: pre-wrap;   /* Respektuj Entery, ale zawijaj wiersze */
+    word-break: break-word;  /* Łam długie słowa */
+    overflow-wrap: anywhere; /* Łam długie linki */
+
+    transition: all 0.2s ease;
+}
+
+/* --- 5. PRZYPIĘTA WIADOMOŚĆ --- */
+.chat-bubble.pinned-bubble {
+    background-color: #0060c0;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+/* --- 6. TREŚĆ WEWNĄTRZ --- */
+.content {
+    margin: 0;
+    /* Dodatkowe zabezpieczenie */
+    word-wrap: break-word;
+}
+
+/* --- 7. PINEZKA (BADGE) --- */
+.pin-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #333;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    z-index: 1;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+/* --- 8. LINKI --- */
+.attachment-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: white;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s;
+
+    /* Zabezpieczenie dla długich nazw plików */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- 9. REAKCJE --- */
+.reactions-container {
+    position: absolute;
+    bottom: -12px;
+    right: 4px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    border: 1px solid #eaeaea;
+    z-index: 10;
+    cursor: pointer;
+    white-space: nowrap; /* Reakcje w jednej linii */
+}
+
+.reaction-pill {
+    background: transparent;
+    border: none;
+    padding: 0 4px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.reaction-pill:hover {
+    transform: scale(1.2);
+}
+
+.reaction-count {
+    font-size: 0.75rem;
+    color: #007aff;
+    font-weight: 600;
+}
+
+/* --- 10. STAN PUSTY --- */
+.empty-message {
+    text-align: center;
+    color: #888;
+    padding: 1.25rem;
+}

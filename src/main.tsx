@@ -3,21 +3,22 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RefreshProvider } from "./context/RefreshContext";
 
-import App from "./App.tsx"; // Nasz główny layout
-import "./index.css"; // Globalne style
+import App from "./App.tsx";
+import "./index.css";
 
-// Importujemy nasze nowe strony
+// Importujemy strony
 import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { ProjectDetailsPage } from "./pages/ProjectDetailsPage.tsx";
-import { ProjectsLayout } from "./features/project/ProjectLayout.tsx";
+import { ProjectsLayout } from "./components/project/ProjectLayout.tsx";
+import { SingleProjectLayout } from "./components/project/SingleProjectLayout.tsx"; // 👈 NOWY IMPORT (sprawdź ścieżkę!)
 import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
 import { SearchingPage } from "./pages/SearchingPage.tsx";
+import { PillarDetailsPage } from "./pages/PillarDetailsPage.tsx";
 
-// 1. Tworzymy definicję routera
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />, // Główny layout aplikacji (Header)
+    element: <App />,
     children: [
       {
         path: "/",
@@ -28,28 +29,39 @@ const router = createBrowserRouter([
         element: <SearchingPage />,
       },
       {
-        // 1. Wchodzimy do sekcji "/projects"
+        // POZIOM 1: Layout z Sidebarem (Lista wszystkich projektów)
         path: "/projects",
-        element: <ProjectsLayout />, // Ładujemy nasz nowy Layout z listą po lewej
-
-        // 2. Co ma być w prawej kolumnie (Outlet)?
+        element: <ProjectsLayout />,
         children: [
           {
-            index: true, // To się wyświetli, gdy adres to samo "/projects"
+            index: true,
             element: (
               <div style={{ padding: 20, color: "#888" }}>
                 ← Wybierz projekt z listy po lewej
               </div>
             ),
           },
+          // POZIOM 2: Layout Konkretnego Projektu (Pobiera dane projektu RAZ)
           {
-            path: ":projectId", // To się wyświetli, gdy adres to "/projects/5"
-            element: <ProjectDetailsPage />,
-          },
-
-          {
-            path: ":projectId/pillars/:pillarId/items/:itemId",
-            element: <ItemDetailsPage />, // 👈 NOWY KOMPONENT
+            path: ":projectId",
+            element: <SingleProjectLayout />, // 👈 Tutaj wpinamy nasz nowy layout
+            children: [
+              {
+                // Widok główny projektu (/projects/1)
+                index: true,
+                element: <ProjectDetailsPage />,
+              },
+              {
+                // Widok filaru (/projects/1/pillars/5)
+                path: "pillars/:pillarId",
+                element: <PillarDetailsPage />,
+              },
+              {
+                // Widok zadania (/projects/1/pillars/5/items/10)
+                path: "pillars/:pillarId/items/:itemId",
+                element: <ItemDetailsPage />,
+              },
+            ],
           },
         ],
       },
@@ -57,7 +69,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-// 2. Renderujemy aplikację używając <RouterProvider />
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <RefreshProvider>
