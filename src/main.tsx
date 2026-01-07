@@ -16,7 +16,7 @@ import { ItemDetailsPage } from "./pages/ItemDetailsPage.tsx";
 import { SearchingPage } from "./pages/SearchingPage.tsx";
 import { PillarDetailsPage } from "./pages/PillarDetailsPage.tsx";
 import { LoginPage } from "./pages/LoginPage.tsx";
-import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
+import { ProtectedRoute } from "./header/ProtectedRoute.tsx";
 import { AdminDashboardLayout } from "./features/admin/AdminDashboardLayout.tsx";
 import { AdminDashboardDetails } from "./features/admin/AdminDashboardDetails.tsx";
 import { UserDetails } from "./features/user/UserDetails.tsx";
@@ -85,22 +85,22 @@ const router = createBrowserRouter([
           },
         ],
       },
-    ],
-  },
-  {
-    element: <ProtectedRoute requireAdmin />,
-    children: [
       {
-        path: "/admin",
-        element: <AdminDashboardLayout />, // Header + Kontener
+        element: <ProtectedRoute requireAdmin />,
         children: [
           {
-            index: true,
-            element: <AdminDashboardDetails />, // Tablica z kolumnami
-          },
-          {
-            path: "users/:userId",
-            element: <UserDetails />,
+            path: "/admin",
+            element: <AdminDashboardLayout />, // Header + Kontener
+            children: [
+              {
+                index: true,
+                element: <AdminDashboardDetails />, // Tablica z kolumnami
+              },
+              {
+                path: "users/:userId",
+                element: <UserDetails />,
+              },
+            ],
           },
         ],
       },

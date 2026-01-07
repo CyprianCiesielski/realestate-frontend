@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaCalendarAlt, FaBell, FaPlus, FaHashtag } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaBell,
+  FaPlus,
+  FaHashtag,
+  FaAddressCard,
+} from "react-icons/fa";
 import "./Header.css";
 
 import { SearchBar } from "../components/searching/SearchBar.tsx";
 import { CreateProjectModal } from "../components/project/CreateProjectModal.tsx";
 import { TagModal } from "../components/tag/TagModal.tsx";
 import type { Project } from "../components/project/types.ts";
+import { useAuth } from "../context/AuthContext";
 
 // 👇 IMPORTY API I TYPÓW TAGÓW
 import {
@@ -18,6 +25,10 @@ import {
 import type { Tag } from "../components/tag/types";
 
 export function Header() {
+  const { user, logout, isAdmin } = useAuth();
+
+  if (!user) return null; // Nie pokazuj nagłówka na stronie logowania
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
@@ -117,7 +128,17 @@ export function Header() {
           <FaBell />
         </button>
 
-        <div className="user-avatar">CC</div>
+        <div className="user-avatar">{user.initial}</div>
+
+        <button onClick={logout} className="logout-btn">
+          Wyloguj
+        </button>
+
+        {isAdmin && (
+          <Link to="/admin" className="admin-btn">
+            <FaAddressCard />
+          </Link>
+        )}
 
         {isModalOpen && (
           <CreateProjectModal

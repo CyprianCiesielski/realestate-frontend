@@ -97,7 +97,7 @@ export function EditProjectModal({
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
           >
-            <label>Tags</label>
+            <label>Tagi</label>
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
@@ -116,18 +116,10 @@ export function EditProjectModal({
             />
           </div>
 
-          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
-          >
-            <label>Tagi</label>
-            <TagSelector
-              selectedTags={selectedTags}
-              onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
-            />
-          </div>
+          ></div>
 
           {/* Reszta pól... */}
           <div className="form-group">
