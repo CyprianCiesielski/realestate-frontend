@@ -7,3 +7,8 @@ export interface AdminViewUser {
     role: string;
 }
 
+export interface UserColumnData{
+    id: number;
+    title: string;
+    users: AdminViewUser[];
+}

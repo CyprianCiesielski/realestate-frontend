@@ -1,5 +1,5 @@
 import { Link, useLocation, useOutletContext } from "react-router-dom";
-import "./Breadcrumbs.css";
+import "./BreadCrumbs.css";
 import type { Project } from "../project/types"; // Upewnij się co do ścieżki
 
 export function Breadcrumbs() {

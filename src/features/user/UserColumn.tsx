@@ -1,4 +1,4 @@
-import { type UserColumnData, type AdminViewUser } from './types';
+import { type UserColumnData, type AdminViewUser } from '../admin/types';
 import { UserCard } from './UserCard';
 import './UserColumn.css';
 
@@ -15,7 +15,7 @@ export const UserColumn = ({ column, onEditUser }: UserColumnProps) => {
                 <span className="user-count">{column.users.length}</span>
             </div>
             <div className="user-column-content">
-                {column.users.map(user => (
+                {column.users.map((user: AdminViewUser) => (
                     <UserCard key={user.id} user={user} onEdit={onEditUser} />
                 ))}
             </div>
