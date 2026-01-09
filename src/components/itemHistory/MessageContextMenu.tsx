@@ -8,6 +8,7 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import "./MessageContextMenu.css";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 // ... (Twoja lista reakcji i interfejsy) ...
 const REACTIONS = ["❤️", "😆", "😮", "😢", "😠", "👍"];
@@ -23,6 +24,7 @@ interface ContextMenuProps {
   onPin: () => void;
   onDelete: () => void;
   isPinned: boolean;
+  isAuthor: boolean;
 }
 
 export function MessageContextMenu({
@@ -35,11 +37,13 @@ export function MessageContextMenu({
   onPin,
   onDelete,
   isPinned,
+  isAuthor,
 }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Stan przechowujący "bezpieczną" pozycję. Na początku ustawiamy to co kliknięto.
   const [coords, setCoords] = useState(position);
+  const { isAdmin } = useAuth();
 
   // useLayoutEffect uruchamia się PO wyrenderowaniu HTML, ale PRZED wyświetleniem na ekranie.
   // Dzięki temu użytkownik nie zobaczy "mignięcia" przy zmianie pozycji.
@@ -116,15 +120,18 @@ export function MessageContextMenu({
 
         {/* Lista Akcji */}
         <div className="action-list">
-          <button
-            onClick={() => {
-              onEdit();
-              onClose();
-            }}
-          >
-            <span>Edit</span>
-            <FaPen />
-          </button>
+          {(isAdmin || isAuthor) && (
+            <button
+              onClick={() => {
+                onEdit();
+                onClose();
+              }}
+            >
+              <span>Edit</span>
+              <FaPen />
+            </button>
+          )}
+
           <button
             onClick={() => {
               onReply();
@@ -153,16 +160,18 @@ export function MessageContextMenu({
             <span>{isPinned ? "Unpin" : "Pin"}</span>
             <FaThumbtack style={{ transform: "rotate(45deg)" }} />
           </button>
-          <button
-            className="delete-btn"
-            onClick={() => {
-              onDelete();
-              onClose();
-            }}
-          >
-            <span>Delete</span>
-            <FaTrashAlt />
-          </button>
+          {isAdmin && (
+            <button
+              className="delete-btn"
+              onClick={() => {
+                onDelete();
+                onClose();
+              }}
+            >
+              <span>Delete</span>
+              <FaTrashAlt />
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -14,4 +14,5 @@ export interface ItemHistory {
   isPinned: boolean;
 
   reactions: MessageReaction[];
+  replyTo?: ItemHistory;
 }

@@ -1,62 +1,68 @@
-/* 1. GŁÓWNY KONTENER */
+/* 1. GŁÓWNY KONTENER - pozostaje bez zmian, to nasza baza */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    height: 3.75rem;       /* 60px -> 3.75rem */
-    padding: 0 1.25rem;    /* 20px -> 1.25rem */
+    height: 3.75rem; /* 60px */
+    padding: 0 1.25rem;
     background-color: white;
     border-bottom: 1px solid #dfe1e6;
-
-    /* Cień */
     box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.05);
-
-    position: sticky; /* Przyklejony do góry */
+    position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-/* 2. LEWA STRONA (Logo + Przycisk) - NOWOŚĆ */
+/* 2. LEWA STRONA - Kontener zarządza środkiem */
 .header-left {
     display: flex;
-    align-items: center;
-    gap: 1.5rem; /* Odstęp między Logo a Przyciskiem */
+    align-items: center; /* KLUCZ: Wszystko wewnątrz będzie zawsze w osi środkowej */
+    gap: 1.5rem;
+    height: 100%;
 }
 
+/* 2. Logo - usuwamy sztywną wysokość i transformy */
 .logo-text {
-    transform: translateY(1.1rem);
     font-size: 1.3rem;
     font-weight: 800;
     color: #172b4d;
     text-decoration: none;
     letter-spacing: -0.03125rem;
     white-space: nowrap;
+
+    /* Usuwamy height i transformy */
+    display: flex;
+    align-items: center;
+    line-height: normal; /* Pozwalamy czcionce zachowywać się naturalnie */
+    margin-top: 1rem;
+    transform: none !important;
 }
 
-/* 3. PRZYCISK "ADD PROJECT" (Zaktualizowany dla Headera) */
+/* 3. Przycisk - usuwamy sztywną wysokość, bazujemy na paddingu */
 .add-project-btn {
-    transform: translateY(0.75rem);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
 
-    /* WAŻNE: Usunięte wielkie marginesy z sidebaru */
+    /* Usuwamy height, używamy paddingu dla spójnego wyglądu */
+    padding: 0.5rem 1rem;
 
-    padding: 0.5rem 1rem; /* Mniejszy padding pasujący do headera */
-
-    background-color: #0052cc; /* Zmieniłem na niebieski (Jira style), ale możesz dać #2ea44f (zielony) */
+    background-color: #0052cc;
     color: white;
-
     border: none;
     border-radius: 0.25rem;
     font-weight: 600;
-    font-size: 0.85rem; /* Nieco mniejsza czcionka */
+    font-size: 0.85rem;
     cursor: pointer;
     transition: background-color 0.2s;
     white-space: nowrap;
+
+    margin: 0;
+    transform: none !important;
 }
+
+/* Reszta stylów (wyszukiwarka, ikony) pozostaje bez zmian */
 
 .add-project-btn:hover {
     background-color: #0065ff; /* Jaśniejszy niebieski przy najechaniu */
@@ -189,4 +195,21 @@
     border-color: #de350b;
     color: white;
     cursor: pointer;
+}
+
+.hash-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 2.2rem;
+    color: #0065ff;
+    padding: 0.3125rem;
+    border-radius: 50%;
+    display: flex;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.hash-btn:hover {
+    background-color: #f4f5f7;
+    color: #172b4d;
 }

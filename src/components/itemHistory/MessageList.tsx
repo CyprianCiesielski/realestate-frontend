@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { FaThumbtack } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaThumbtack, FaReply } from "react-icons/fa";
 import type { ItemHistory, MessageReaction } from "./types.ts";
 import { MessageContextMenu } from "./MessageContextMenu";
 import "./MessageList.css";
+import { fetchMyProfile } from "../../features/user/api";
 
 const HighlightedText = ({
   text,
@@ -12,13 +13,12 @@ const HighlightedText = ({
   highlight: string;
 }) => {
   if (!highlight.trim()) return <>{text}</>;
-
   const parts = text.split(new RegExp(`(${highlight})`, "gi"));
   return (
     <>
       {parts.map((part, i) =>
         part.toLowerCase() === highlight.toLowerCase() ? (
-          <span key={i} style={{ backgroundColor: "#fff566", color: "black" }}>
+          <span key={i} className="search-highlight">
             {part}
           </span>
         ) : (
@@ -63,13 +63,8 @@ interface MessageListProps {
     togglePin: (id: number) => void;
     deleteMessage: (id: number) => void;
     editMessage: (entry: ItemHistory) => void;
+    goToMessage: (id: number) => void;
   };
-}
-
-interface ContextMenuState {
-  x: number;
-  y: number;
-  messageId: number;
 }
 
 export function MessageList({
@@ -77,127 +72,187 @@ export function MessageList({
   onAction,
   searchQuery = "",
 }: MessageListProps) {
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    messageId: number;
+  } | null>(null);
+  const [currentUserFullName, setCurrentUserFullName] = useState<string>("");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await fetchMyProfile();
+        const fullName = `${profile.firstName} ${profile.lastName}`
+          .trim()
+          .toLowerCase();
+        setCurrentUserFullName(fullName);
+      } catch (error) {
+        console.error("Błąd pobierania profilu:", error);
+      }
+    };
+    loadProfile();
+  }, []);
 
   if (!historyEntries || historyEntries.length === 0) {
     return <div className="empty-message">Brak historii zmian.</div>;
   }
 
   const sortedHistory = [...historyEntries].sort((a, b) => {
-    const dateA = new Date(a.changeDate).getTime();
-    const dateB = new Date(b.changeDate).getTime();
-    const diff = dateA - dateB;
-    if (diff !== 0) return diff;
-    return a.id - b.id;
+    return (
+      new Date(a.changeDate).getTime() - new Date(b.changeDate).getTime() ||
+      a.id - b.id
+    );
   });
 
   const filteredHistory = sortedHistory.filter((entry) =>
     entry.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleContextMenu = (e: React.MouseEvent, msgId: number) => {
-    e.preventDefault();
-    setContextMenu({
-      x: e.pageX,
-      y: e.pageY,
-      messageId: msgId,
-    });
-  };
-
-  const handleCloseMenu = () => setContextMenu(null);
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
   const activeMessageForMenu = contextMenu
     ? historyEntries.find((e) => e.id === contextMenu.messageId)
     : null;
 
-  if (filteredHistory.length === 0 && searchQuery) {
-    return (
-      <div className="empty-message">
-        Brak wiadomości pasujących do wyszukiwania.
-      </div>
-    );
-  }
+  // Sprawdzanie czy otwarta w menu wiadomość jest nasza (na potrzeby Edit/Delete)
+  const activeMessageIsMine = !!(
+    activeMessageForMenu &&
+    activeMessageForMenu.author?.trim().toLowerCase() === currentUserFullName
+  );
 
   return (
     <div className="message-list">
-      {filteredHistory.map((entry) => (
-        <div key={entry.id} id={`msg-${entry.id}`} className="message-wrapper">
-          <div className="message-meta">
-            <span className="author">{entry.author || "System"}</span>
-            <span className="date"> • {formatDate(entry.changeDate)}</span>
-          </div>
+      {filteredHistory.map((entry) => {
+        const authorInDb = entry.author?.trim().toLowerCase();
+        const isMine = authorInDb === currentUserFullName;
 
+        return (
           <div
-            className={`chat-bubble ${entry.isPinned ? "pinned-bubble" : ""}`}
-            onContextMenu={(e) => handleContextMenu(e, entry.id)}
+            key={entry.id}
+            id={`msg-${entry.id}`}
+            className={`message-wrapper ${isMine ? "mine" : "others"}`}
           >
-            {entry.isPinned && (
-              <div className="pin-badge" title="Przypięta wiadomość">
-                <FaThumbtack />
-              </div>
-            )}
+            <div className="message-meta">
+              <span className="author">
+                {isMine ? "Ty" : entry.author || "System"}
+              </span>
+              <span className="date"> • {formatDate(entry.changeDate)}</span>
+            </div>
 
-            <p className="content">
-              <HighlightedText
-                text={entry.description}
-                highlight={searchQuery}
-              />
-            </p>
+            <div
+              className={`chat-bubble ${entry.isPinned ? "pinned-bubble" : ""}`}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenu({ x: e.pageX, y: e.pageY, messageId: entry.id });
+              }}
+            >
+              {/* Pinezka */}
+              {entry.isPinned && <FaThumbtack className="pin-badge" />}
 
-            {entry.googleFileId && (
-              <a
-                href={entry.webViewLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="attachment-link"
-              >
-                📎 Załącznik
-              </a>
-            )}
-
-            {entry.reactions && entry.reactions.length > 0 && (
-              <div className="reactions-container">
-                {Object.entries(groupReactions(entry.reactions)).map(
-                  ([emoji, data]) => (
-                    <div
-                      key={emoji}
-                      className="reaction-pill"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAction.addReaction(entry.id, emoji);
+              {/* Sekcja Odpowiedzi (Reply) */}
+              {entry.replyTo && (
+                <div
+                  className="reply-preview"
+                  /* Upewnij się, że scrollToMessage jest dostępne w zasięgu tego komponentu */
+                  onClick={(e) => {
+                    e.stopPropagation(); // Zapobiega otwarciu menu kontekstowego przy kliknięciu w podgląd
+                    onAction.goToMessage(entry.replyTo!.id);
+                  }}
+                >
+                  <div className="reply-author">
+                    <FaReply
+                      style={{
+                        fontSize: "0.6rem",
+                        marginRight: "4px",
+                        transform: "scaleX(-1)",
                       }}
-                      title={`Reakcje: ${data.users.join(", ")}`}
-                    >
-                      <span>{emoji}</span>
-                      {data.count > 1 && (
-                        <span className="reaction-count">{data.count}</span>
-                      )}
-                    </div>
-                  ),
-                )}
-              </div>
-            )}
+                    />
+                    {entry.replyTo.author?.trim().toLowerCase() ===
+                    currentUserFullName?.toLowerCase()
+                      ? "Ty"
+                      : entry.replyTo.author}
+                  </div>
+                  <div className="reply-content-text">
+                    {entry.replyTo.description}
+                  </div>
+                </div>
+              )}
+
+              <p className="content">
+                <HighlightedText
+                  text={entry.description}
+                  highlight={searchQuery}
+                />
+              </p>
+
+              {entry.googleFileId && (
+                <a
+                  href={entry.webViewLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="attachment-link"
+                >
+                  📎 Załącznik
+                </a>
+              )}
+
+              {/* Reakcje */}
+              {entry.reactions && entry.reactions.length > 0 && (
+                <div className="reactions-container">
+                  {Object.entries(groupReactions(entry.reactions)).map(
+                    ([emoji, data]) => (
+                      <div
+                        key={emoji}
+                        className="reaction-pill"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAction.addReaction(entry.id, emoji);
+                        }}
+                        title={`Reakcje: ${data.users.join(", ")}`}
+                      >
+                        <span>{emoji}</span>
+                        {data.count > 1 && (
+                          <span className="reaction-count">{data.count}</span>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {contextMenu && activeMessageForMenu && (
         <MessageContextMenu
           position={{ x: contextMenu.x, y: contextMenu.y }}
-          onClose={handleCloseMenu}
+          onClose={() => setContextMenu(null)}
           isPinned={activeMessageForMenu.isPinned || false}
-          onReact={(emoji) =>
-            onAction.addReaction(activeMessageForMenu.id, emoji)
-          }
-          onReply={() => onAction.setReplyTo(activeMessageForMenu)}
-          onEdit={() => onAction.editMessage(activeMessageForMenu)}
-          onCopy={() => handleCopy(activeMessageForMenu.description)}
-          onPin={() => onAction.togglePin(activeMessageForMenu.id)}
-          onDelete={() => onAction.deleteMessage(activeMessageForMenu.id)}
+          isAuthor={activeMessageIsMine} // Kluczowe dla edycji
+          onReact={(emoji) => {
+            onAction.addReaction(activeMessageForMenu.id, emoji);
+            setContextMenu(null);
+          }}
+          onReply={() => {
+            onAction.setReplyTo(activeMessageForMenu);
+            setContextMenu(null);
+          }}
+          onEdit={() => {
+            onAction.editMessage(activeMessageForMenu);
+            setContextMenu(null);
+          }}
+          onCopy={() => {
+            navigator.clipboard.writeText(activeMessageForMenu.description);
+            setContextMenu(null);
+          }}
+          onPin={() => {
+            onAction.togglePin(activeMessageForMenu.id);
+            setContextMenu(null);
+          }}
+          onDelete={() => {
+            onAction.deleteMessage(activeMessageForMenu.id);
+            setContextMenu(null);
+          }}
         />
       )}
     </div>

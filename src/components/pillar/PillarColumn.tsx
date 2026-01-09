@@ -5,7 +5,8 @@ import type { Pillar } from "./types";
 import { archivePillar } from "./api";
 import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import type { Item } from "../item/types.ts";
-import { Link, useNavigate } from "react-router-dom"; // Do celów archiwizacji
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.tsx"; // Do celów archiwizacji
 
 interface PillarColumnProps {
   pillar: Pillar;
@@ -22,6 +23,8 @@ export function PillarColumn({
 }: PillarColumnProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
+
+  const { isAdmin } = useAuth();
 
   const navigate = useNavigate();
 
@@ -76,28 +79,32 @@ export function PillarColumn({
       onClick={() => handleCardClick()}
       style={{ cursor: "pointer", position: "relative" }}
     >
-      {/* IKONA USTAWIEŃ - Zębatka */}
-      <button
-        className="settings-pillar-btn"
-        onClick={(e) => {
-          (setIsEditModalOpen(true),
-            e.preventDefault(), // Zapobiega domyślnej akcji linku
-            e.stopPropagation());
-        }}
-      >
-        <FaCog />
-      </button>
+      {/* --- NOWY KONTENER NA PRZYCISKI --- */}
+      <div className="pillar-actions">
+        <button
+          className="add-item-btn"
+          onClick={(e) => {
+            setIsCreateItemModalOpen(true);
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <FaPlus />
+        </button>
 
-      <button
-        className="add-item-btn"
-        onClick={(e) => {
-          (setIsCreateItemModalOpen(true),
-            e.preventDefault(), // Zapobiega domyślnej akcji linku
-            e.stopPropagation());
-        }}
-      >
-        <FaPlus />
-      </button>
+        {isAdmin && (
+          <button
+            className="settings-pillar-btn"
+            onClick={(e) => {
+              setIsEditModalOpen(true);
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <FaCog />
+          </button>
+        )}
+      </div>
 
       {/* Nagłówek kolumny */}
       <div className="pillar-header">

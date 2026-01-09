@@ -17,6 +17,9 @@ import { EditItemModal } from "./EditItemModal.tsx";
 import { useRefresh } from "../../context/RefreshContext.tsx";
 import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
 import { PinnedMessagesModal } from "../itemHistory/PinnedMessagesModal.tsx";
+import type { UserDetailData } from "../../features/user/types.ts";
+import { fetchMyProfile } from "../../features/user/api.ts";
+import type { ItemHistory } from "../itemHistory/types.ts";
 
 export function ItemDetails() {
   const { projectId, pillarId, itemId } = useParams<{
@@ -32,7 +35,12 @@ export function ItemDetails() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { triggerRefresh } = useRefresh();
 
+  const [currentUser, setCurrentUser] = useState<UserDetailData | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+
+  // --- NOWY STAN: Odpowiedź ---
+  const [replyTo, setReplyTo] = useState<ItemHistory | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isPinnedListOpen, setIsPinnedListOpen] = useState(false);
@@ -44,19 +52,21 @@ export function ItemDetails() {
     null;
 
   useEffect(() => {
+    fetchMyProfile()
+      .then((data) => setCurrentUser(data))
+      .catch((err) =>
+        console.error("Nie udało się pobrać profilu użytkownika:", err),
+      );
+  }, []);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         closeSearch();
       }
     }
-
-    if (isSearchActive) {
-      document.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    if (isSearchActive) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isSearchActive]);
 
   const closeSearch = () => {
@@ -76,6 +86,7 @@ export function ItemDetails() {
         const elementRect = element.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
         const offset = elementRect.top - containerRect.top;
+
         const targetScroll =
           container.scrollTop +
           offset -
@@ -87,8 +98,18 @@ export function ItemDetails() {
           behavior: "smooth",
         });
 
+        // Czyścimy poprzednie podświetlenia, jeśli użytkownik klika szybko raz za razem
+        element.classList.remove("flash-highlight");
+
+        // Force reflow - trik, żeby animacja odpaliła się od nowa za każdym razem
+        void element.offsetWidth;
+
         element.classList.add("flash-highlight");
-        setTimeout(() => element.classList.remove("flash-highlight"), 2000);
+
+        // Usuwamy klasę po 2.1s (ciut po zakończeniu animacji CSS)
+        setTimeout(() => {
+          element.classList.remove("flash-highlight");
+        }, 2100);
       }
     }, 100);
   };
@@ -100,26 +121,21 @@ export function ItemDetails() {
       triggerRefresh();
       navigate(`/projects/${projectId}`);
     } catch (err) {
-      console.error(err);
       alert("Archive Error.");
     }
   };
 
   const handleTogglePin = async (historyId: number) => {
     if (!itemId || !projectId || !pillarId) return;
-
-    setItem((prevItem) => {
-      if (!prevItem) return null;
+    setItem((prev) => {
+      if (!prev) return null;
       return {
-        ...prevItem,
-        historyEntries: prevItem.historyEntries.map((entry) =>
-          entry.id === historyId
-            ? { ...entry, isPinned: !entry.isPinned }
-            : entry,
+        ...prev,
+        historyEntries: prev.historyEntries.map((e) =>
+          e.id === historyId ? { ...e, isPinned: !e.isPinned } : e,
         ),
       };
     });
-
     try {
       await pinItemHistory(projectId, pillarId, itemId, historyId);
     } catch (e) {
@@ -128,24 +144,15 @@ export function ItemDetails() {
   };
 
   const handleDelete = async (historyId: number) => {
-    if (
-      !itemId ||
-      !projectId ||
-      !pillarId ||
-      !window.confirm("Are you sure you want to delete this message?")
-    )
+    if (!itemId || !projectId || !pillarId || !window.confirm("Are you sure?"))
       return;
-
-    setItem((prevItem) => {
-      if (!prevItem) return null;
+    setItem((prev) => {
+      if (!prev) return null;
       return {
-        ...prevItem,
-        historyEntries: prevItem.historyEntries.filter(
-          (entry) => entry.id !== historyId,
-        ),
+        ...prev,
+        historyEntries: prev.historyEntries.filter((e) => e.id !== historyId),
       };
     });
-
     try {
       await archiveItemHistory(projectId, pillarId, itemId, historyId);
     } catch (e) {
@@ -155,7 +162,6 @@ export function ItemDetails() {
 
   const handleAddReaction = async (historyId: number, emoji: string) => {
     if (!itemId || !projectId || !pillarId) return;
-
     try {
       const updatedEntry = await addReaction(
         projectId,
@@ -164,13 +170,12 @@ export function ItemDetails() {
         historyId,
         emoji,
       );
-
-      setItem((prevItem) => {
-        if (!prevItem) return null;
+      setItem((prev) => {
+        if (!prev) return null;
         return {
-          ...prevItem,
-          historyEntries: prevItem.historyEntries.map((entry) =>
-            entry.id === historyId ? updatedEntry : entry,
+          ...prev,
+          historyEntries: prev.historyEntries.map((e) =>
+            e.id === historyId ? updatedEntry : e,
           ),
         };
       });
@@ -182,22 +187,25 @@ export function ItemDetails() {
   useEffect(() => {
     if (itemId && projectId && pillarId) {
       setIsLoading(true);
-      setError(null);
       getItemById(projectId, pillarId, itemId)
         .then((data) => {
           setItem(data);
           setIsLoading(false);
         })
-        .catch((err) => {
-          console.error(err);
-          setError("Nie udało się pobrać szczegółów zadania.");
+        .catch(() => {
+          setError("Błąd pobierania.");
           setIsLoading(false);
         });
     }
   }, [itemId, projectId, pillarId]);
 
+  // --- ZAKTUALIZOWANA LOGIKA WYSYŁANIA ---
   const handleSendMessage = async (text: string) => {
     if (!item || !projectId || !pillarId || !itemId) return;
+
+    const authorName = currentUser
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : "User";
 
     if (editingMessageId) {
       try {
@@ -208,28 +216,28 @@ export function ItemDetails() {
           editingMessageId,
           {
             description: text,
-            author: "User",
+            author: authorName,
           },
         );
-
         setEditingMessageId(null);
-
-        setItem((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            historyEntries: prev.historyEntries.map((e) =>
-              e.id === editingMessageId ? updatedEntry : e,
-            ),
-          };
-        });
+        setItem((prev) => ({
+          ...prev!,
+          historyEntries: prev!.historyEntries.map((e) =>
+            e.id === editingMessageId ? updatedEntry : e,
+          ),
+        }));
       } catch (e) {
-        console.error(e);
-        alert("Nie udało się zapisać zmian.");
+        alert("Błąd zapisu edycji.");
       }
     } else {
       try {
-        const historyDto = { description: text, author: "User" };
+        // Dodajemy parametr replyToId do DTO
+        const historyDto = {
+          description: text,
+          author: authorName,
+          replyToId: replyTo?.id,
+        };
+
         const newEntry = await addHistoryEntry(
           projectId,
           pillarId,
@@ -237,13 +245,12 @@ export function ItemDetails() {
           historyDto,
         );
 
-        setItem((prevItem) => {
-          if (!prevItem) return null;
-          return {
-            ...prevItem,
-            historyEntries: [...(prevItem.historyEntries || []), newEntry],
-          };
-        });
+        setReplyTo(null); // Czyścimy odpowiedź po wysłaniu
+
+        setItem((prevItem) => ({
+          ...prevItem!,
+          historyEntries: [...(prevItem!.historyEntries || []), newEntry],
+        }));
       } catch (err) {
         console.error(err);
       }
@@ -285,7 +292,6 @@ export function ItemDetails() {
               <button
                 className="search-btn"
                 onClick={() => setIsSearchActive(true)}
-                title="Szukaj w czacie"
               >
                 <FaSearch />
               </button>
@@ -294,7 +300,6 @@ export function ItemDetails() {
             <button
               className="search-btn"
               onClick={() => setIsPinnedListOpen(true)}
-              title="Pokaż przypięte"
               style={{ position: "relative" }}
             >
               <FaThumbtack />
@@ -306,7 +311,6 @@ export function ItemDetails() {
             <button
               className="settings-btn"
               onClick={() => setIsEditModalOpen(true)}
-              title="Edytuj zadanie"
             >
               <FaCog />
             </button>
@@ -338,10 +342,18 @@ export function ItemDetails() {
             searchQuery={searchQuery}
             onAction={{
               addReaction: handleAddReaction,
-              setReplyTo: () => console.log("not implemented"),
+              // --- PODPIĘCIE AKCJI REPLY ---
+              setReplyTo: (entry: ItemHistory) => {
+                setEditingMessageId(null); // Odpowiedź wyklucza edycję
+                setReplyTo(entry);
+              },
               togglePin: handleTogglePin,
               deleteMessage: handleDelete,
-              editMessage: (entry) => setEditingMessageId(entry.id),
+              editMessage: (entry) => {
+                setReplyTo(null); // Edycja wyklucza odpowiedź
+                setEditingMessageId(entry.id);
+              },
+              goToMessage: scrollToMessage,
             }}
           />
         </div>
@@ -351,6 +363,9 @@ export function ItemDetails() {
             onSendMessage={handleSendMessage}
             editingText={editingMessageText}
             onCancelEdit={() => setEditingMessageId(null)}
+            // --- NOWE PROPSY DO INPUTA ---
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
           />
         </div>
       </div>

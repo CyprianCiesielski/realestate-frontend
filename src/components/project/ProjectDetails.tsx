@@ -9,6 +9,7 @@ import { FaPlus, FaCog, FaSearch } from "react-icons/fa";
 import { CreatePillarModal } from "../pillar/CreatePillarModal.tsx";
 import type { Pillar } from "../pillar/types.ts";
 import { ScopedSearchModal } from "../searching/SearchModal.tsx";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 export function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -24,6 +25,8 @@ export function ProjectDetails() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     if (projectId) {
@@ -96,13 +99,15 @@ export function ProjectDetails() {
             <FaSearch />
           </button>
 
-          <button
-            className="settings-btn"
-            onClick={() => setIsEditModalOpen(true)}
-            title="Edytuj projekt"
-          >
-            <FaCog />
-          </button>
+          {isAdmin && (
+            <button
+              className="settings-btn"
+              onClick={() => setIsEditModalOpen(true)}
+              title="Edytuj projekt"
+            >
+              <FaCog />
+            </button>
+          )}
         </div>
       </header>
 
@@ -135,9 +140,11 @@ export function ProjectDetails() {
       </section>
 
       {/* GUZIK DODAWANIA FILARU */}
-      <button className="add-pillar-btn" onClick={() => setIsModalOpen(true)}>
-        Add Pillar <FaPlus />
-      </button>
+      {isAdmin && (
+        <button className="add-pillar-btn" onClick={() => setIsModalOpen(true)}>
+          Add Pillar <FaPlus />
+        </button>
+      )}
 
       {/* MODAL DODAWANIA FILARU */}
       {isModalOpen && projectId && (

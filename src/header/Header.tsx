@@ -1,97 +1,49 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  FaCalendarAlt,
-  FaBell,
-  FaPlus,
-  FaHashtag,
-  FaAddressCard,
-} from "react-icons/fa";
+import { FaCalendarAlt, FaBell, FaPlus, FaAddressCard } from "react-icons/fa";
 import "./Header.css";
 
 import { SearchBar } from "../components/searching/SearchBar.tsx";
 import { CreateProjectModal } from "../components/project/CreateProjectModal.tsx";
-import { TagModal } from "../components/tag/TagModal.tsx";
 import type { Project } from "../components/project/types.ts";
 import { useAuth } from "../context/AuthContext";
-
-// 👇 IMPORTY API I TYPÓW TAGÓW
-import {
-  getAllTags,
-  createTag,
-  updateTag,
-  archiveTag,
-} from "../components/tag/api";
-import type { Tag } from "../components/tag/types";
+import type { UserDetailData } from "../features/user/types.ts";
+import { fetchMyProfile } from "../features/user/api.ts";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
-
-  if (!user) return null; // Nie pokazuj nagłówka na stronie logowania
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [currentUserData, setCurrentUserData] = useState<UserDetailData | null>(
+    null,
+  );
 
-  // --- LOGIKA TAGÓW ---
-  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
-  const [tags, setTags] = useState<Tag[]>([]);
-
-  // 1. Pobieranie tagów przy starcie
   useEffect(() => {
-    fetchTags();
-  }, []);
+    const loadUserData = async () => {
+      if (user) {
+        try {
+          // Pobieramy dane zalogowanej osoby bez przekazywania ID w URL
+          const data = await fetchMyProfile();
+          setCurrentUserData(data);
+        } catch (err) {
+          console.error("Błąd pobierania profilu:", err);
+        }
+      }
+    };
+    loadUserData();
+  }, [user]);
 
-  const fetchTags = async () => {
-    try {
-      const data = await getAllTags();
-      setTags(data);
-    } catch (err) {
-      console.error("Błąd pobierania tagów:", err);
+  if (!user) return null;
+
+  const getDisplayInitials = () => {
+    // Używamy firstName i lastName zgodnie z Twoim interfejsem UserDetailData
+    if (currentUserData?.firstName && currentUserData?.lastName) {
+      return (
+        currentUserData.firstName.charAt(0) + currentUserData.lastName.charAt(0)
+      ).toUpperCase();
     }
-  };
-
-  // 2. Dodawanie taga
-  const handleAddTag = async (data: { name: string; color: string }) => {
-    try {
-      const newTag = await createTag({
-        name: data.name,
-        color: data.color,
-      });
-      setTags((prev) => [...prev, newTag]);
-    } catch (err) {
-      console.error("Błąd tworzenia taga:", err);
-      alert("Nie udało się utworzyć taga.");
-    }
-  };
-
-  // 3. Usuwanie (archiwizacja) taga
-  const handleRemoveTag = async (tagId: number) => {
-    try {
-      await archiveTag(tagId);
-      // Usuwamy go lokalnie z listy
-      setTags((prev) => prev.filter((t) => t.id !== tagId));
-    } catch (err) {
-      console.error("Błąd usuwania taga:", err);
-      alert("Nie udało się usunąć taga.");
-    }
-  };
-
-  // 4. Edycja taga
-  const handleEditTag = async (
-    tagId: number,
-    data: { name: string; color: string },
-  ) => {
-    try {
-      const updatedTag = await updateTag(tagId, {
-        name: data.name,
-        color: data.color, // Przekazujemy wybrany kolor do API
-      });
-
-      setTags((prev) => prev.map((t) => (t.id === tagId ? updatedTag : t)));
-    } catch (err) {
-      console.error("Błąd edycji taga:", err);
-      alert("Nie udało się edytować taga.");
-    }
+    // Jeśli dane się jeszcze ładują, pokazujemy inicjał z maila (z AuthContext)
+    return user.initial?.toUpperCase() || "?";
   };
 
   return (
@@ -101,34 +53,37 @@ export function Header() {
           RealEstate<span style={{ fontWeight: "normal" }}>Tracker</span>
         </Link>
 
-        <button
-          className="add-project-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Dodaj Projekt <FaPlus />
-        </button>
+        {isAdmin && (
+          <button
+            className="add-project-btn"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Dodaj Projekt <FaPlus />
+          </button>
+        )}
       </div>
 
       <SearchBar />
 
       <div className="header-right">
-        <button
-          className="icon-btn"
-          onClick={() => setIsTagsModalOpen(true)}
-          title="Zarządzaj tagami"
-        >
-          <FaHashtag />
-        </button>
-
         <button className="icon-btn">
           <FaCalendarAlt />
         </button>
-
         <button className="icon-btn">
           <FaBell />
         </button>
 
-        <div className="user-avatar">{user.initial}</div>
+        {/* Wyświetlanie inicjałów z imienia i nazwiska */}
+        <div
+          className="user-avatar"
+          title={
+            currentUserData
+              ? `${currentUserData.firstName} ${currentUserData.lastName}`
+              : "Profil"
+          }
+        >
+          {getDisplayInitials()}
+        </div>
 
         <button onClick={logout} className="logout-btn">
           Wyloguj
@@ -147,17 +102,6 @@ export function Header() {
               setProjects([...projects, newProject]);
               setIsModalOpen(false);
             }}
-          />
-        )}
-
-        {isTagsModalOpen && (
-          <TagModal
-            isOpen={isTagsModalOpen}
-            onClose={() => setIsTagsModalOpen(false)}
-            tags={tags}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-            onEditTag={handleEditTag}
           />
         )}
       </div>

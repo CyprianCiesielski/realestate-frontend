@@ -15,6 +15,7 @@ import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
 import type { Project } from "../project/types.ts";
 import { ScopedSearchModal } from "../searching/SearchModal.tsx";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 export function PillarDetails() {
   const { projectId, pillarId } = useParams<{
@@ -34,6 +35,8 @@ export function PillarDetails() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  const { isAdmin } = useAuth();
 
   // 1. Pobieranie danych przy wejściu na stronę
   useEffect(() => {
@@ -114,13 +117,15 @@ export function PillarDetails() {
             <FaSearch />
           </button>
 
-          <button
-            className="settings-btn"
-            onClick={() => setIsEditModalOpen(true)}
-            title="Edytuj filar"
-          >
-            <FaCog />
-          </button>
+          {isAdmin && (
+            <button
+              className="settings-btn"
+              onClick={() => setIsEditModalOpen(true)}
+              title="Edytuj filar"
+            >
+              <FaCog />
+            </button>
+          )}
         </div>
       </header>
 

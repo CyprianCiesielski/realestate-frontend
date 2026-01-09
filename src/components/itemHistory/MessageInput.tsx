@@ -1,40 +1,53 @@
 import { useState, useEffect, useRef } from "react";
-import { FaPaperPlane, FaTimes, FaPen, FaPlus, FaImage } from "react-icons/fa";
+import {
+  FaPaperPlane,
+  FaTimes,
+  FaPen,
+  FaPlus,
+  FaImage,
+  FaReply,
+} from "react-icons/fa";
+import type { ItemHistory } from "./types.ts"; // Importuj typ, aby mieć dostęp do autora i treści
 import "./MessageInput.css";
 
 interface MessageInputProps {
   onSendMessage: (text: string) => void;
-  editingText?: string | null; // 👇 To przychodzi z ItemDetails
-  onCancelEdit?: () => void; // 👇 To też
+  editingText?: string | null;
+  onCancelEdit?: () => void;
+  // --- NOWE PROPSY ---
+  replyTo?: ItemHistory | null;
+  onCancelReply?: () => void;
 }
 
 export function MessageInput({
   onSendMessage,
   editingText,
   onCancelEdit,
+  replyTo,
+  onCancelReply,
 }: MessageInputProps) {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // 👇 TEGO BRAKOWAŁO: Synchronizacja propsa ze stanem inputa
+  // Synchronizacja dla Edycji i Odpowiedzi
   useEffect(() => {
-    // Jeśli editingText jest stringiem (nawet pustym) -> wchodzimy w tryb edycji
     if (typeof editingText === "string") {
       setText(editingText);
       textareaRef.current?.focus();
-    }
-    // Jeśli editingText jest explicite null -> wychodzimy z trybu edycji / anulujemy
-    // Ważne: sprawdzamy null, a nie "falsy", żeby nie czyściło przy undefined (start)
-    else if (editingText === null) {
+    } else if (editingText === null && !replyTo) {
       setText("");
     }
-  }, [editingText]);
+
+    // Jeśli pojawia się odpowiedź, fokusujemy input
+    if (replyTo) {
+      textareaRef.current?.focus();
+    }
+  }, [editingText, replyTo]);
 
   const handleSubmit = () => {
     if (!text.trim()) return;
     onSendMessage(text);
     setText("");
-    // Resetuj wysokość textarea po wysłaniu
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -45,14 +58,13 @@ export function MessageInput({
       e.preventDefault();
       handleSubmit();
     }
-    // Obsługa ESC do anulowania
-    if (e.key === "Escape" && editingText && onCancelEdit) {
-      onCancelEdit();
-      setText("");
+    // ESC anuluje edycję lub odpowiedź
+    if (e.key === "Escape") {
+      if (editingText && onCancelEdit) onCancelEdit();
+      if (replyTo && onCancelReply) onCancelReply();
     }
   };
 
-  // Automatyczne rozszerzanie inputa
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
     e.target.style.height = "auto";
@@ -61,27 +73,39 @@ export function MessageInput({
 
   return (
     <div
-      className={`input-container-wrapper ${editingText ? "editing-mode" : ""}`}
+      className={`input-container-wrapper ${editingText ? "editing-mode" : ""} ${replyTo ? "reply-mode" : ""}`}
     >
-      {/* 1. PASEK INFORMACYJNY O EDYCJI (Pojawia się tylko gdy edytujesz) */}
+      {/* 1. PASEK EDYCJI */}
       {editingText && (
         <div className="editing-info-bar">
           <div className="editing-label">
             <FaPen size={12} /> <span>Edytujesz wiadomość</span>
           </div>
-          <button
-            className="cancel-edit-btn"
-            onClick={() => {
-              setText("");
-              if (onCancelEdit) onCancelEdit();
-            }}
-          >
+          <button className="cancel-edit-btn" onClick={onCancelEdit}>
             <FaTimes />
           </button>
         </div>
       )}
 
-      {/* 2. GŁÓWNY PASEK INPUTA */}
+      {/* 2. PASEK ODPOWIEDZI (REPLY INFO BAR) */}
+      {replyTo && !editingText && (
+        <div className="reply-info-bar">
+          <div className="reply-label">
+            <FaReply size={12} style={{ transform: "scaleX(-1)" }} />
+            <div className="reply-details">
+              <span className="reply-to-user">
+                Odpowiadasz użytkownikowi <strong>{replyTo.author}</strong>
+              </span>
+              <span className="reply-to-text">{replyTo.description}</span>
+            </div>
+          </div>
+          <button className="cancel-reply-btn" onClick={onCancelReply}>
+            <FaTimes />
+          </button>
+        </div>
+      )}
+
+      {/* 3. GŁÓWNY PASEK INPUTA */}
       <div className="input-container">
         <div className="input-actions">
           <button className="icon-btn">
@@ -99,9 +123,7 @@ export function MessageInput({
             value={text}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder={
-              editingText ? "Zmień treść wiadomości..." : "Napisz wiadomość..."
-            }
+            placeholder={editingText ? "Zmień treść..." : "Napisz wiadomość..."}
             rows={1}
           />
         </div>
@@ -110,13 +132,10 @@ export function MessageInput({
           className="send-btn"
           onClick={handleSubmit}
           disabled={!text.trim()}
-          title={editingText ? "Zapisz zmiany" : "Wyślij"}
+          title={editingText ? "Zapisz" : "Wyślij"}
         >
-          {/* Zmieniamy ikonkę w zależności od trybu */}
           {editingText ? (
-            <span style={{ fontSize: "0.9rem", fontWeight: "bold" }}>
-              Zapisz
-            </span>
+            <span className="save-text">Zapisz</span>
           ) : (
             <FaPaperPlane />
           )}

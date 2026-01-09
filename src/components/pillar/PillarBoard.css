@@ -1,15 +1,9 @@
+/* --- KONTENER GŁÓWNY BOARDU --- */
 .board-container {
-    /* 1. Ustawiamy Siatkę (Grid) */
     display: grid;
-
-    /* 2. Magiczna linijka: Stwórz dokładnie 4 kolumny o równej szerokości */
     grid-template-columns: repeat(4, 1fr);
-
-    /* Odstępy między kafelkami (pionowe i poziome) */
-    gap: 1.25rem; /* 20px -> 1.25rem */
-
-    padding-bottom: 1.25rem; /* 20px -> 1.25rem */
-
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
     min-height: 0;
     min-width: 0;
 }
@@ -17,52 +11,108 @@
 .pillar-column {
     position: relative;
     background-color: #f4f5f7;
-    border-radius: 0.5rem; /* 8px -> 0.5rem */
-    padding: 0.625rem; /* 10px -> 0.625rem */
+    border-radius: 0.5rem;
+    padding: 0.625rem;
     display: flex;
     flex-direction: column;
     height: fit-content;
 }
 
-/* --- Reszta stylów (nagłówki, karty) bez zmian --- */
+/* --- LOGIKA PRZYCISKÓW (Zębatka i Plusik) --- */
+.pillar-actions {
+    position: absolute;
+    top: 0.3125rem; /* 5px */
+    right: 0.3125rem; /* 5px */
+    display: flex;
+    /* Dzięki row-reverse element zadeklarowany jako pierwszy w HTML (zębatka)
+       będzie najbardziej po prawej. Jeśli go nie będzie, plusik wskoczy na jego miejsce. */
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+}
 
+.settings-pillar-btn,
+.add-item-btn {
+    position: static !important; /* Resetujemy absolute, bo zarządza nimi flex */
+    margin: 0 !important;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.settings-pillar-btn {
+    padding: 0.3125rem;
+    color: #888;
+    font-size: 1.1rem;
+}
+
+.settings-pillar-btn:hover {
+    color: #172b4d;
+}
+
+.add-item-btn {
+    color: #5aac44;
+    font-size: 1.2rem;
+    padding: 0.1875rem;
+    border-radius: 50%;
+}
+
+.add-item-btn:hover {
+    background-color: #dfffe5;
+    color: #3f7b2e;
+    transform: scale(1.1);
+}
+
+.add-item-btn svg {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+/* --- NAGŁÓWEK FILARU --- */
 .pillar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.625rem; /* 10px -> 0.625rem */
-    padding-bottom: 0.625rem; /* 10px -> 0.625rem */
-    border-bottom: 0.125rem solid #e0e0e0; /* 2px -> 0.125rem */
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 0.125rem solid #e0e0e0;
 }
 
 .pillar-header h3 {
     margin: 0;
-    font-size: 1rem; /* 16px -> 1rem */
+    font-size: 1rem;
     color: #172b4d;
+    /* Margines, żeby tytuł nie wchodził pod przyciski */
+    padding-right: 45px;
 }
 
 .item-count {
     background: #dfe1e6;
-    padding: 0.125rem 0.5rem; /* 2px 8px -> rem */
-    border-radius: 0.75rem; /* 12px -> 0.75rem */
-    font-size: 0.75rem; /* 12px -> 0.75rem */
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
     font-weight: bold;
-    margin-right: 2.8125rem; /* 45px -> 2.8125rem */
 }
 
+/* --- LISTA ZADAŃ (Wewnątrz kolumny) --- */
 .pillar-items {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem; /* 10px -> 0.625rem */
-    min-height: 3.125rem; /* 50px -> 3.125rem */
+    gap: 0.625rem;
+    min-height: 3.125rem;
 }
 
 .item-card {
     background-color: white;
-    padding: 0.625rem; /* 10px -> 0.625rem */
-    border-radius: 0.25rem; /* 4px -> 0.25rem */
-    box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1); /* 1px 2px -> rem */
+    padding: 0.625rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -75,16 +125,16 @@
 
 .item-card:hover {
     background-color: #fafafa;
-    transform: translateY(-0.125rem); /* 2px -> 0.125rem */
+    transform: translateY(-0.125rem);
 }
 
 .item-title {
     font-weight: 500;
-    margin-bottom: 0.3125rem; /* 5px -> 0.3125rem */
+    margin-bottom: 0.3125rem;
 }
 
 .item-status {
-    font-size: 0.6875rem; /* 11px -> 0.6875rem */
+    font-size: 0.6875rem;
     color: #888;
     text-transform: uppercase;
 }
@@ -92,138 +142,60 @@
 .empty-state {
     color: #888;
     text-align: center;
-    padding: 1.25rem; /* 20px -> 1.25rem */
+    padding: 1.25rem;
     font-style: italic;
     font-size: 0.9em;
 }
 
-.settings-pillar-btn {
-    position: absolute;
-    top: 0.3125rem; /* 5px -> 0.3125rem */
-    right: 0.3125rem; /* 5px -> 0.3125rem */
-
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.3125rem; /* 5px -> 0.3125rem */
-    z-index: 10;
-    color: #888;
-    font-size: 1.1rem;
-    transition: color 0.2s;
-}
-
-.settings-pillar-btn:hover {
-    color: #172b4d;
-}
-
-.add-item-btn {
-    position: absolute;
-    top: 0.4375rem; /* 7px -> 0.4375rem */
-    right: 1.875rem; /* 30px -> 1.875rem */
-
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    color: #5aac44;
-    font-size: 1.2rem;
-
-    padding: 0.1875rem; /* 3px -> 0.1875rem */
-    margin-left: 0.3125rem; /* 5px -> 0.3125rem */
-    border-radius: 50%;
-    transition: all 0.2s ease-in-out;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Styl dla samego elementu SVG (ikonki) */
-.add-item-btn svg {
-    width: 1.125rem; /* 18px -> 1.125rem */
-    height: 1.125rem; /* 18px -> 1.125rem */
-}
-
-/* EFEKT PO NAJECHANIU (Hover) */
-.add-item-btn:hover {
-    background-color: #dfffe5;
-    color: #3f7b2e;
-    transform: scale(1.1);
-}
-
-/* --- Wrapper Linku (układ i reset stylów) --- */
+/* --- STYLE DLA KAZELEKÓW W WIDOKU SZCZEGÓŁÓW (PillarDetails) --- */
 .items-list ul {
     display: grid;
-    /* To jest kluczowe:
-       minmax(250px, 1fr) oznacza: "Kafelek ma mieć minimum 250px szerokości.
-       Jeśli jest więcej miejsca, rozciągnij go (1fr)".
-       auto-fill upycha tyle kolumn, ile się zmieści w rzędzie.
-    */
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 50px; /* Odstęp między kafelkami (pionowo i poziomo) */
-
-    /* Reset stylu listy (usuwamy kropki i marginesy) */
+    gap: 50px;
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-/* --- 2. LINK (Wrapper) --- */
 .task-tile-link {
     text-decoration: none;
     color: inherit;
     display: block;
-    /* Usuwamy margin-bottom, bo grid-gap załatwia sprawę odstępów */
-    height: 100%; /* Ważne, żeby link wypełniał całą komórkę siatki */
+    height: 100%;
 }
 
-/* --- 3. KAFELEK (Wygląd wizualny) --- */
 .task-tile {
     background-color: #fff;
     border: 1px solid #dfe1e6;
     border-radius: 8px;
     padding: 16px;
-
-    /* To sprawia, że wszystkie kafelki w rzędzie mają tę samą wysokość,
-       nawet jak w jednym jest mało tekstu, a w drugim dużo */
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Rozsuwa treść (np. tytuł na górze, status na dole) */
-
+    justify-content: space-between;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-
-    /* Ozdobny pasek po lewej */
     border-left: 4px solid #0079bf;
 }
 
-/* --- 4. TEXT WEWNĄTRZ --- */
 .task-tile-title {
     font-weight: 600;
     color: #172b4d;
     font-size: 15px;
     line-height: 1.5;
-    margin-bottom: 8px; /* Odstęp od dołu, jeśli dodasz tam np. datę */
 }
 
-/* --- 5. EFEKT NAJECHANIA --- */
 .task-tile-link:hover .task-tile {
-    transform: translateY(-4px); /* Wyraźniejsze uniesienie */
+    transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    border-color: #0079bf; /* Ramka zmienia kolor na niebieski */
+    border-color: #0079bf;
 }
 
-/* --- RESPONSYWNOŚĆ (Bonus) --- */
-/* Media query też przeliczamy na rem: 1400px -> 87.5rem, 1000px -> 62.5rem */
+/* --- RESPONSYWNOŚĆ --- */
 @media (max-width: 87.5rem) {
-    .board-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
+    .board-container { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 62.5rem) {
-    .board-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .board-container { grid-template-columns: repeat(2, 1fr); }
 }
