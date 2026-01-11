@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
@@ -67,6 +67,12 @@ export const Login = () => {
           <button type="submit" className="login-btn" disabled={isSubmitting}>
             {isSubmitting ? "Logowanie..." : "Zaloguj się"}
           </button>
+          <div className="auth-switch-container">
+            Nie masz konta?{" "}
+            <Link to="/register" className="auth-link">
+              Zarejestruj się
+            </Link>
+          </div>
         </form>
       </div>
     </div>

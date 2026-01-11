@@ -20,6 +20,7 @@ import { ProtectedRoute } from "./header/ProtectedRoute.tsx";
 import { AdminDashboardLayout } from "./features/admin/AdminDashboardLayout.tsx";
 import { AdminDashboardDetails } from "./features/admin/AdminDashboardDetails.tsx";
 import { UserDetails } from "./features/user/UserDetails.tsx";
+import { RegisterPage } from "./pages/RegisterPage.tsx";
 
 const router = createBrowserRouter([
   // 1. TRASA PUBLICZNA (Dostępna bez logowania)
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/register", // To jest URL w przeglądarce
+    element: <RegisterPage />,
   },
 
   // 2. TRASY CHRONIONE (Wymagają zalogowania)
