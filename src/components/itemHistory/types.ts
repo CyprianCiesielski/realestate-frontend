@@ -12,6 +12,7 @@ export interface ItemHistory {
   googleFileId?: string;
   description: string;
   isPinned: boolean;
+  edited: boolean;
 
   reactions: MessageReaction[];
   replyTo?: ItemHistory;

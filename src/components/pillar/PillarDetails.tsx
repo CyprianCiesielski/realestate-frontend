@@ -57,7 +57,7 @@ export function PillarDetails() {
     }
   }, [projectId, pillarId]);
 
-  // 2. Obsługa Archiwizacji (usuwa filar i wraca do projektu)
+  // 2. Obsługa Archiwizacji
   const handleArchive = async () => {
     if (!pillar || !projectId) return;
 
@@ -71,7 +71,6 @@ export function PillarDetails() {
 
     try {
       await archivePillar(projectId, pillar.id);
-      // Po archiwizacji ten widok nie ma już sensu, wracamy do projektu
       navigate(`/projects/${projectId}`);
     } catch (err) {
       console.error(err);
@@ -79,17 +78,16 @@ export function PillarDetails() {
     }
   };
 
-  // 3. Obsługa sukcesu edycji filaru (z modala EditPillarModal)
+  // 3. Obsługa sukcesu edycji filaru
   const handlePillarUpdateSuccess = (updatedPillar: Pillar) => {
-    setPillar(updatedPillar); // Aktualizujemy lokalny stan
-    setIsEditModalOpen(false); // Zamykamy modal
+    setPillar(updatedPillar);
+    setIsEditModalOpen(false);
   };
 
-  // 4. Obsługa dodania nowego zadania (Item)
+  // 4. Obsługa dodania nowego zadania
   const handleItemCreationSuccess = (newItem: Item) => {
     setPillar((prev) => {
       if (!prev) return null;
-      // Zakładamy, że Pillar ma tablicę 'items'
       const updatedItems = [...(prev.items || []), newItem];
       return { ...prev, items: updatedItems };
     });
@@ -131,43 +129,36 @@ export function PillarDetails() {
 
       {/* INFO GRID */}
       <div className="project-info-grid">
-        <InfoItem
-          label="Firma odpowiedzialna"
-          value={pillar.companyResposible}
-        />
-        <InfoItem label="Deadline" value={pillar.deadline} />
+        {/* 👇 ZMIANA TUTAJ: pillar.company?.name zamiast pillar.companyResposible */}
+        <InfoItem label="Firma odpowiedzialna" value={pillar.company?.name} />
         <InfoItem label="Data startu" value={pillar.startDate} />
-        <InfoItem
-          label="Priorytet"
-          value={`${pillar.priority > 0 ? pillar.priority : "—"}`}
-        />
+        <InfoItem label="Deadline" value={pillar.deadline} />
       </div>
 
       {/* SEKCJA ZADAŃ (ITEMS) */}
       <div className="items-section-header">
         <button
-          className="add-pillar-btn" // Klasa CSS może zostać ta sama, jeśli styl pasuje
+          className="add-pillar-btn"
           onClick={() => setIsCreateItemModalOpen(true)}
         >
-          Dodaj Item <FaPlus />
+          Dodaj Wątek <FaPlus />
         </button>
       </div>
 
-      {/* Tutaj możesz wyrenderować listę zadań, jeśli chcesz je widzieć w szczegółach */}
       <div className="items-list">
         {pillar.items && pillar.items.length > 0 ? (
           <ul>
             {pillar.items.map((item) => (
               <Link
                 key={item.id}
-                to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`} // Budujemy URL
-                className="task-tile-link" // Klasa do usunięcia podkreślenia (CSS niżej)
+                to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`}
+                className="task-tile-link"
                 state={{
-                  projectName: project.name, // Przekazujemy dalej nazwę projektu
-                  pillarName: pillar.name, // I dodajemy nazwę filaru
+                  projectName: project.name,
+                  pillarName: pillar.name,
                 }}
                 onClick={(e) => {
-                  e.stopPropagation(); // To sprawia, że kliknięcie nie leci do rodzica (Filaru)
+                  e.stopPropagation();
                 }}
               >
                 <div className="task-tile">

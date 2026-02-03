@@ -1,0 +1,142 @@
+/* Tło (przyciemnienie reszty strony) */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Właściwy panel boczny */
+.sidebar-panel {
+    position: fixed;
+    top: 0;
+    right: -450px; /* Startowo schowany poza ekranem */
+    width: 400px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-panel.open {
+    right: 0; /* Wjazd na ekran */
+}
+
+/* Header panelu */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #dfe1e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f4f5f7;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #172b4d;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #6b778c;
+}
+
+/* Formularz dodawania */
+.add-company-form {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid #dfe1e6;
+}
+
+.add-company-form input {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+}
+
+.add-btn {
+    padding: 8px 16px;
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-btn:hover {
+    background-color: #0747a6;
+}
+
+/* Lista firm */
+.company-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    list-style: none;
+    margin: 0;
+}
+
+.company-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    transition: box-shadow 0.2s;
+}
+
+.company-item:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.company-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b778c;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.action-btn.edit:hover { color: #0052cc; }
+.action-btn.delete:hover { color: #de350b; }
+.action-btn.save:hover { color: #00875a; }
+
+/* Tryb edycji w liście */
+.edit-input {
+    flex: 1;
+    padding: 4px;
+    margin-right: 10px;
+    border: 1px solid #0052cc;
+    border-radius: 3px;
+}

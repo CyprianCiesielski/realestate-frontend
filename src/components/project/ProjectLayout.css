@@ -96,8 +96,8 @@
 /* --- STYLIZACJA TREŚCI WEWNĄTRZ SIDEBARA (Twoje oryginalne style) --- */
 
 .projects-sidebar h3 {
-    margin: 0 0 0.75rem 1rem; /* 12px -> 0.75rem, 16px -> 1rem */
-    font-size: 0.85rem;
+    margin: 0.2rem 0 0.75rem 1rem; /* 12px -> 0.75rem, 16px -> 1rem */
+    font-size: 1rem;
     text-transform: uppercase;
     color: #6b778c;
     letter-spacing: 0.03rem; /* 0.5px -> ~0.03rem */
@@ -271,4 +271,118 @@
 
 .add-project-btn:hover {
     background-color: #2c974b;
+}
+
+/* Układ nagłówka w sidebarze */
+.sidebar-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    margin-bottom: 10px;
+    position: relative; /* Ważne dla dropdownu */
+}
+
+/* Przycisk Filtra */
+.filter-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    padding: 5px;
+    border-radius: 4px;
+    margin-top: -0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.filter-icon-btn:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.filter-icon-btn.active {
+    color: #007bff; /* Niebieski gdy aktywny */
+}
+
+/* Kropka sygnalizująca aktywne filtry */
+.filter-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    background-color: #ff4d4f;
+    border-radius: 50%;
+    border: 1px solid white;
+}
+
+/* Dropdown Menu */
+.filter-dropdown-menu {
+    position: absolute;
+    top: 100%; /* Zaraz pod nagłówkiem */
+    right: 10px;
+    width: 200px;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    padding: 8px 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-title {
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 5px;
+}
+
+.filter-checkbox-label {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.filter-checkbox-label:hover {
+    background-color: #f5f5f5;
+}
+
+.filter-checkbox-label input {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.filter-clear-btn {
+    margin-top: 5px;
+    border: none;
+    background: none;
+    color: #007bff;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 8px;
+    border-top: 1px solid #eee;
+}
+
+.filter-clear-btn:hover {
+    text-decoration: underline;
+}
+
+.empty-sidebar-msg {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9rem;
 }

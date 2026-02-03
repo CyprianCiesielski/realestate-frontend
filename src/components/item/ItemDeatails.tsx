@@ -38,7 +38,6 @@ export function ItemDetails() {
   const [currentUser, setCurrentUser] = useState<UserDetailData | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
 
-  // --- NOWY STAN: Odpowiedź ---
   const [replyTo, setReplyTo] = useState<ItemHistory | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,15 +97,10 @@ export function ItemDetails() {
           behavior: "smooth",
         });
 
-        // Czyścimy poprzednie podświetlenia, jeśli użytkownik klika szybko raz za razem
         element.classList.remove("flash-highlight");
-
-        // Force reflow - trik, żeby animacja odpaliła się od nowa za każdym razem
         void element.offsetWidth;
-
         element.classList.add("flash-highlight");
 
-        // Usuwamy klasę po 2.1s (ciut po zakończeniu animacji CSS)
         setTimeout(() => {
           element.classList.remove("flash-highlight");
         }, 2100);
@@ -199,7 +193,6 @@ export function ItemDetails() {
     }
   }, [itemId, projectId, pillarId]);
 
-  // --- ZAKTUALIZOWANA LOGIKA WYSYŁANIA ---
   const handleSendMessage = async (text: string) => {
     if (!item || !projectId || !pillarId || !itemId) return;
 
@@ -231,7 +224,6 @@ export function ItemDetails() {
       }
     } else {
       try {
-        // Dodajemy parametr replyToId do DTO
         const historyDto = {
           description: text,
           author: authorName,
@@ -245,7 +237,7 @@ export function ItemDetails() {
           historyDto,
         );
 
-        setReplyTo(null); // Czyścimy odpowiedź po wysłaniu
+        setReplyTo(null);
 
         setItem((prevItem) => ({
           ...prevItem!,
@@ -318,20 +310,14 @@ export function ItemDetails() {
         </header>
 
         <div className="project-info-grid">
+          <InfoItem label="Firma odpowiedzialna" value={item.company?.name} />
           <InfoItem
             label="Osoba odpowiedzialna"
             value={item.personResponsible}
           />
-          <InfoItem
-            label="Firma odpowiedzialna"
-            value={item.companyResposible}
-          />
-          <InfoItem label="Deadline" value={item.deadline} />
+          {/* Zmiana tutaj: item.company?.name zamiast item.companyResposible */}
           <InfoItem label="Data startu" value={item.startDate} />
-          <InfoItem
-            label="Priorytet"
-            value={`${item.priority > 0 ? item.priority : "—"}`}
-          />
+          <InfoItem label="Deadline" value={item.deadline} />
         </div>
       </div>
 
@@ -342,15 +328,14 @@ export function ItemDetails() {
             searchQuery={searchQuery}
             onAction={{
               addReaction: handleAddReaction,
-              // --- PODPIĘCIE AKCJI REPLY ---
               setReplyTo: (entry: ItemHistory) => {
-                setEditingMessageId(null); // Odpowiedź wyklucza edycję
+                setEditingMessageId(null);
                 setReplyTo(entry);
               },
               togglePin: handleTogglePin,
               deleteMessage: handleDelete,
               editMessage: (entry) => {
-                setReplyTo(null); // Edycja wyklucza odpowiedź
+                setReplyTo(null);
                 setEditingMessageId(entry.id);
               },
               goToMessage: scrollToMessage,
@@ -363,7 +348,6 @@ export function ItemDetails() {
             onSendMessage={handleSendMessage}
             editingText={editingMessageText}
             onCancelEdit={() => setEditingMessageId(null)}
-            // --- NOWE PROPSY DO INPUTA ---
             replyTo={replyTo}
             onCancelReply={() => setReplyTo(null)}
           />

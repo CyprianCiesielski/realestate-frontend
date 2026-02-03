@@ -7,14 +7,13 @@ import {
   FaImage,
   FaReply,
 } from "react-icons/fa";
-import type { ItemHistory } from "./types.ts"; // Importuj typ, aby mieć dostęp do autora i treści
+import type { ItemHistory } from "./types.ts";
 import "./MessageInput.css";
 
 interface MessageInputProps {
   onSendMessage: (text: string) => void;
   editingText?: string | null;
   onCancelEdit?: () => void;
-  // --- NOWE PROPSY ---
   replyTo?: ItemHistory | null;
   onCancelReply?: () => void;
 }
@@ -33,12 +32,20 @@ export function MessageInput({
   useEffect(() => {
     if (typeof editingText === "string") {
       setText(editingText);
-      textareaRef.current?.focus();
+      // Przy wejściu w tryb edycji warto przeliczyć wysokość, aby tekst się zmieścił
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        textareaRef.current.focus();
+      }
     } else if (editingText === null && !replyTo) {
       setText("");
+      // Reset wysokości przy wyjściu z trybu edycji
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "";
+      }
     }
 
-    // Jeśli pojawia się odpowiedź, fokusujemy input
     if (replyTo) {
       textareaRef.current?.focus();
     }
@@ -48,8 +55,11 @@ export function MessageInput({
     if (!text.trim()) return;
     onSendMessage(text);
     setText("");
+
+    // ZMIANA: Resetujemy wysokość do pustego stringa (""),
+    // co sprawia, że textarea wraca do domyślnej wysokości z atrybutu rows={3}
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = "";
     }
   };
 
@@ -58,7 +68,6 @@ export function MessageInput({
       e.preventDefault();
       handleSubmit();
     }
-    // ESC anuluje edycję lub odpowiedź
     if (e.key === "Escape") {
       if (editingText && onCancelEdit) onCancelEdit();
       if (replyTo && onCancelReply) onCancelReply();
@@ -67,7 +76,9 @@ export function MessageInput({
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
+    // Reset do auto, aby poprawnie obliczyć scrollHeight (zmniejszanie)
     e.target.style.height = "auto";
+    // Ustawienie nowej wysokości na podstawie zawartości
     e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
@@ -87,7 +98,7 @@ export function MessageInput({
         </div>
       )}
 
-      {/* 2. PASEK ODPOWIEDZI (REPLY INFO BAR) */}
+      {/* 2. PASEK ODPOWIEDZI */}
       {replyTo && !editingText && (
         <div className="reply-info-bar">
           <div className="reply-label">
@@ -124,7 +135,7 @@ export function MessageInput({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder={editingText ? "Zmień treść..." : "Napisz wiadomość..."}
-            rows={1}
+            rows={3} // ZMIANA: Domyślnie 3 linijki
           />
         </div>
 

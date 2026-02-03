@@ -184,6 +184,15 @@ export function MessageList({
                 />
               </p>
 
+              {entry.edited && (
+                <span
+                  className="edited-info"
+                  title="Ta wiadomość była edytowana"
+                >
+                  Edytowano
+                </span>
+              )}
+
               {entry.googleFileId && (
                 <a
                   href={entry.webViewLink}

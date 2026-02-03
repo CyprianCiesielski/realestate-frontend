@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Project } from "./types";
-import { getProjectById, archiveProject } from "./api"; // 👈 ZMIANA IMPORTU
+import { getProjectById, archiveProject } from "./api";
 import { EditProjectModal } from "./EditProjectModal";
 import { PillarBoard } from "../pillar/PillarBoard";
 import "./ProjectDetails.css";
@@ -19,11 +19,9 @@ export function ProjectDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Stany dla modali i menu
+  // Stany dla modali
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   const { isAdmin } = useAuth();
@@ -46,7 +44,6 @@ export function ProjectDetails() {
     }
   }, [projectId]);
 
-  // 👇 ZMIANA: Obsługa archiwizacji
   const handleArchive = async () => {
     if (!project || !project.id) return;
     try {
@@ -63,16 +60,12 @@ export function ProjectDetails() {
     setProject((prevProject) => {
       if (!prevProject) return null;
 
-      // 👇 ZMIANA LOGIKI: FILTRUJEMY, a nie tylko mapujemy/podmieniamy
-
-      // Jeśli status to 'archived', filtrujemy go z listy (usuwamy).
-      // Jeśli status jest inny (np. 'active'), podmieniamy go.
       const newPillars =
         updatedPillar.state === "archived"
-          ? prevProject.pillars.filter((p) => p.id !== updatedPillar.id) // USUNIĘCIE
+          ? prevProject.pillars.filter((p) => p.id !== updatedPillar.id)
           : prevProject.pillars.map((p) =>
               p.id === updatedPillar.id ? updatedPillar : p,
-            ); // AKTUALIZACJA
+            );
 
       return { ...prevProject, pillars: newPillars };
     });
@@ -113,36 +106,29 @@ export function ProjectDetails() {
 
       {/* INFO */}
       <div className="project-info-grid">
+        <InfoItem label="Firma odpowiedzialna" value={project.company?.name} />
         <InfoItem
           label="Osoba odpowiedzialna"
           value={project.personResponsible}
         />
-        <InfoItem
-          label="Firma odpowiedzialna"
-          value={project.companyResposible}
-        />
-        <InfoItem label="Deadline" value={project.deadline} />
+
         <InfoItem label="Data startu" value={project.startDate} />
-        <InfoItem
-          label="Priorytet"
-          value={`${project.priority > 0 ? project.priority : "—"}`}
-        />
+        <InfoItem label="Deadline" value={project.deadline} />
       </div>
 
       {/* BOARD */}
       <section className="board-section">
         <PillarBoard
           pillars={project.pillars || []}
-          projectId={projectId!} // 👈 Przekazujemy ID projektu
+          projectId={projectId!}
           projectName={project.name}
-          onPillarUpdated={handlePillarUpdate} // 👈 Przekazujemy funkcję do aktualizacji
+          onPillarUpdated={handlePillarUpdate}
         />
       </section>
 
-      {/* GUZIK DODAWANIA FILARU */}
       {isAdmin && (
         <button className="add-pillar-btn" onClick={() => setIsModalOpen(true)}>
-          Add Pillar <FaPlus />
+          Dodaj moduł <FaPlus />
         </button>
       )}
 
@@ -170,7 +156,6 @@ export function ProjectDetails() {
           onClose={() => setIsEditModalOpen(false)}
           onArchive={handleArchive}
           onSuccess={(updatedProject) => {
-            // Aktualizujemy dane na ekranie
             setProject((prev) =>
               prev ? { ...prev, ...updatedProject } : null,
             );

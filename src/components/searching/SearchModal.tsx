@@ -15,9 +15,7 @@ import "./SearchModal.css";
 interface ScopedSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // Typ kontekstu: gdzie aktualnie jesteśmy?
   contextType: "global" | "project" | "pillar" | "item";
-  // ID kontekstu (np. projectId). Może być nullem dla globalnego wyszukiwania.
   contextId?: string;
 }
 
@@ -33,19 +31,33 @@ export function ScopedSearchModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Reset stanu po otwarciu/zamknięciu
+  // 1. POPRAWKA: Obliczamy nazwę kontekstu tutaj, żeby była dostępna w JSX
+  const getContextLabel = () => {
+    switch (contextType) {
+      case "project":
+        return "projekcie";
+      case "pillar":
+        return "module"; // lub "filarze"
+      case "item":
+        return "wątku"; // lub "zadaniu"
+      default:
+        return "systemie";
+    }
+  };
+  const contextLabel = getContextLabel();
+
+  // Reset stanu po otwarciu
   useEffect(() => {
     if (isOpen) {
       setQuery("");
       setResults([]);
-      // Focus na input po otwarciu
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
   }, [isOpen]);
 
-  // Obsługa wyszukiwania z opóźnieniem (debounce)
+  // Obsługa wyszukiwania
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (!query || query.trim().length < 2) {
@@ -57,7 +69,7 @@ export function ScopedSearchModal({
       try {
         let data: SearchResult[] = [];
 
-        // Wybór odpowiedniej metody API w zależności od kontekstu
+        // 2. POPRAWKA: Usunąłem stąd logikę 'nazwa', została tylko logika API
         if (contextType === "project" && contextId) {
           data = await searchInProject(contextId, query);
         } else if (contextType === "pillar" && contextId) {
@@ -65,9 +77,7 @@ export function ScopedSearchModal({
         } else if (contextType === "item" && contextId) {
           data = await searchInItem(contextId, query);
         } else {
-          // Tutaj możesz dodać obsługę globalnego wyszukiwania, jeśli backend to wspiera
-          // np. data = await searchGlobal(query);
-          console.warn("Global search not implemented yet in this modal");
+          console.warn("Global search not implemented yet");
         }
 
         setResults(data);
@@ -76,18 +86,16 @@ export function ScopedSearchModal({
       } finally {
         setIsLoading(false);
       }
-    }, 300); // 300ms czekania po ostatnim znaku
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
   }, [query, contextType, contextId]);
 
   if (!isOpen) return null;
 
-  // Obsługa kliknięcia w wynik
   const handleNavigate = (result: SearchResult) => {
     onClose();
 
-    // Logika przekierowania w zależności od typu znalezionego obiektu
     if (result.type === "project") {
       navigate(`/projects/${result.id}`);
     } else if (result.type === "pillar") {
@@ -97,12 +105,13 @@ export function ScopedSearchModal({
         `/projects/${result.projectId}/pillars/${result.pillarId}/items/${result.id}`,
       );
     } else if (result.type === "message") {
-      console.log("Navigate to message in item", result.id);
-      // Możesz przekierować do itemu i dodać parametr ?msg=ID żeby przewinąć
+      // Przykład przekierowania do wiadomości (zakłada strukturę URL)
+      navigate(
+        `/projects/${result.projectId}/pillars/${result.pillarId}/items/${result.itemId}?msg=${result.id}`,
+      );
     }
   };
 
-  // Zamykanie na ESC
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") onClose();
   };
@@ -114,13 +123,13 @@ export function ScopedSearchModal({
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        {/* Nagłówek z Inputem */}
         <div className="search-header">
           <FaSearch className="search-icon-input" />
           <input
             ref={inputRef}
             type="text"
-            placeholder={`Szukaj w ${contextType}...`}
+            // 3. POPRAWKA: Używamy zmiennej obliczonej na górze komponentu
+            placeholder={`Szukaj w ${contextLabel}...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="search-input-field"
@@ -130,7 +139,6 @@ export function ScopedSearchModal({
           </button>
         </div>
 
-        {/* Lista Wyników */}
         <div className="search-results-list">
           {isLoading && <div className="loading-row">Szukanie...</div>}
 
@@ -157,13 +165,11 @@ export function ScopedSearchModal({
 
               <div className="result-info">
                 <span className="result-name">
-                  {/* Jeśli to długa wiadomość, przytnij tekst */}
                   {res.type === "message" && res.name.length > 60
                     ? res.name.substring(0, 60) + "..."
                     : res.name}
                 </span>
 
-                {/* Wyświetlanie kontekstu (np. "w: Nazwa Projektu") */}
                 {res.parentName && (
                   <span className="result-parent">w: {res.parentName}</span>
                 )}

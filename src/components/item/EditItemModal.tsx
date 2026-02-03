@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { updateItem, type CreateItemDto } from "./api";
 import type { Item } from "./types";
 import "../project/CreateProjectModal.css";
-import { getAllTags } from "../tag/api"; // 👈 1. Import API
+import { getAllTags } from "../tag/api";
 import { TagSelector } from "../tag/TagSelector.tsx";
 import type { Tag } from "../tag/types.ts";
+import type { Company } from "../company/types.ts";
 
 interface EditItemModalProps {
   project_id: string;
@@ -15,6 +16,11 @@ interface EditItemModalProps {
   onArchive: () => void;
 }
 
+// Typ pomocniczy
+interface ItemFormData extends Omit<CreateItemDto, "company"> {
+  company: Company | null;
+}
+
 export function EditItemModal({
   project_id,
   pillar_id,
@@ -23,20 +29,20 @@ export function EditItemModal({
   onSuccess,
   onArchive,
 }: EditItemModalProps) {
-  // 2. Stan na tagi z bazy
+  // 1. TAGI
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
-
-  // 3. Pobieranie tagów
   useEffect(() => {
     getAllTags()
       .then((data) => setAllAvailableTags(data))
       .catch((err) => console.error(err));
   }, []);
 
-  const [formData, setFormData] = useState<CreateItemDto>({
+  // 3. STAN FORMULARZA
+  const [formData, setFormData] = useState<ItemFormData>({
     name: item.name || "",
     state: item.state || "active",
-    companyResposible: item.companyResposible || "",
+    // ZMIANA: Inicjalizacja obiektem
+    company: item.company || null,
     personResponsible: item.personResponsible || "",
     deadline: item.deadline || "",
     startDate: item.startDate || new Date().toISOString().split("T")[0],
@@ -50,7 +56,10 @@ export function EditItemModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "priority" ? Number(value) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,14 +68,16 @@ export function EditItemModal({
     try {
       const payload = {
         ...formData,
+        company: formData.company, // Obiekt
         tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
+      // @ts-ignore
       const updated = await updateItem(project_id, pillar_id, item.id, payload);
       onSuccess(updated);
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Failed to edit item.");
+      alert("Nie udało się edytować wątku.");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,21 +86,20 @@ export function EditItemModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Edytuj Item: {item.name}</h2>
+        <h2>Edytuj Wątek: {item.name}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nazwa itemu *</label>
+            <label>Nazwa wątku *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="np. Osiedle Dębowe"
+              placeholder="np. Prace ziemne"
             />
           </div>
 
-          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
@@ -98,26 +108,15 @@ export function EditItemModal({
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
+              allTags={allAvailableTags}
             />
           </div>
 
-          {/* Reszta pól... */}
           <div className="form-group">
             <label>Osoba odpowiedzialna</label>
             <input
               name="personResponsible"
               value={formData.personResponsible}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Deadline</label>
-            <input
-              type="date"
-              name="deadline"
-              value={formData.deadline}
               onChange={handleChange}
             />
           </div>
@@ -133,14 +132,21 @@ export function EditItemModal({
           </div>
 
           <div className="form-group">
-            <label>Priority</label>
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Priorytet</label>
             <select
               name="priority"
               value={formData.priority}
-              onChange={(e) => {
-                const { name, value } = e.target;
-                setFormData((prev) => ({ ...prev, [name]: Number(value) }));
-              }}
+              onChange={handleChange}
             >
               <option value={0}></option>
               <option value={1}>1</option>
@@ -160,15 +166,13 @@ export function EditItemModal({
               className="btn-delete"
               onClick={() => {
                 if (
-                  window.confirm(
-                    "Czy na pewno chcesz zarchiwizować ten projekt?",
-                  )
+                  window.confirm("Czy na pewno chcesz zarchiwizować ten wątek?")
                 ) {
                   onArchive();
                 }
               }}
             >
-              Archive Item
+              Archiwizuj Wątek
             </button>
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">

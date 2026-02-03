@@ -1,14 +1,16 @@
 import type { Pillar } from "../pillar/types";
 import type { Tag } from "../tag/types.ts";
+import type { Company } from "../company/types.ts"; // Upewnij się, że importujesz Company
 
 export interface Project {
   id: number;
   name: string;
-  deadline?: string; // '?' oznacza, że pole może być nullem (opcjonalne)
+  deadline?: string;
   personResponsible?: string;
-  companyResposible?: string;
+  // ZMIANA: Backend zwraca teraz obiekt, a nazwa pola w Javie to "company"
+  company?: Company;
   state: string;
-  startDate: string; // Daty z JSON przychodzą jako stringi
+  startDate: string;
   priority: number;
 
   pillars: Pillar[];

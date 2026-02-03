@@ -1,18 +1,26 @@
 import { useState, useEffect, useRef } from "react";
-import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaSearch, FaCube, FaTasks, FaProjectDiagram } from "react-icons/fa";
 import { searchGlobal } from "./api";
-import type { GlobalSearchResultDto } from "./types";
 import "./SearchBar.css";
+
+// Pomocniczy typ do płaskiej listy wyników
+interface FlatSearchResult {
+  id: number;
+  name: string;
+  type: "project" | "pillar" | "item";
+  parentName?: string;
+  url: string;
+}
 
 export function SearchBar() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<GlobalSearchResultDto | null>(null);
+  const [flatResults, setFlatResults] = useState<FlatSearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // 1. Zamykanie dropdownu po kliknięciu poza komponent
+  // 1. Zamykanie po kliknięciu poza
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -26,19 +34,63 @@ export function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 2. Pobieranie podpowiedzi (Debounce 300ms)
+  // 2. Pobieranie i "SPŁASZCZANIE" wyników (Debounce)
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (query.trim().length > 1) {
         try {
           const data = await searchGlobal({ name: query });
-          setResults(data);
+
+          // --- TU JEST KLUCZOWA ZMIANA ---
+          // Zamieniamy obiekt { projects:[], pillars:[], items:[] } na jedną listę []
+          // żeby wyglądało to jak w SearchModal
+
+          const projects: FlatSearchResult[] = data.projects.map((p) => ({
+            id: p.id,
+            name: p.name,
+            type: "project",
+            url: `/projects/${p.id}`,
+            // W globalnym searchu projekt nie ma rodzica
+          }));
+
+          const pillars: FlatSearchResult[] = data.pillars.map((p) => ({
+            id: p.id,
+            name: p.name,
+            type: "pillar",
+            parentName: p.project ? `Projekt: ${p.project.name}` : undefined,
+            url: p.project ? `/projects/${p.project.id}/pillars/${p.id}` : "#",
+          }));
+
+          const items: FlatSearchResult[] = data.items.map((i) => {
+            // Bezpieczne pobieranie ID
+            // @ts-ignore
+            const pid = i.pillar?.project?.id;
+            // @ts-ignore
+            const pilId = i.pillar?.id;
+
+            return {
+              id: i.id,
+              name: i.name,
+              type: "item",
+              // @ts-ignore
+              parentName: i.pillar
+                ? `Projekt: ${i.pillar.project?.name} Moduł: ${i.pillar.name}`
+                : undefined,
+              url:
+                pid && pilId
+                  ? `/projects/${pid}/pillars/${pilId}/items/${i.id}`
+                  : "#",
+            };
+          });
+
+          // Łączymy i bierzemy np. max 10 wyników łącznie, żeby dropdown nie był za długi
+          setFlatResults([...projects, ...pillars, ...items].slice(0, 10));
           setIsOpen(true);
         } catch (error) {
           console.error(error);
         }
       } else {
-        setResults(null);
+        setFlatResults([]);
         setIsOpen(false);
       }
     }, 300);
@@ -46,7 +98,7 @@ export function SearchBar() {
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
 
-  // 3. Obsługa klawisza ENTER
+  // 3. Obsługa klawisza ENTER -> Pełna strona SearchPage
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && query.trim().length > 0) {
       setIsOpen(false);
@@ -54,18 +106,12 @@ export function SearchBar() {
     }
   };
 
-  // 4. Obsługa nawigacji
-  const handleNavigateToItem = (path: string) => {
-    navigate(path);
+  // 4. Kliknięcie w konkretny wynik -> Przejście do obiektu
+  const handleResultClick = (url: string) => {
+    navigate(url);
     setIsOpen(false);
     setQuery("");
   };
-
-  const hasResults =
-    results &&
-    (results.projects.length > 0 ||
-      results.pillars.length > 0 ||
-      results.items.length > 0);
 
   return (
     <div className="header-center" ref={searchRef}>
@@ -73,116 +119,42 @@ export function SearchBar() {
         <FaSearch className="search-icon" />
         <input
           type="text"
-          placeholder="Search for projects, pillars and items..."
+          placeholder="Szukaj... (min. 2 znaki)"
           className="search-input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            if (hasResults) setIsOpen(true);
+            if (flatResults.length > 0) setIsOpen(true);
           }}
         />
       </div>
 
-      {isOpen && hasResults && (
+      {isOpen && flatResults.length > 0 && (
         <div className="search-results-dropdown">
-          {/* --- PROJEKTY --- */}
-          {results.projects.length > 0 && (
-            <div className="search-section">
-              <h4>Projects</h4>
-              <ul>
-                {results.projects.slice(0, 3).map((p) => (
-                  <li
-                    key={`p-${p.id}`}
-                    onClick={() => handleNavigateToItem(`/projects/${p.id}`)}
-                  >
-                    {p.name}
-                  </li>
-                ))}
-              </ul>
+          {/* Renderujemy płaską listę, tak jak chciałeś */}
+          {flatResults.map((res) => (
+            <div
+              key={`${res.type}-${res.id}`}
+              className="search-dropdown-item"
+              onClick={() => handleResultClick(res.url)}
+            >
+              <div className="dropdown-icon">
+                {res.type === "project" && <FaProjectDiagram />}
+                {res.type === "pillar" && <FaCube />}
+                {res.type === "item" && <FaTasks />}
+              </div>
+
+              <div className="dropdown-info">
+                <span className="dropdown-name">{res.name}</span>
+                {res.parentName && (
+                  <span className="dropdown-parent">{res.parentName}</span>
+                )}
+              </div>
             </div>
-          )}
+          ))}
 
-          {/* --- FILARY --- */}
-          {results.pillars.length > 0 && (
-            <div className="search-section">
-              <h4>Pillars</h4>
-              <ul>
-                {results.pillars.slice(0, 3).map((pil) => {
-                  if (!pil.project) return null;
-
-                  return (
-                    <li
-                      key={`pil-${pil.id}`}
-                      // 👇 PRZYWRÓCONO: Nawigacja do projektu z parametrem pillar
-                      onClick={() =>
-                        handleNavigateToItem(
-                          `/projects/${pil.project!.id}?pillar=${pil.id}`,
-                        )
-                      }
-                    >
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span>{pil.name}</span>
-                        <small style={{ color: "#888", fontSize: "0.75rem" }}>
-                          in {pil.project.name}
-                        </small>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {/* --- ZADANIA (ITEMS) --- */}
-          {results.items.length > 0 && (
-            <div className="search-section">
-              <h4>Items</h4>
-              <ul>
-                {results.items.slice(0, 5).map((item) => {
-                  // 👇 PRZYWRÓCONO: Pobieranie ID rodziców i budowanie pełnej ścieżki
-                  const projectId = item.pillar?.project?.id;
-                  const pillarId = item.pillar?.id;
-
-                  if (!projectId || !pillarId) return null;
-
-                  return (
-                    <li
-                      key={`i-${item.id}`}
-                      // 👇 PRZYWRÓCONO: Pełna ścieżka zagnieżdżona
-                      onClick={() =>
-                        handleNavigateToItem(
-                          `/projects/${projectId}/pillars/${pillarId}/items/${item.id}`,
-                        )
-                      }
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <span>{item.name}</span>
-                        {item.pillar && (
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "#999",
-                              marginLeft: "10px",
-                            }}
-                          >
-                            {item.pillar.name}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
+          {/* Stopka */}
           <div
             className="search-footer"
             onClick={() => {
@@ -190,7 +162,7 @@ export function SearchBar() {
               setIsOpen(false);
             }}
           >
-            Press Enter to see all results...
+            Wciśnij <strong>Enter</strong>, aby zobaczyć więcej...
           </div>
         </div>
       )}

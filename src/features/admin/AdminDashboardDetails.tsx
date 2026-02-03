@@ -4,6 +4,7 @@ import { type AdminViewUser } from "./types";
 import { UserCard } from "../user/UserCard";
 import { EditUserModal } from "./EditUserModal";
 import { FaHashtag } from "react-icons/fa";
+import { MdDomainAdd } from "react-icons/md";
 import type { Tag } from "../../components/tag/types.ts";
 import {
   getAllTags,
@@ -12,12 +13,15 @@ import {
   archiveTag,
 } from "../../components/tag/api";
 import { TagModal } from "../../components/tag/TagModal.tsx";
+import { CompanySidebar } from "../../components/company/CompanySidebar.tsx";
 
 export const AdminDashboardDetails = () => {
   // 1. Zmieniamy stan: teraz trzymamy płaską listę userów, nie kolumny
   const [users, setUsers] = useState<AdminViewUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<AdminViewUser | null>(null);
+
+  const [isCompanySidebarOpen, setIsCompanySidebarOpen] = useState(false);
 
   const loadData = async () => {
     try {
@@ -111,17 +115,18 @@ export const AdminDashboardDetails = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* NAGŁÓWEK Z PRZYCISKIEM PO PRAWEJ */}
+      {/* NAGŁÓWEK */}
       <div
         style={{
           marginBottom: "20px",
           borderBottom: "1px solid #dfe1e6",
           paddingBottom: "10px",
-          display: "flex", // Użycie Flexbox
-          justifyContent: "space-between", // Rozsuwa elementy na końce
-          alignItems: "center", // Centruje w pionie
+          display: "flex",
+          justifyContent: "space-between", // Rozsuwa: Lewa <-> Prawa
+          alignItems: "center",
         }}
       >
+        {/* LEWA STRONA: Tytuł */}
         <div>
           <h1 style={{ margin: 0, fontSize: "1.5rem", color: "#172b4d" }}>
             Wszyscy Użytkownicy
@@ -131,14 +136,27 @@ export const AdminDashboardDetails = () => {
           </span>
         </div>
 
-        <button
-          className="hash-btn"
-          onClick={() => setIsTagsModalOpen(true)}
-          title="Zarządzaj tagami"
-          style={{ transform: "none" }} // Reset ewentualnych transformacji z CSS
-        >
-          <FaHashtag />
-        </button>
+        {/* PRAWA STRONA: Kontener na przyciski */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="hash-btn"
+            // Pamiętaj, żeby tu dodać obsługę modala Firm (np. setIsCompanyModalOpen(true))
+            onClick={() => setIsCompanySidebarOpen(true)}
+            title="Zarządzaj firmami"
+            style={{ transform: "none" }}
+          >
+            <MdDomainAdd />
+          </button>
+
+          <button
+            className="hash-btn"
+            onClick={() => setIsTagsModalOpen(true)}
+            title="Zarządzaj tagami"
+            style={{ transform: "none" }}
+          >
+            <FaHashtag />
+          </button>
+        </div>
       </div>
 
       {/* KONTENER SIATKI (GRID) - reszta bez zmian */}
@@ -179,6 +197,11 @@ export const AdminDashboardDetails = () => {
           onEditTag={handleEditTag}
         />
       )}
+
+      <CompanySidebar
+        isOpen={isCompanySidebarOpen}
+        onClose={() => setIsCompanySidebarOpen(false)}
+      />
     </div>
   );
 };

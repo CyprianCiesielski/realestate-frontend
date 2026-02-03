@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { searchGlobal } from "./api";
 import type { GlobalSearchResultDto } from "./types";
 import "./SearchPage.css";
+// Usunięto import getProjectById, bo nie można go używać wewnątrz return (JSX)
 
 export function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -48,8 +49,6 @@ export function SearchPage() {
 
   return (
     <div className="search-page-container">
-      <h1>Wyniki wyszukiwania dla: "{query}"</h1>
-
       {!hasResults && <p>Nie znaleziono żadnych wyników.</p>}
 
       {results && (
@@ -76,21 +75,26 @@ export function SearchPage() {
           {/* --- FILARY --- */}
           {results.pillars.length > 0 && (
             <div className="result-column">
-              <h3>Filary ({results.pillars.length})</h3>
+              <h3>Moduły ({results.pillars.length})</h3>
               <div className="card-list">
                 {results.pillars.map((pillar) => {
-                  if (!pillar.project) return null;
+                  // Próbujemy pobrać ID projektu z zagnieżdżonego obiektu LUB z płaskiego pola projectId (jeśli masz takie w DTO)
+                  // @ts-ignore - ignorujemy błąd TS jeśli typy nie są idealnie zsynchronizowane
+                  const projectId = pillar.project?.id || pillar.projectId;
+                  // @ts-ignore
+                  const projectName = pillar.project?.name;
+
+                  if (!projectId) return null;
 
                   return (
                     <Link
                       key={pillar.id}
-                      // Nawigacja do projektu z parametrem pillar
-                      to={`/projects/${pillar.project.id}/pillars/${pillar.id}`}
+                      to={`/projects/${projectId}/pillars/${pillar.id}`}
                       className="result-card pillar-card"
                     >
                       <div className="card-title">{pillar.name}</div>
                       <div className="card-meta">
-                        Należy do Projektu #{pillar.project.id}
+                        Należy do Projektu: {projectName || projectId}
                       </div>
                     </Link>
                   );
@@ -102,13 +106,23 @@ export function SearchPage() {
           {/* --- ZADANIA (ITEMS) --- */}
           {results.items.length > 0 && (
             <div className="result-column">
-              <h3>Zadania ({results.items.length})</h3>
+              <h3>Wątki ({results.items.length})</h3>
               <div className="card-list">
                 {results.items.map((item) => {
-                  const projectId = item.pillar?.project?.id;
-                  const pillarId = item.pillar?.id;
+                  // 1. Pobieranie ID (zakładamy, że item ma strukturę zagnieżdżoną LUB płaskie ID)
+                  // @ts-ignore
+                  const projectId = item.pillar?.project?.id || item.projectId;
+                  // @ts-ignore
+                  const pillarId = item.pillar?.id || item.pillarId;
 
-                  // Zabezpieczenie przed brakiem danych
+                  // 2. Pobieranie Nazw (korzystamy z getterów dodanych w Item.java: getProjectName, getPillarName)
+                  // @ts-ignore
+                  const projectName =
+                    item.pillar?.project?.name || `ID: ${projectId}`;
+                  // @ts-ignore
+                  const pillarName = item.pillar?.name || `ID: ${pillarId}`;
+
+                  // Zabezpieczenie
                   if (!projectId || !pillarId) {
                     return (
                       <div
@@ -117,7 +131,7 @@ export function SearchPage() {
                       >
                         <div className="card-title">{item.name}</div>
                         <div className="card-meta error">
-                          Błąd danych (brak rodzica)
+                          Błąd danych (brak kontekstu projektu)
                         </div>
                       </div>
                     );
@@ -133,7 +147,9 @@ export function SearchPage() {
                         <span className="card-title">{item.name}</span>
                       </div>
                       <div className="card-meta">
-                        Projekt #{projectId} / Filar #{pillarId}
+                        {/* Wyświetlamy pobrane wyżej nazwy */}
+                        Projekt: {projectName} <br />
+                        Moduł: {pillarName}
                       </div>
                     </Link>
                   );

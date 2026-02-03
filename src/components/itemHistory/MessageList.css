@@ -214,6 +214,22 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.edited-info {
+    display: block; /* Lub 'inline-block' jeśli wolisz obok tekstu */
+    font-size: 0.7rem;
+    color: #a0a0a0; /* Jasnoszary kolor */
+    font-style: italic;
+    margin-top: 2px;
+    text-align: right; /* Wyrównanie do prawej, popularne w komunikatorach */
+    user-select: none; /* Żeby nie zaznaczało się przy kopiowaniu tekstu */
+}
+
+/* Opcjonalnie: Jeśli wiadomość jest "moja", kolor może być jaśniejszy,
+   jeśli dymek ma ciemne tło */
+.message-wrapper.mine .edited-info {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 @keyframes target-pulse {
     0% {
         transform: scale(1);

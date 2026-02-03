@@ -1,14 +1,16 @@
 import type { ItemHistory } from "../itemHistory/types.ts";
 import type { Tag } from "../tag/types.ts";
+import type { Company } from "../company/types.ts"; // 👈 Import Company
 
 export interface Item {
   id: number;
   name: string;
-  deadline?: string; // '?' oznacza, że pole może być nullem (opcjonalne)
+  deadline?: string;
   personResponsible?: string;
-  companyResposible?: string;
+  // ZMIANA: Obiekt zamiast stringa
+  company?: Company;
   state: string;
-  startDate: string; // Daty z JSON przychodzą jako stringi
+  startDate: string;
   priority: number;
 
   historyEntries: ItemHistory[];

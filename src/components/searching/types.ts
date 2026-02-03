@@ -57,4 +57,5 @@ export interface SearchResult {
 
   projectId?: number;
   pillarId?: number;
+  itemId?: number;
 }

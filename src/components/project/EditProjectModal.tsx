@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { updateProject, type CreateProjectDto } from "./api";
 import type { Project } from "./types";
-import { getAllTags } from "../tag/api"; // 👈 1. IMPORT API
+import { getAllTags } from "../tag/api";
 import "./CreateProjectModal.css";
 import { TagSelector } from "../tag/TagSelector.tsx";
 import type { Tag } from "../tag/types.ts";
+import { getAllCompanies } from "../company/api.ts";
+import type { Company } from "../company/types.ts";
+import { useRefresh } from "../../context/RefreshContext.tsx";
 
 interface EditProjectModalProps {
   project: Project;
@@ -13,39 +16,57 @@ interface EditProjectModalProps {
   onArchive: () => void;
 }
 
+// Interfejs lokalny dla stanu formularza
+interface ProjectFormData extends Omit<CreateProjectDto, "company"> {
+  company: Company | null;
+}
+
 export function EditProjectModal({
   project,
   onClose,
   onSuccess,
   onArchive,
 }: EditProjectModalProps) {
-  // 2. STAN NA POBRANE TAGI Z BAZY
-  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
+  const { triggerRefresh } = useRefresh();
 
-  // 3. POBIERANIE TAGÓW PRZY OTWARCIU
+  // 1. TAGI
+  const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
   useEffect(() => {
     getAllTags()
-      .then((data) => {
-        setAllAvailableTags(data);
-      })
-      .catch((err) => console.error("Błąd pobierania tagów w edycji:", err));
+      .then((data) => setAllAvailableTags(data))
+      .catch((err) => console.error("Błąd pobierania tagów:", err));
   }, []);
 
-  const [formData, setFormData] = useState<CreateProjectDto>({
+  // 2. FIRMY
+  const [availableCompanies, setAvailableCompanies] = useState<Company[]>([]);
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await getAllCompanies();
+        setAvailableCompanies(data.filter((c) => c.state !== "archived"));
+      } catch (error) {
+        console.error("Nie udało się pobrać firm", error);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  // 3. STAN FORMULARZA
+  // Inicjalizujemy pole 'company' obiektem z projektu (jeśli istnieje)
+  const [formData, setFormData] = useState<ProjectFormData>({
     name: project.name,
     personResponsible: project.personResponsible || "",
     deadline: project.deadline || "",
-    companyResposible: project.companyResposible || "",
+    // ZMIANA: używamy pola company z projektu (obiektu)
+    company: project.company || null,
     state: project.state,
     startDate: project.startDate || "",
     priority: project.priority || 1,
   });
 
-  // Inicjalizacja wybranych tagów tymi, które projekt już ma
   const [selectedTags, setSelectedTags] = useState<Tag[]>(project.tags || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Obsługa zmian w polach
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -62,9 +83,12 @@ export function EditProjectModal({
     try {
       const payload = {
         ...formData,
+        // Backend oczekuje obiektu company (tak jak w create)
+        company: formData.company,
         tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
 
+      // @ts-ignore
       const updated = await updateProject(project.id, payload);
       onSuccess(updated);
       onClose();
@@ -72,6 +96,7 @@ export function EditProjectModal({
       console.error(err);
       alert("Nie udało się zaktualizować projektu.");
     } finally {
+      triggerRefresh();
       setIsSubmitting(false);
     }
   };
@@ -83,7 +108,7 @@ export function EditProjectModal({
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Project name</label>
+            <label>Nazwa projektu *</label>
             <input
               name="name"
               value={formData.name}
@@ -92,7 +117,6 @@ export function EditProjectModal({
             />
           </div>
 
-          {/* 4. TAG SELECTOR Z DANYMI Z BAZY */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
@@ -101,27 +125,10 @@ export function EditProjectModal({
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Teraz zmienna istnieje i ma dane
+              allTags={allAvailableTags}
             />
           </div>
 
-          <div className="form-group">
-            <label>Nazwa projektu *</label>
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="np. Osiedle Dębowe"
-            />
-          </div>
-
-          <div
-            className="form-group"
-            style={{ position: "relative", zIndex: 101 }}
-          ></div>
-
-          {/* Reszta pól... */}
           <div className="form-group">
             <label>Osoba odpowiedzialna</label>
             <input
@@ -131,11 +138,48 @@ export function EditProjectModal({
             />
           </div>
 
+          {/* SELECT FIRMY - NAPRAWIONY */}
           <div className="form-group">
             <label>Firma Odpowiedzialna</label>
+            <select
+              name="company"
+              // Wyświetlamy nazwę z obiektu w stanie
+              value={formData.company?.name || ""}
+              onChange={(e) => {
+                const selectedName = e.target.value;
+                const selectedCompanyObj = availableCompanies.find(
+                  (c) => c.name === selectedName,
+                );
+                // Ręczna aktualizacja stanu obiektem
+                setFormData((prev) => ({
+                  ...prev,
+                  company: selectedCompanyObj || null,
+                }));
+              }}
+              className="form-control"
+              style={{
+                padding: "8px",
+                width: "100%",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            >
+              <option value="">-- Wybierz firmę --</option>
+              {availableCompanies.map((company) => (
+                <option key={company.id} value={company.name}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Reszta bez zmian */}
+          <div className="form-group">
+            <label>Data Startu</label>
             <input
-              name="companyResposible"
-              value={formData.companyResposible}
+              type="date"
+              name="startDate"
+              value={formData.startDate}
               onChange={handleChange}
             />
           </div>
@@ -146,16 +190,6 @@ export function EditProjectModal({
               type="date"
               name="deadline"
               value={formData.deadline}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Data Startu</label>
-            <input
-              type="date"
-              name="startDate"
-              value={formData.startDate}
               onChange={handleChange}
             />
           </div>

@@ -3,8 +3,9 @@ import { updatePillar, type CreatePillarDto } from "./api";
 import type { Pillar } from "./types";
 import "./CreatePillarModal.css";
 import type { Tag } from "../tag/types.ts";
-import { getAllTags } from "../tag/api"; // 👈 1. Import API
+import { getAllTags } from "../tag/api";
 import { TagSelector } from "../tag/TagSelector.tsx";
+import type { Company } from "../company/types.ts";
 
 interface EditPillarModalProps {
   project_id: string;
@@ -14,6 +15,11 @@ interface EditPillarModalProps {
   onArchive: () => void;
 }
 
+// Typ pomocniczy
+interface PillarFormData extends Omit<CreatePillarDto, "company"> {
+  company: Company | null;
+}
+
 export function EditPillarModal({
   project_id,
   pillar,
@@ -21,21 +27,21 @@ export function EditPillarModal({
   onSuccess,
   onArchive,
 }: EditPillarModalProps) {
-  // 2. Stan na tagi z bazy
+  // 1. TAGI
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
-
-  // 3. Pobieranie tagów
   useEffect(() => {
     getAllTags()
       .then((data) => setAllAvailableTags(data))
       .catch((err) => console.error(err));
   }, []);
 
-  const [formData, setFormData] = useState<CreatePillarDto>({
+  // 3. STAN FORMULARZA
+  const [formData, setFormData] = useState<PillarFormData>({
     name: pillar.name,
     state: pillar.state,
-    deadline: pillar.deadline || new Date().toISOString(),
-    companyResposible: pillar.companyResposible,
+    deadline: pillar.deadline || new Date().toISOString().split("T")[0],
+    // ZMIANA: Inicjalizacja obiektem
+    company: pillar.company || null,
     startDate: pillar.startDate || new Date().toISOString().split("T")[0],
     priority: pillar.priority || 0,
   });
@@ -49,14 +55,16 @@ export function EditPillarModal({
     try {
       const payload = {
         ...formData,
+        company: formData.company, // Obiekt
         tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
 
+      // @ts-ignore
       const updated = await updatePillar(project_id, pillar.id, payload);
       onSuccess(updated);
       onClose();
     } catch (err) {
-      alert("Nie udało się zaktualizować filaru.");
+      alert("Nie udało się zaktualizować modułu.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,26 +74,27 @@ export function EditPillarModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "priority" ? Number(value) : value,
+    }));
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2>Edytuj Filar: {pillar.name}</h2>
+        <h2>Edytuj Moduł: {pillar.name}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Nazwa filaru *</label>
+            <label>Nazwa modułu *</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="np. Osiedle Dębowe"
             />
           </div>
 
-          {/* TAGI - Tutaj przekazujemy pobrane wyżej tagi */}
           <div
             className="form-group"
             style={{ position: "relative", zIndex: 101 }}
@@ -94,18 +103,7 @@ export function EditPillarModal({
             <TagSelector
               selectedTags={selectedTags}
               onChange={setSelectedTags}
-              allTags={allAvailableTags} // 👈 Przekazujemy to co pobrał useEffect
-            />
-          </div>
-
-          {/* Reszta pól... */}
-          <div className="form-group">
-            <label>Deadline</label>
-            <input
-              type="date"
-              name="deadline"
-              value={formData.deadline}
-              onChange={handleChange}
+              allTags={allAvailableTags}
             />
           </div>
 
@@ -120,17 +118,21 @@ export function EditPillarModal({
           </div>
 
           <div className="form-group">
-            <label>Priority</label>
+            <label>Deadline</label>
+            <input
+              type="date"
+              name="deadline"
+              value={formData.deadline}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Priorytet</label>
             <select
               name="priority"
               value={formData.priority}
-              onChange={(e) => {
-                const { name, value } = e.target;
-                setFormData((prev) => ({
-                  ...prev,
-                  [name]: Number(value),
-                }));
-              }}
+              onChange={handleChange}
             >
               <option value={0}></option>
               <option value={1}>1</option>
@@ -160,7 +162,7 @@ export function EditPillarModal({
             style={{ justifyContent: "space-between" }}
           >
             <button type="button" className="btn-delete" onClick={onArchive}>
-              Archiwizuj Filar
+              Archiwizuj Moduł
             </button>
 
             <div style={{ display: "flex", gap: 10 }}>
