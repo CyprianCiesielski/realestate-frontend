@@ -66,3 +66,53 @@
     font-size: 0.9rem;
     border: 1px solid #ffbdad;
 }
+
+/* Kontener na listę firm - pozwala na scrollowanie jeśli jest ich dużo */
+.companies-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 2px solid #dfe1e6;
+    border-radius: 3px;
+    padding: 10px;
+    background-color: #fafbfc;
+}
+
+/* Styl pojedynczego wiersza z checkboxem */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.checkbox-item:hover {
+    background-color: #ebecf0;
+}
+
+.checkbox-item:last-child {
+    margin-bottom: 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-size: 0.9rem;
+    color: #172b4d;
+}
+
+/* Pasek scrolla (opcjonalnie dla estetyki) */
+.companies-checkbox-list::-webkit-scrollbar {
+    width: 8px;
+}
+.companies-checkbox-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}

@@ -273,25 +273,42 @@
     background-color: #2c974b;
 }
 
-/* Układ nagłówka w sidebarze */
+/* ================================================= */
+/* === NOWE STYLE: NAGŁÓWEK, SORTOWANIE, FILTR ===== */
+/* ================================================= */
+
+/* Kontener nagłówka (H3 i Przyciski) */
 .sidebar-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 10px;
     margin-bottom: 10px;
-    position: relative; /* Ważne dla dropdownu */
+    height: 40px; /* Stała wysokość dla wyrównania */
+    position: relative;
 }
 
-/* Przycisk Filtra */
-.filter-icon-btn {
+/* Kontener na przyciski akcji (prawy róg) */
+.sidebar-actions {
+    display: flex;
+    gap: 5px; /* Odstęp między ikonką sortowania a filtrem */
+    align-items: center;
+}
+
+/* Wrapper dla pojedynczej akcji (żeby dropdown był pozycjonowany względem przycisku) */
+.action-wrapper {
+    position: relative;
+}
+
+/* --- WSPÓLNE STYLE PRZYCISKÓW (Filter & Sort) --- */
+.icon-btn {
     background: none;
     border: none;
     cursor: pointer;
     color: #888;
-    padding: 5px;
+    width: 30px;
+    height: 30px;
     border-radius: 4px;
-    margin-top: -0.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -299,20 +316,21 @@
     transition: all 0.2s;
 }
 
-.filter-icon-btn:hover {
+.icon-btn:hover {
     background-color: #f0f0f0;
     color: #333;
 }
 
-.filter-icon-btn.active {
-    color: #007bff; /* Niebieski gdy aktywny */
+.icon-btn.active {
+    color: #007bff;
+    background-color: #e6f0ff;
 }
 
-/* Kropka sygnalizująca aktywne filtry */
-.filter-dot {
+/* Kropka sygnalizująca aktywny filtr/sortowanie */
+.dot-indicator {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 4px;
+    right: 4px;
     width: 6px;
     height: 6px;
     background-color: #ff4d4f;
@@ -320,12 +338,11 @@
     border: 1px solid white;
 }
 
-/* Dropdown Menu */
-.filter-dropdown-menu {
+/* --- WSPÓLNE STYLE DLA DROPDOWNÓW (MENU) --- */
+.dropdown-menu {
     position: absolute;
-    top: 100%; /* Zaraz pod nagłówkiem */
-    right: 10px;
-    width: 200px;
+    top: 100%;
+    right: 0;
     background: white;
     border: 1px solid #ddd;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -336,7 +353,11 @@
     flex-direction: column;
 }
 
-.filter-title {
+/* Specyficzne szerokości dla różnych menu */
+.filter-menu { width: 220px; }
+.sort-menu { width: 180px; }
+
+.dropdown-title {
     padding: 5px 12px;
     font-size: 0.75rem;
     color: #888;
@@ -346,26 +367,59 @@
     margin-bottom: 5px;
 }
 
-.filter-checkbox-label {
+.dropdown-empty {
+    padding: 10px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* --- ELEMENTY WEWNĄTRZ MENU --- */
+
+/* Checkbox (Filtr) */
+.checkbox-item {
     display: flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 8px 12px;
     cursor: pointer;
     font-size: 0.9rem;
     color: #333;
     transition: background 0.2s;
 }
+.checkbox-item:hover { background-color: #f5f5f5; }
+.checkbox-item input { margin-right: 8px; cursor: pointer; }
 
-.filter-checkbox-label:hover {
-    background-color: #f5f5f5;
-}
-
-.filter-checkbox-label input {
-    margin-right: 8px;
+/* Przycisk (Sortowanie) */
+.dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
     cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
 }
 
-.filter-clear-btn {
+.dropdown-item:hover { background-color: #f5f5f5; }
+
+.dropdown-item.selected {
+    color: #007bff;
+    font-weight: 500;
+    background-color: #f0f7ff;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 4px 0;
+}
+
+/* Przycisk czyszczenia (filtr) */
+.clear-btn {
     margin-top: 5px;
     border: none;
     background: none;
@@ -374,11 +428,10 @@
     cursor: pointer;
     padding: 8px;
     border-top: 1px solid #eee;
+    width: 100%;
+    text-align: center;
 }
-
-.filter-clear-btn:hover {
-    text-decoration: underline;
-}
+.clear-btn:hover { text-decoration: underline; }
 
 .empty-sidebar-msg {
     padding: 20px;

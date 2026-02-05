@@ -6,17 +6,42 @@ import {
   FaTrashAlt,
   FaThumbtack,
   FaPlus,
+  FaChevronLeft,
 } from "react-icons/fa";
 import "./MessageContextMenu.css";
 import { useAuth } from "../../context/AuthContext.tsx";
 
-// ... (Twoja lista reakcji i interfejsy) ...
-const REACTIONS = ["❤️", "😆", "😮", "😢", "😠", "👍"];
+// 1. Podstawowe reakcje (szybki wybór)
+const QUICK_REACTIONS = ["❤️", "😆", "😮", "😢", "😠", "👍"];
+
+// 2. Rozszerzona lista (po kliknięciu w plusa)
+const ALL_REACTIONS = [
+  ...QUICK_REACTIONS,
+  "🔥",
+  "🎉",
+  "👀",
+  "💯",
+  "🚀",
+  "👋",
+  "✅",
+  "❌",
+  "🤔",
+  "🥰",
+  "😎",
+  "😭",
+  "😡",
+  "💩",
+  "🙏",
+  "🤝",
+  "👻",
+  "🧠",
+  "🤡",
+  "🍿",
+];
 
 interface ContextMenuProps {
   position: { x: number; y: number };
   onClose: () => void;
-  // ... reszta propsów
   onReact: (emoji: string) => void;
   onReply: () => void;
   onEdit: () => void;
@@ -40,13 +65,13 @@ export function MessageContextMenu({
   isAuthor,
 }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // Stan przechowujący "bezpieczną" pozycję. Na początku ustawiamy to co kliknięto.
   const [coords, setCoords] = useState(position);
+
+  // NOWE: Stan do przełączania widoku emotek
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
   const { isAdmin } = useAuth();
 
-  // useLayoutEffect uruchamia się PO wyrenderowaniu HTML, ale PRZED wyświetleniem na ekranie.
-  // Dzięki temu użytkownik nie zobaczy "mignięcia" przy zmianie pozycji.
   useLayoutEffect(() => {
     if (menuRef.current) {
       const menu = menuRef.current;
@@ -55,23 +80,18 @@ export function MessageContextMenu({
 
       let { x, y } = position;
 
-      // 1. Sprawdź czy menu wychodzi dołem poza ekran
       if (y + offsetHeight > innerHeight) {
-        // Jeśli tak, przesuń je do góry (tak żeby dolna krawędź była w miejscu kliknięcia)
         y = y - offsetHeight;
       }
-
-      // 2. Sprawdź czy menu wychodzi prawą stroną poza ekran
       if (x + offsetWidth > innerWidth) {
-        // Jeśli tak, przesuń je w lewo
         x = x - offsetWidth;
       }
 
       setCoords({ x, y });
     }
-  }, [position]); // Uruchom ponownie, jeśli zmieni się pozycja wejściowa
+    // Dodajemy showEmojiPicker do zależności, aby przeliczył pozycję po otwarciu siatki
+  }, [position, showEmojiPicker]);
 
-  // Zamykanie przy kliknięciu poza (bez zmian)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -97,26 +117,66 @@ export function MessageContextMenu({
           left: coords.x,
         }}
       >
-        {/* ... RESZTA TWOJEGO KODU BEZ ZMIAN ... */}
-
-        {/* Pasek Reakcji */}
-        <div className="reaction-bar">
-          {REACTIONS.map((emoji) => (
+        {/* LOGIKA WYŚWIETLANIA EMOTEK */}
+        {!showEmojiPicker ? (
+          // WIDOK 1: Pasek szybkich reakcji
+          <div className="reaction-bar">
+            {QUICK_REACTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                className="reaction-btn"
+                onClick={() => {
+                  onReact(emoji);
+                  onClose();
+                }}
+              >
+                <span className="emoji-icon">{emoji}</span>
+              </button>
+            ))}
             <button
-              key={emoji}
-              className="reaction-btn"
-              onClick={() => {
-                onReact(emoji);
-                onClose();
+              className="reaction-btn add-reaction"
+              onClick={(e) => {
+                e.stopPropagation(); // Zapobiega zamykaniu menu
+                setShowEmojiPicker(true);
               }}
+              title="Więcej reakcji"
             >
-              <span className="emoji-icon">{emoji}</span>
+              <FaPlus />
             </button>
-          ))}
-          <button className="reaction-btn add-reaction">
-            <FaPlus />
-          </button>
-        </div>
+          </div>
+        ) : (
+          // WIDOK 2: Pełna siatka emotek
+          <div className="emoji-picker-container">
+            <div className="emoji-picker-header">
+              <span>Wybierz reakcję</span>
+              <button
+                className="back-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEmojiPicker(false);
+                }}
+              >
+                <FaChevronLeft size={10} /> Wróć
+              </button>
+            </div>
+            <div className="emoji-grid">
+              {ALL_REACTIONS.map((emoji) => (
+                <button
+                  key={emoji}
+                  className="emoji-grid-item"
+                  onClick={() => {
+                    onReact(emoji);
+                    onClose();
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="divider" />
 
         {/* Lista Akcji */}
         <div className="action-list">
@@ -150,7 +210,7 @@ export function MessageContextMenu({
             <span>Copy</span>
             <FaRegCopy />
           </button>
-          <div className="divider" />
+
           <button
             onClick={() => {
               onPin();
@@ -158,19 +218,24 @@ export function MessageContextMenu({
             }}
           >
             <span>{isPinned ? "Unpin" : "Pin"}</span>
-            <FaThumbtack style={{ transform: "rotate(45deg)" }} />
+            <FaThumbtack
+              style={{ transform: isPinned ? "none" : "rotate(45deg)" }}
+            />
           </button>
           {isAdmin && (
-            <button
-              className="delete-btn"
-              onClick={() => {
-                onDelete();
-                onClose();
-              }}
-            >
-              <span>Delete</span>
-              <FaTrashAlt />
-            </button>
+            <>
+              <div className="divider" />
+              <button
+                className="delete-btn"
+                onClick={() => {
+                  onDelete();
+                  onClose();
+                }}
+              >
+                <span>Delete</span>
+                <FaTrashAlt />
+              </button>
+            </>
           )}
         </div>
       </div>

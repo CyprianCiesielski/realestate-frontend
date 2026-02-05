@@ -1,14 +1,16 @@
-import api from '../../api/axios';
-import { type AdminViewUser } from './types';
+import api from "../../api/axios";
+import { type AdminViewUser } from "./types";
 
 export const fetchUsers = async (): Promise<AdminViewUser[]> => {
-    const response = await api.get('/admin/users');
-    return response.data;
+  const response = await api.get("/admin/users");
+  return response.data;
 };
 
-export const assignCompanyToUser = async (userId: number, company: string) => {
-    return api.post(`/admin/users/${userId}/company`, { company });
+// 👇 ZMIANA TUTAJ: companyIds zamiast company string
+export const assignCompanyToUser = async (
+  userId: number,
+  companyIds: number[],
+) => {
+  // Wysyłamy obiekt JSON: { "companyIds": [1, 2, 5] }
+  return api.post(`/admin/users/${userId}/company`, { companyIds });
 };
-
-// Opcjonalnie: zmiana roli, jeśli backend na to pozwoli
-// export const changeUserRole = ...

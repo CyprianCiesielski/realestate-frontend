@@ -5,40 +5,47 @@ import type { Project } from "./types";
 import { getProjects } from "./api";
 import { getAllCompanies } from "../company/api";
 import type { Company } from "../company/types";
-import { FaChevronLeft, FaChevronRight, FaFilter } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaFilter,
+  FaSortAmountDown, // Ikonka sortowania
+  FaCheck, // Ikonka wyboru
+} from "react-icons/fa";
 import "./ProjectLayout.css";
 import { useRefresh } from "../../context/RefreshContext";
 
-export function ProjectsLayout() {
-  // 1. DANE: Trzymamy tu WSZYSTKIE projekty (nieprzefiltrowane)
-  const [allProjects, setAllProjects] = useState<Project[]>([]);
+// Definicja typów sortowania
+type SortOption = "dateDesc" | "dateAsc" | "alphaAsc" | "alphaDesc";
 
-  // 2. DANE: Lista dostępnych firm do filtra
+export function ProjectsLayout() {
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
 
-  // 3. STAN FILTRA: Tablica nazw wybranych firm
+  // Stan filtrów
   const [selectedCompanyNames, setSelectedCompanyNames] = useState<string[]>(
     [],
   );
 
-  // Stany UI
+  // Stan sortowania (domyślnie: najnowsze na górze)
+  const [sortOption, setSortOption] = useState<SortOption>("dateDesc");
+
+  // Stany UI (otwieranie pasków/menu)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false); // <--- Nowy stan dla menu sortowania
+
   const filterRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null); // <--- Ref dla menu sortowania
 
   const { refreshTrigger } = useRefresh();
 
-  // 4. POBIERANIE DANYCH (Tylko raz lub przy odświeżeniu)
+  // 1. Pobieranie danych
   useEffect(() => {
-    // Pobierz projekty
     getProjects()
-      .then((data) => {
-        console.log("Pobrano projekty:", data); // Debug
-        setAllProjects(data);
-      })
+      .then((data) => setAllProjects(data))
       .catch(console.error);
 
-    // Pobierz firmy (tylko raz, chyba że chcesz też odświeżać przy triggerze)
     getAllCompanies()
       .then((data) =>
         setAllCompanies(data.filter((c) => c.state !== "archived")),
@@ -46,45 +53,67 @@ export function ProjectsLayout() {
       .catch(console.error);
   }, [refreshTrigger]);
 
-  // 5. ZAMYKANIE DROPDOWNU (Kliknięcie poza)
+  // 2. Zamykanie dropdownów po kliknięciu poza
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Zamykanie filtra
       if (
         filterRef.current &&
         !filterRef.current.contains(event.target as Node)
       ) {
         setIsFilterOpen(false);
       }
+      // Zamykanie sortowania
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 6. LOGIKA FILTROWANIA (Obliczana w locie przy każdym renderze)
-  // Używamy useMemo dla wydajności, ale zwykły const też by zadziałał natychmiast.
-  const filteredProjects = useMemo(() => {
-    console.log("Filtrowanie...", selectedCompanyNames);
+  // 3. LOGIKA: FILTROWANIE + SORTOWANIE
+  const processedProjects = useMemo(() => {
+    // A. Filtrowanie
+    let result = allProjects;
 
-    if (selectedCompanyNames.length === 0) {
-      return allProjects;
+    if (selectedCompanyNames.length > 0) {
+      result = result.filter((project) => {
+        const companyName = project.company?.name;
+        return companyName && selectedCompanyNames.includes(companyName);
+      });
     }
 
-    return allProjects.filter((project) => {
-      // Jeśli projekt nie ma przypisanej firmy, a filtr jest włączony -> ukrywamy go
-      // (lub zmien logic na true, jeśli chcesz widzieć projekty bez firmy)
-      if (!project.company) return false;
+    // B. Sortowanie (na przefiltrowanej liście)
+    // UWAGA: Zakładam, że masz pole `createdAt` lub `id` (jeśli id rośnie z czasem)
+    return [...result].sort((a, b) => {
+      switch (sortOption) {
+        case "dateDesc": // Najnowsze (po ID lub dacie)
+          // Jeśli masz pole createdAt:
+          // return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return b.id - a.id; // Fallback: wyższe ID = nowszy
 
-      return selectedCompanyNames.includes(project.company.name);
+        case "dateAsc": // Najstarsze
+          // return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return a.id - b.id;
+
+        case "alphaAsc": // A-Z
+          return a.name.localeCompare(b.name);
+
+        case "alphaDesc": // Z-A
+          return b.name.localeCompare(a.name);
+
+        default:
+          return 0;
+      }
     });
-  }, [allProjects, selectedCompanyNames]);
+  }, [allProjects, selectedCompanyNames, sortOption]); // Dodano sortOption do zależności
 
-  // Obsługa kliknięcia w checkbox
   const handleFilterChange = (companyName: string) => {
-    setSelectedCompanyNames(
-      (prev) =>
-        prev.includes(companyName)
-          ? prev.filter((name) => name !== companyName) // Usuń
-          : [...prev, companyName], // Dodaj
+    setSelectedCompanyNames((prev) =>
+      prev.includes(companyName)
+        ? prev.filter((name) => name !== companyName)
+        : [...prev, companyName],
     );
   };
 
@@ -92,7 +121,6 @@ export function ProjectsLayout() {
     <div
       className={`projects-layout ${!isSidebarOpen ? "sidebar-collapsed" : ""}`}
     >
-      {/* SIDEBAR */}
       <aside className="projects-sidebar">
         <button
           className="sidebar-toggle-btn"
@@ -103,72 +131,133 @@ export function ProjectsLayout() {
         </button>
 
         <div className="sidebar-content-wrapper">
-          {/* NAGŁÓWEK + FILTR */}
-          <div className="sidebar-header-row" ref={filterRef}>
-            <h3>Projekty</h3>
+          {/* NAGŁÓWEK Z AKCJAMI */}
+          <div className="sidebar-header-row">
+            <h3>Projekty ({processedProjects.length})</h3>
 
-            <button
-              className={`filter-icon-btn ${isFilterOpen || selectedCompanyNames.length > 0 ? "active" : ""}`}
-              onClick={() => {
-                setIsFilterOpen(!isFilterOpen);
-              }}
-              title="Filtruj wg firmy"
-            >
-              <FaFilter />
-              {selectedCompanyNames.length > 0 && (
-                <span className="filter-dot" />
-              )}
-            </button>
+            <div className="sidebar-actions">
+              {/* --- 1. SORTOWANIE --- */}
+              <div className="action-wrapper" ref={sortRef}>
+                <button
+                  className={`icon-btn ${isSortOpen ? "active" : ""}`}
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  title="Sortowanie"
+                >
+                  <FaSortAmountDown />
+                </button>
 
-            {/* DROPDOWN MENU */}
-            {isFilterOpen && (
-              <div className="filter-dropdown-menu">
-                <div className="filter-title">Filtruj wg firmy:</div>
-                {allCompanies.length === 0 ? (
-                  <div className="filter-empty">Brak firm</div>
-                ) : (
-                  allCompanies.map((company) => (
-                    <label key={company.id} className="filter-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={selectedCompanyNames.includes(company.name)}
-                        onChange={() => handleFilterChange(company.name)}
-                      />
-                      <span>{company.name}</span>
-                    </label>
-                  ))
-                )}
+                {isSortOpen && (
+                  <div className="dropdown-menu sort-menu">
+                    <div className="dropdown-title">Sortuj według:</div>
 
-                {selectedCompanyNames.length > 0 && (
-                  <button
-                    className="filter-clear-btn"
-                    onClick={() => setSelectedCompanyNames([])}
-                  >
-                    Wyczyść filtry
-                  </button>
+                    <button
+                      className={`dropdown-item ${sortOption === "dateDesc" ? "selected" : ""}`}
+                      onClick={() => {
+                        setSortOption("dateDesc");
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      <span>Data: Najnowsze</span>
+                      {sortOption === "dateDesc" && <FaCheck size={10} />}
+                    </button>
+
+                    <button
+                      className={`dropdown-item ${sortOption === "dateAsc" ? "selected" : ""}`}
+                      onClick={() => {
+                        setSortOption("dateAsc");
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      <span>Data: Najstarsze</span>
+                      {sortOption === "dateAsc" && <FaCheck size={10} />}
+                    </button>
+
+                    <div className="dropdown-divider" />
+
+                    <button
+                      className={`dropdown-item ${sortOption === "alphaAsc" ? "selected" : ""}`}
+                      onClick={() => {
+                        setSortOption("alphaAsc");
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      <span>Nazwa: A-Z</span>
+                      {sortOption === "alphaAsc" && <FaCheck size={10} />}
+                    </button>
+
+                    <button
+                      className={`dropdown-item ${sortOption === "alphaDesc" ? "selected" : ""}`}
+                      onClick={() => {
+                        setSortOption("alphaDesc");
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      <span>Nazwa: Z-A</span>
+                      {sortOption === "alphaDesc" && <FaCheck size={10} />}
+                    </button>
+                  </div>
                 )}
               </div>
-            )}
+
+              {/* --- 2. FILTROWANIE --- */}
+              <div className="action-wrapper" ref={filterRef}>
+                <button
+                  className={`icon-btn ${isFilterOpen || selectedCompanyNames.length > 0 ? "active" : ""}`}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  title="Filtruj wg firmy"
+                >
+                  <FaFilter size={14} />
+                  {selectedCompanyNames.length > 0 && (
+                    <span className="dot-indicator" />
+                  )}
+                </button>
+
+                {isFilterOpen && (
+                  <div className="dropdown-menu filter-menu">
+                    <div className="dropdown-title">Filtruj wg firmy:</div>
+                    {allCompanies.length === 0 ? (
+                      <div className="dropdown-empty">Brak firm</div>
+                    ) : (
+                      allCompanies.map((company) => (
+                        <label key={company.id} className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={selectedCompanyNames.includes(
+                              company.name,
+                            )}
+                            onChange={() => handleFilterChange(company.name)}
+                          />
+                          <span>{company.name}</span>
+                        </label>
+                      ))
+                    )}
+
+                    {selectedCompanyNames.length > 0 && (
+                      <button
+                        className="clear-btn"
+                        onClick={() => setSelectedCompanyNames([])}
+                      >
+                        Wyczyść filtry
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* LISTA PROJEKTÓW */}
           <nav className="sidebar-nav">
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
+            {processedProjects.length > 0 ? (
+              processedProjects.map((project) => (
                 <ProjectSidebarItem key={project.id} project={project} />
               ))
             ) : (
-              <div className="empty-sidebar-msg">
-                {allProjects.length === 0
-                  ? "Brak projektów"
-                  : "Brak wyników dla filtrów"}
-              </div>
+              <div className="empty-sidebar-msg">Brak projektów</div>
             )}
           </nav>
         </div>
       </aside>
 
-      {/* CONTENT */}
       <main className="projects-content">
         <Outlet />
       </main>

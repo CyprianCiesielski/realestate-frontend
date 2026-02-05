@@ -115,3 +115,71 @@
     from { opacity: 0; transform: scale(0.9) translateY(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
+
+/* ... Twoje istniejące style ... */
+
+/* Kontener dla siatki (widok po kliknięciu w plusa) */
+.emoji-picker-container {
+    padding: 8px;
+    background-color: #f8f9fa; /* Lekko inne tło dla odróżnienia */
+    border-radius: 8px 8px 0 0;
+}
+
+/* Nagłówek wewnątrz pickera (tytuł + przycisk wstecz) */
+.emoji-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.back-btn:hover {
+    background-color: #e9ecef;
+}
+
+/* Siatka emotek */
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 w rzędzie */
+    gap: 4px;
+    max-height: 150px; /* Ograniczenie wysokości */
+    overflow-y: auto; /* Scroll jeśli za dużo emotek */
+}
+
+/* Pojedyncza emotka w siatce */
+.emoji-grid-item {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, background-color 0.1s;
+}
+
+.emoji-grid-item:hover {
+    background-color: #e6f0ff; /* Jasnoniebieskie podświetlenie */
+    transform: scale(1.1);
+    border-color: #b3d7ff;
+}

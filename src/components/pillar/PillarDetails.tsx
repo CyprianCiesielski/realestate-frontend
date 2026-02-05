@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   useParams,
   useNavigate,
@@ -9,7 +9,8 @@ import type { Pillar } from "./types";
 import { getPillarById, archivePillar } from "./api";
 import { EditPillarModal } from "./EditPillarModal";
 import "../project/ProjectDetails.css";
-import { FaPlus, FaCog, FaSearch } from "react-icons/fa";
+// Dodajemy ikonę FaFilter
+import { FaPlus, FaCog, FaSearch, FaFilter } from "react-icons/fa";
 import type { Item } from "../item/types.ts";
 import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
@@ -36,9 +37,15 @@ export function PillarDetails() {
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
+  // --- STANY DLA FILTRÓW ---
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]); // Filtrujemy po nazwach tagów
+  const [selectedPriorities, setSelectedPriorities] = useState<number[]>([]); // Priorytet to number
+  const filterRef = useRef<HTMLDivElement>(null);
+
   const { isAdmin } = useAuth();
 
-  // 1. Pobieranie danych przy wejściu na stronę
+  // 1. Pobieranie danych
   useEffect(() => {
     if (projectId && pillarId) {
       setIsLoading(true);
@@ -57,10 +64,86 @@ export function PillarDetails() {
     }
   }, [projectId, pillarId]);
 
-  // 2. Obsługa Archiwizacji
+  // 2. Zamykanie dropdownu filtra po kliknięciu poza
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // --- LOGIKA FILTROWANIA ---
+
+  // A. Obliczamy dostępne opcje filtrów na podstawie zadań w filarze
+  const { uniqueTags, uniquePriorities } = useMemo(() => {
+    if (!pillar || !pillar.items)
+      return { uniqueTags: [], uniquePriorities: [] };
+
+    const tagsSet = new Set<string>();
+    const prioSet = new Set<number>();
+
+    pillar.items.forEach((item) => {
+      // Tagi
+      if (item.tags) {
+        item.tags.forEach((t) => tagsSet.add(t.name));
+      }
+      // Priorytety (number)
+      if (item.priority !== undefined && item.priority !== null) {
+        prioSet.add(item.priority);
+      }
+    });
+
+    return {
+      uniqueTags: Array.from(tagsSet).sort(),
+      uniquePriorities: Array.from(prioSet).sort((a, b) => a - b),
+    };
+  }, [pillar]);
+
+  // B. Filtrujemy listę zadań
+  const filteredItems = useMemo(() => {
+    if (!pillar || !pillar.items) return [];
+
+    return pillar.items.filter((item) => {
+      // Filtr Tagów (jeśli pusty -> true, w przeciwnym razie musi zawierać jeden z wybranych)
+      const matchesTag =
+        selectedTags.length === 0 ||
+        item.tags.some((t) => selectedTags.includes(t.name));
+
+      // Filtr Priorytetów
+      const matchesPriority =
+        selectedPriorities.length === 0 ||
+        selectedPriorities.includes(item.priority);
+
+      return matchesTag && matchesPriority;
+    });
+  }, [pillar, selectedTags, selectedPriorities]);
+
+  // Handler toggleowania tagów
+  const toggleTag = (tagName: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagName)
+        ? prev.filter((t) => t !== tagName)
+        : [...prev, tagName],
+    );
+  };
+
+  // Handler toggleowania priorytetów
+  const togglePriority = (prio: number) => {
+    setSelectedPriorities((prev) =>
+      prev.includes(prio) ? prev.filter((p) => p !== prio) : [...prev, prio],
+    );
+  };
+
+  // --- OBSŁUGA POZOSTAŁYCH AKCJI ---
+
   const handleArchive = async () => {
     if (!pillar || !projectId) return;
-
     if (
       !window.confirm(
         `Czy na pewno chcesz zarchiwizować filar "${pillar.name}"?`,
@@ -68,7 +151,6 @@ export function PillarDetails() {
     ) {
       return;
     }
-
     try {
       await archivePillar(projectId, pillar.id);
       navigate(`/projects/${projectId}`);
@@ -78,13 +160,11 @@ export function PillarDetails() {
     }
   };
 
-  // 3. Obsługa sukcesu edycji filaru
   const handlePillarUpdateSuccess = (updatedPillar: Pillar) => {
     setPillar(updatedPillar);
     setIsEditModalOpen(false);
   };
 
-  // 4. Obsługa dodania nowego zadania
   const handleItemCreationSuccess = (newItem: Item) => {
     setPillar((prev) => {
       if (!prev) return null;
@@ -97,6 +177,9 @@ export function PillarDetails() {
   if (isLoading) return <div className="loading">Ładowanie danych...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!pillar) return <div className="not-found">Nie znaleziono filaru.</div>;
+
+  const hasActiveFilters =
+    selectedTags.length > 0 || selectedPriorities.length > 0;
 
   return (
     <div className="project-details-container">
@@ -111,9 +194,83 @@ export function PillarDetails() {
           <button
             className="search-btn"
             onClick={() => setIsSearchModalOpen(true)}
+            title="Szukaj w module"
           >
             <FaSearch />
           </button>
+
+          {/* --- PRZYCISK FILTROWANIA --- */}
+          <div
+            className="filter-wrapper"
+            ref={filterRef}
+            style={{ position: "relative" }}
+          >
+            <button
+              className={`filter-btn ${isFilterOpen || hasActiveFilters ? "active" : ""}`}
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              title="Filtruj zadania"
+            >
+              <FaFilter />
+              {hasActiveFilters && <span className="filter-dot-indicator" />}
+            </button>
+
+            {isFilterOpen && (
+              <div className="filter-dropdown-menu right-aligned">
+                {/* 1. SEKCJA TAGÓW */}
+                <div className="filter-section">
+                  <div className="filter-section-title">Tagi</div>
+                  {uniqueTags.length === 0 ? (
+                    <div className="filter-empty-text">Brak tagów</div>
+                  ) : (
+                    uniqueTags.map((tag) => (
+                      <label key={tag} className="filter-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedTags.includes(tag)}
+                          onChange={() => toggleTag(tag)}
+                        />
+                        <span>#{tag}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+
+                <div className="dropdown-divider" />
+
+                {/* 2. SEKCJA PRIORYTETÓW */}
+                <div className="filter-section">
+                  <div className="filter-section-title">Priorytety</div>
+                  {uniquePriorities.length === 0 ? (
+                    <div className="filter-empty-text">Brak priorytetów</div>
+                  ) : (
+                    uniquePriorities.map((prio) => (
+                      <label key={prio} className="filter-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedPriorities.includes(prio)}
+                          onChange={() => togglePriority(prio)}
+                        />
+                        <span>Priorytet {prio}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+
+                {/* PRZYCISK CZYSZCZENIA */}
+                {hasActiveFilters && (
+                  <button
+                    className="filter-clear-all"
+                    onClick={() => {
+                      setSelectedTags([]);
+                      setSelectedPriorities([]);
+                    }}
+                  >
+                    Wyczyść filtry
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
           {isAdmin && (
             <button
@@ -129,7 +286,6 @@ export function PillarDetails() {
 
       {/* INFO GRID */}
       <div className="project-info-grid">
-        {/* 👇 ZMIANA TUTAJ: pillar.company?.name zamiast pillar.companyResposible */}
         <InfoItem label="Firma odpowiedzialna" value={pillar.company?.name} />
         <InfoItem label="Data startu" value={pillar.startDate} />
         <InfoItem label="Deadline" value={pillar.deadline} />
@@ -143,12 +299,21 @@ export function PillarDetails() {
         >
           Dodaj Wątek <FaPlus />
         </button>
+
+        {/* Info o filtrowaniu */}
+        {hasActiveFilters && (
+          <span
+            style={{ marginLeft: "auto", fontSize: "0.85rem", color: "#666" }}
+          >
+            Wyniki: {filteredItems.length}
+          </span>
+        )}
       </div>
 
       <div className="items-list">
-        {pillar.items && pillar.items.length > 0 ? (
+        {filteredItems && filteredItems.length > 0 ? (
           <ul>
-            {pillar.items.map((item) => (
+            {filteredItems.map((item) => (
               <Link
                 key={item.id}
                 to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`}
@@ -162,17 +327,35 @@ export function PillarDetails() {
                 }}
               >
                 <div className="task-tile">
-                  <div className="task-tile-title">{item.name}</div>
+                  <div className="task-tile-title">
+                    {item.name}
+                    {/* Opcjonalnie: Pokaż priorytet na liście */}
+                    {item.priority > 0 && (
+                      <span
+                        style={{
+                          fontSize: "0.7em",
+                          color: "#888",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        (P{item.priority})
+                      </span>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
           </ul>
         ) : (
-          <p className="empty-state">Brak zadań w tym filarze.</p>
+          <p className="empty-state">
+            {hasActiveFilters
+              ? "Brak zadań spełniających kryteria filtrów."
+              : "Brak zadań w tym filarze."}
+          </p>
         )}
       </div>
 
-      {/* MODAL: TWORZENIE ZADANIA */}
+      {/* MODALE */}
       {isCreateItemModalOpen && projectId && (
         <CreateItemModal
           projectId={projectId}
@@ -182,7 +365,6 @@ export function PillarDetails() {
         />
       )}
 
-      {/* MODAL: EDYCJA FILARU */}
       {isEditModalOpen && projectId && (
         <EditPillarModal
           project_id={projectId}
