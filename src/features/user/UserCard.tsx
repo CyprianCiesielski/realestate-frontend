@@ -51,8 +51,8 @@ export const UserCard = ({ user, onEdit }: UserCardProps) => {
             </div>
 
             <div className="user-card-footer">
-                {user.company ? (
-                    <span className="company-badge">{user.company}</span>
+                {user.companies ? (
+                    <span className="company-badge">{user.companies.map(c => c.name).join(", ")}</span>
                 ) : (
                     <span className="no-company">Brak firmy</span>
                 )}

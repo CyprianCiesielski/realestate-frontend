@@ -1,3 +1,5 @@
+import type { Company } from "../../components/company/types";
+
 export interface UserProjectAccess {
     projectId: number;
     projectName: string;
@@ -9,7 +11,7 @@ export interface UserDetailData {
     email: string;
     firstName: string;
     lastName: string;
-    company: string | null;
+    companies: Company[];
     role: string;
     assignedProjects: UserProjectAccess[];
 }

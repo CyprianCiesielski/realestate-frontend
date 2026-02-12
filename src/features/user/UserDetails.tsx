@@ -106,7 +106,7 @@ export const UserDetails = () => {
                     <div className="profile-email">{user.email}</div>
                     <div className="profile-meta-grid">
                         <div className="meta-item"><label>Rola</label><span>{user.role}</span></div>
-                        <div className="meta-item"><label>Firma</label><span>{user.company || '-'}</span></div>
+                        <div className="meta-item"><label>Firma</label><span>{user.companies.map(c => c.name).join(", ") || '-'}</span></div>
                         <div className="meta-item"><label>ID</label><span>#{user.id}</span></div>
                     </div>
                 </div>

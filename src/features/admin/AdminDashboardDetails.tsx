@@ -38,9 +38,9 @@ export const AdminDashboardDetails = () => {
     loadData();
   }, []);
 
-  const handleSaveUser = async (userId: number, companyName: string) => {
+  const handleSaveUser = async (userId: number, companyIds: number[]) => {
     try {
-      await assignCompanyToUser(userId, companyName);
+      await assignCompanyToUser(userId, companyIds);
       await loadData(); // Odśwież listę po sukcesie
     } catch (error) {
       // Rzucamy błąd dalej, żeby Modal mógł go złapać i wyświetlić .error-msg
