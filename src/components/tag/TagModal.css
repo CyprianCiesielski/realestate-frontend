@@ -21,8 +21,9 @@
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    max-height: 80vh; /* Ograniczenie wysokości */
+    /* NOWE: */
+    max-height: 90vh; 
+    overflow-y: auto; 
 }
 
 .tag-modal-header {

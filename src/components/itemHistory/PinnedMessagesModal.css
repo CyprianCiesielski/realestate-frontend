@@ -14,12 +14,14 @@
 .pinned-modal-container {
     background: white;
     width: 400px;
-    max-height: 80vh;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     animation: fadeIn 0.2s ease-out;
+    /* NOWE (zmienione z max-height: 80vh): */
+    max-height: 90vh; 
+    overflow-y: auto; 
 }
 
 .pinned-modal-header {
