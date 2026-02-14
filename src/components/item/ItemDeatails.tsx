@@ -8,11 +8,18 @@ import {
   archiveItemHistory,
   pinItemHistory,
   updateItemHistory,
+  uploadFileToItemHistory, // NOWY IMPORT
 } from "../itemHistory/api";
 import { MessageList } from "../itemHistory/MessageList.tsx";
 import { MessageInput } from "../itemHistory/MessageInput.tsx";
 import "./ItemDetails.css";
-import { FaCog, FaSearch, FaThumbtack, FaTimes } from "react-icons/fa";
+import {
+  FaCog,
+  FaSearch,
+  FaThumbtack,
+  FaTimes,
+  FaFolderOpen,
+} from "react-icons/fa"; // NOWY IMPORT FaFolderOpen
 import { EditItemModal } from "./EditItemModal.tsx";
 import { useRefresh } from "../../context/RefreshContext.tsx";
 import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
@@ -193,13 +200,37 @@ export function ItemDetails() {
     }
   }, [itemId, projectId, pillarId]);
 
-  const handleSendMessage = async (text: string) => {
+  // ZMODYFIKOWANA FUNKCJA WYSYŁANIA
+  const handleSendMessage = async (text: string, file?: File) => {
     if (!item || !projectId || !pillarId || !itemId) return;
 
     const authorName = currentUser
       ? `${currentUser.firstName} ${currentUser.lastName}`
       : "User";
 
+    // 1. Obsługa wysyłania pliku
+    if (file) {
+      try {
+        const newEntry = await uploadFileToItemHistory(
+          projectId,
+          pillarId,
+          itemId,
+          file,
+          text,
+        );
+        setItem((prevItem) => ({
+          ...prevItem!,
+          historyEntries: [...(prevItem!.historyEntries || []), newEntry],
+        }));
+        setReplyTo(null);
+      } catch (e) {
+        console.error("Błąd wysyłania pliku", e);
+        alert("Nie udało się wysłać pliku.");
+      }
+      return;
+    }
+
+    // 2. Obsługa edycji istniejącej wiadomości
     if (editingMessageId) {
       try {
         const updatedEntry = await updateItemHistory(
@@ -223,6 +254,7 @@ export function ItemDetails() {
         alert("Błąd zapisu edycji.");
       }
     } else {
+      // 3. Obsługa nowej wiadomości tekstowej
       try {
         const historyDto = {
           description: text,
@@ -265,6 +297,26 @@ export function ItemDetails() {
           </div>
 
           <div className="header-right">
+            {/* PRZYCISK GOOGLE DRIVE */}
+            {item.driveFolderLink && (
+              <a
+                href={item.driveFolderLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="search-btn"
+                title="Otwórz folder na dysku Google"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "inherit",
+                  textDecoration: "none",
+                }}
+              >
+                <FaFolderOpen />
+              </a>
+            )}
+
             {isSearchActive ? (
               <div className="local-search-bar" ref={searchRef}>
                 <FaSearch className="search-icon-inside" />
@@ -315,7 +367,6 @@ export function ItemDetails() {
             label="Osoba odpowiedzialna"
             value={item.personResponsible}
           />
-          {/* Zmiana tutaj: item.company?.name zamiast item.companyResposible */}
           <InfoItem label="Data startu" value={item.startDate} />
           <InfoItem label="Deadline" value={item.deadline} />
         </div>

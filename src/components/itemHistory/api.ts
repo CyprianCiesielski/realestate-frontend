@@ -87,3 +87,26 @@ export const addReaction = async (
   );
   return response.data;
 };
+
+export const uploadFileToItemHistory = async (
+  projectId: string,
+  pillarId: string,
+  itemId: string,
+  file: File,
+  description: string,
+): Promise<ItemHistory> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("description", description);
+
+  const response = await apiClient.post<ItemHistory>(
+    `/projects/${projectId}/pillars/${pillarId}/items/${itemId}/files`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+  return response.data;
+};

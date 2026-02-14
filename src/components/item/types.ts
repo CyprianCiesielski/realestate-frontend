@@ -13,6 +13,10 @@ export interface Item {
   startDate: string;
   priority: number;
 
+  driveFolderId?: string;
+  driveFolderLink?: string;
+  customDriveFolderId?: string;
+
   historyEntries: ItemHistory[];
   tags: Tag[];
 }

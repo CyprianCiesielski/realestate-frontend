@@ -11,7 +11,7 @@ import type { ItemHistory } from "./types.ts";
 import "./MessageInput.css";
 
 interface MessageInputProps {
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string, file?: File) => void;
   editingText?: string | null;
   onCancelEdit?: () => void;
   replyTo?: ItemHistory | null;
@@ -26,7 +26,9 @@ export function MessageInput({
   onCancelReply,
 }: MessageInputProps) {
   const [text, setText] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Synchronizacja dla Edycji i Odpowiedzi
   useEffect(() => {
@@ -52,9 +54,17 @@ export function MessageInput({
   }, [editingText, replyTo]);
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
-    onSendMessage(text);
+    if (!text.trim() && !selectedFile) return;
+
+    onSendMessage(text, selectedFile || undefined);
+
     setText("");
+    setSelectedFile(null);
+
+    // Reset inputu pliku
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
 
     // ZMIANA: Resetujemy wysokość do pustego stringa (""),
     // co sprawia, że textarea wraca do domyślnej wysokości z atrybutu rows={3}
@@ -71,6 +81,10 @@ export function MessageInput({
     if (e.key === "Escape") {
       if (editingText && onCancelEdit) onCancelEdit();
       if (replyTo && onCancelReply) onCancelReply();
+      if (selectedFile) {
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -80,6 +94,12 @@ export function MessageInput({
     e.target.style.height = "auto";
     // Ustawienie nowej wysokości na podstawie zawartości
     e.target.style.height = `${e.target.scrollHeight}px`;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
   };
 
   return (
@@ -119,7 +139,17 @@ export function MessageInput({
       {/* 3. GŁÓWNY PASEK INPUTA */}
       <div className="input-container">
         <div className="input-actions">
-          <button className="icon-btn">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
+          <button
+            className="icon-btn"
+            onClick={() => fileInputRef.current?.click()}
+            title="Dodaj plik"
+          >
             <FaPlus />
           </button>
           <button className="icon-btn">
@@ -127,7 +157,45 @@ export function MessageInput({
           </button>
         </div>
 
-        <div className="input-wrapper">
+        <div
+          className="input-wrapper"
+          style={{ display: "flex", flexDirection: "column" }}
+        >
+          {selectedFile && (
+            <div
+              className="selected-file-preview"
+              style={{
+                fontSize: "12px",
+                color: "#666",
+                padding: "4px 8px",
+                background: "#f0f0f0",
+                borderRadius: "4px",
+                marginBottom: "4px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span>📎 {selectedFile.name}</span>
+              <button
+                onClick={() => {
+                  setSelectedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                style={{
+                  cursor: "pointer",
+                  border: "none",
+                  background: "transparent",
+                  color: "#999",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                title="Usuń plik"
+              >
+                <FaTimes size={10} />
+              </button>
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             className="message-input"
@@ -142,7 +210,7 @@ export function MessageInput({
         <button
           className="send-btn"
           onClick={handleSubmit}
-          disabled={!text.trim()}
+          disabled={!text.trim() && !selectedFile}
           title={editingText ? "Zapisz" : "Wyślij"}
         >
           {editingText ? (
