@@ -5,6 +5,8 @@ import "./Header.css";
 
 import { SearchBar } from "../components/searching/SearchBar.tsx";
 import { CreateProjectModal } from "../components/project/CreateProjectModal.tsx";
+// 👇 Import nowego modala
+import { EditProfileModal } from "../features/user/EditProfileModal.tsx";
 import type { Project } from "../components/project/types.ts";
 import { useAuth } from "../context/AuthContext";
 import type { UserDetailData } from "../features/user/types.ts";
@@ -12,37 +14,41 @@ import { fetchMyProfile } from "../features/user/api.ts";
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Stan dla modala projektu
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  // 👇 Stan dla modala profilu
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentUserData, setCurrentUserData] = useState<UserDetailData | null>(
     null,
   );
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (user) {
-        try {
-          // Pobieramy dane zalogowanej osoby bez przekazywania ID w URL
-          const data = await fetchMyProfile();
-          setCurrentUserData(data);
-        } catch (err) {
-          console.error("Błąd pobierania profilu:", err);
-        }
+  // Wyciągamy funkcję ładowania danych na zewnątrz useEffect, aby móc jej użyć ponownie
+  const loadUserData = async () => {
+    if (user) {
+      try {
+        const data = await fetchMyProfile();
+        setCurrentUserData(data);
+      } catch (err) {
+        console.error("Błąd pobierania profilu:", err);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     loadUserData();
   }, [user]);
 
   if (!user) return null;
 
   const getDisplayInitials = () => {
-    // Używamy firstName i lastName zgodnie z Twoim interfejsem UserDetailData
     if (currentUserData?.firstName && currentUserData?.lastName) {
       return (
         currentUserData.firstName.charAt(0) + currentUserData.lastName.charAt(0)
       ).toUpperCase();
     }
-    // Jeśli dane się jeszcze ładują, pokazujemy inicjał z maila (z AuthContext)
     return user.initial?.toUpperCase() || "?";
   };
 
@@ -56,7 +62,7 @@ export function Header() {
         {isAdmin && (
           <button
             className="add-project-btn"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsProjectModalOpen(true)}
           >
             Dodaj Projekt <FaPlus />
           </button>
@@ -73,14 +79,12 @@ export function Header() {
           <FaBell />
         </button>
 
-        {/* Wyświetlanie inicjałów z imienia i nazwiska */}
+        {/* 👇 Dodano onClick i style kursora */}
         <div
           className="user-avatar"
-          title={
-            currentUserData
-              ? `${currentUserData.firstName} ${currentUserData.lastName}`
-              : "Profil"
-          }
+          style={{ cursor: "pointer" }}
+          onClick={() => setIsProfileModalOpen(true)}
+          title="Kliknij, aby edytować profil"
         >
           {getDisplayInitials()}
         </div>
@@ -95,12 +99,25 @@ export function Header() {
           </Link>
         )}
 
-        {isModalOpen && (
+        {/* Modal Projektu */}
+        {isProjectModalOpen && (
           <CreateProjectModal
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => setIsProjectModalOpen(false)}
             onSuccess={(newProject) => {
               setProjects([...projects, newProject]);
-              setIsModalOpen(false);
+              setIsProjectModalOpen(false);
+            }}
+          />
+        )}
+
+        {/* 👇 Modal Edycji Profilu */}
+        {isProfileModalOpen && currentUserData && (
+          <EditProfileModal
+            currentUser={currentUserData}
+            onClose={() => setIsProfileModalOpen(false)}
+            onSuccess={() => {
+              // Po udanej edycji, pobierz dane ponownie, żeby zaktualizować inicjały/dymek
+              loadUserData();
             }}
           />
         )}

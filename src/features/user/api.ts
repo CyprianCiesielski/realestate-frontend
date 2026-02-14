@@ -24,3 +24,13 @@ export const fetchMyProfile = async (): Promise<UserDetailData> => {
   const response = await api.get("/users/me");
   return response.data;
 };
+
+export const updateMyProfile = async (data: {
+  firstName: string;
+  lastName: string;
+  email: string;
+}): Promise<UserDetailData> => {
+  // Zakładam endpoint /users/me dla metody PUT
+  const response = await api.put<UserDetailData>("/users/me", data);
+  return response.data;
+};
