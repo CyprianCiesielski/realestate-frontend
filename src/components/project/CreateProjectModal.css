@@ -21,17 +21,16 @@
 .modal-content {
     background-color: white;
     width: 100%;
-    /* 450px -> 28.125rem */
     max-width: 28.125rem;
-    padding: 1.5rem;      /* 24px -> 1.5rem */
-    border-radius: 0.5rem; /* 8px -> 0.5rem */
-
-    /* Cień */
-    box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.2); /* 10px 25px -> rem */
-
+    padding: 1.5rem;      
+    border-radius: 0.5rem; 
+    box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.2); 
     animation: slideUp 0.3s ease-out;
     position: relative;
     z-index: 10000;
+    /* NOWE: */
+    max-height: 90vh; 
+    overflow-y: auto; 
 }
 
 /* Nagłówek modala */

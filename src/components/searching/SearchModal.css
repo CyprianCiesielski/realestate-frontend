@@ -2,13 +2,14 @@
     max-width: 600px;
     width: 100%;
     padding: 0;
-    overflow: hidden;
     border-radius: 8px;
     background: white;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    /* Pozycjonowanie modala wyżej niż środek */
     position: relative;
     top: -10%;
+    /* NOWE: */
+    max-height: 90vh; 
+    overflow-y: auto; 
 }
 
 .search-header {
