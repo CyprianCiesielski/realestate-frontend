@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react'; // Dodaj useRef
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchUserDetails, grantUserPermissions } from './api'; // Import nowej funkcji API
+import { fetchUserDetails, grantUserPermissions } from './api';
 import { type UserDetailData } from './types';
-import { FaPlus, FaTimes } from 'react-icons/fa'; // Import ikonki
+import { FaPlus, FaTimes } from 'react-icons/fa';
 import './UserDetails.css';
 
 // Dostępne uprawnienia (BEZ ADMIN)
@@ -17,13 +17,12 @@ export const UserDetails = () => {
     // Stan przechowujący ID projektu, dla którego otwarte jest menu dodawania
     const [activeDropdownProjectId, setActiveDropdownProjectId] = useState<number | null>(null);
 
-    // Ref do obsługi kliknięcia poza dropdownem (żeby go zamknąć)
+    // Ref do obsługi kliknięcia poza dropdownem
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const loadDetails = async () => {
         if (!userId) return;
         try {
-            // Nie ustawiamy setLoading(true) przy odświeżaniu, żeby nie migało
             const data = await fetchUserDetails(userId);
             setUser(data);
         } catch (err) {
@@ -38,20 +37,13 @@ export const UserDetails = () => {
         loadDetails();
     }, [userId]);
 
-    // Obsługa dodania uprawnienia
     const handleAddPermission = async (projectId: number, currentPermissions: string[], newPermission: string) => {
         if (!user) return;
-
         try {
-            // Dodajemy nowe uprawnienie do istniejących
             const updatedPermissions = [...currentPermissions, newPermission];
-
             await grantUserPermissions(user.id, projectId, updatedPermissions);
-
-            // Zamknij menu i odśwież widok
             setActiveDropdownProjectId(null);
             await loadDetails();
-
         } catch (err) {
             alert('Wystąpił błąd podczas dodawania uprawnienia.');
             console.error(err);
@@ -60,22 +52,16 @@ export const UserDetails = () => {
 
     const handleRemovePermission = async (projectId: number, currentPermissions: string[], permissionToRemove: string) => {
         if (!user) return;
-
         try {
-            // Filtrujemy listę, wyrzucając kliknięte uprawnienie
             const updatedPermissions = currentPermissions.filter(p => p !== permissionToRemove);
-
-            // Wysyłamy nową, krótszą listę do backendu
             await grantUserPermissions(user.id, projectId, updatedPermissions);
-
-            await loadDetails(); // Odświeżamy widok
+            await loadDetails();
         } catch (err) {
             alert('Błąd podczas usuwania uprawnienia.');
             console.error(err);
         }
     };
 
-    // Zamykanie dropdownu po kliknięciu poza nim
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -89,16 +75,16 @@ export const UserDetails = () => {
     if (loading) return <div className="user-details-container">Ładowanie...</div>;
     if (error) return <div className="user-details-container error-msg">{error}</div>;
     if (!user) return <div className="user-details-container">Brak danych.</div>;
-    const isGlobalAdmin = user.role === 'ADMIN' || user.role === 'ROLE_ADMIN';
 
+    const isGlobalAdmin = user.role === 'ADMIN' || user.role === 'ROLE_ADMIN';
     const initials = (user.firstName?.charAt(0) || '') + (user.lastName?.charAt(0) || '');
+
     return (
         <div className="user-details-container">
             <div className="user-details-header">
                 <Link to="/admin" className="back-link">← Wróć do listy użytkowników</Link>
             </div>
 
-            {/* KARTA PROFILOWA (Bez zmian) */}
             <div className="user-profile-card">
                 <div className="profile-avatar-large">{initials.toUpperCase() || 'U'}</div>
                 <div className="profile-info">
@@ -106,13 +92,14 @@ export const UserDetails = () => {
                     <div className="profile-email">{user.email}</div>
                     <div className="profile-meta-grid">
                         <div className="meta-item"><label>Rola</label><span>{user.role}</span></div>
-                        <div className="meta-item"><label>Firma</label><span>{user.companies.map(c => c.name).join(", ") || '-'}</span></div>
+                        <div className="meta-item"><label>Firma</label><span>{user.companies && user.companies.length > 0
+                            ? user.companies.join(", ")
+                            : '-'}</span></div>
                         <div className="meta-item"><label>ID</label><span>#{user.id}</span></div>
                     </div>
                 </div>
             </div>
 
-            {/* TABELA PROJEKTÓW */}
             <div className="projects-section">
                 <h3>Dostęp do projektów ({user.assignedProjects?.length || 0})</h3>
 
@@ -132,32 +119,33 @@ export const UserDetails = () => {
                                         <td style={{ width: '60px', color: '#6b778c' }}>#{project.projectId}</td>
                                         <td className="project-name-cell">{project.projectName}</td>
                                         <td>
-                                            <div className="permissions-container" ref={activeDropdownProjectId === project.projectId ? dropdownRef : null}>
-
-                                                {/* 1. Wyświetlanie kafelków z funkcją usuwania */}
+                                            <div className="permissions-container">
+                                                {/* Wyświetlanie kafelków */}
                                                 {project.permissions.map((perm) => (
                                                     <span key={perm} className="permission-badge" data-perm={perm}>
-
-                                                        {/* Ikona X - widoczna po najechaniu dzięki CSS */}
-                                                    
-                                                        {!isGlobalAdmin && (<button
-                                                            className="remove-permission-btn"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation(); // Żeby nie klikało niczego pod spodem
-                                                                handleRemovePermission(project.projectId, project.permissions, perm);
-                                                            }}
-                                                            title="Usuń uprawnienie"
-                                                        >
-                                                            <FaTimes />
-                                                        </button>)}
-
+                                                        {!isGlobalAdmin && (
+                                                            <button
+                                                                className="remove-permission-btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleRemovePermission(project.projectId, project.permissions, perm);
+                                                                }}
+                                                                title="Usuń uprawnienie"
+                                                            >
+                                                                <FaTimes />
+                                                            </button>
+                                                        )}
                                                         {perm.replace('_', ' ')}
                                                     </span>
                                                 ))}
 
-                                                {/* 2. Przycisk PLUSIK - wyświetlany tylko jeśli user nie ma kompletu uprawnień */}
+                                                {/* Przycisk PLUSIK i DROPDOWN opakowane w wrapper dla pozycjonowania */}
                                                 {!isGlobalAdmin && !ALL_PERMISSIONS.every(p => project.permissions.includes(p)) && (
-                                                    <>
+                                                    <div
+                                                        className="add-permission-wrapper"
+                                                        ref={activeDropdownProjectId === project.projectId ? dropdownRef : null}
+                                                        style={{ position: 'relative', display: 'inline-flex' }}
+                                                    >
                                                         <button
                                                             className="add-permission-btn"
                                                             onClick={() => setActiveDropdownProjectId(
@@ -168,7 +156,6 @@ export const UserDetails = () => {
                                                             <FaPlus />
                                                         </button>
 
-                                                        {/* DROPDOWN MENU */}
                                                         {activeDropdownProjectId === project.projectId && (
                                                             <div className="permissions-dropdown">
                                                                 {ALL_PERMISSIONS
@@ -185,9 +172,8 @@ export const UserDetails = () => {
                                                                 }
                                                             </div>
                                                         )}
-                                                    </>
+                                                    </div>
                                                 )}
-
                                             </div>
                                         </td>
                                     </tr>
