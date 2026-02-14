@@ -9,7 +9,7 @@ import {
   FaProjectDiagram,
 } from "react-icons/fa";
 import { searchInProject, searchInPillar, searchInItem } from "./api";
-import type { SearchResult } from "./api";
+import type { SearchResult } from "./types";
 import "./SearchModal.css";
 
 interface ScopedSearchModalProps {

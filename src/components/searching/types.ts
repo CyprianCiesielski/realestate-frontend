@@ -1,9 +1,7 @@
-// features/search/types.ts
-
 // 1. Kryteria wyszukiwania (SearchingCriteria z Javy)
 export interface SearchCriteria {
   name?: string;
-  tags?: string[]; // Tagi do wyszukiwania w bazie (opcjonalne)
+  tags?: string[];
   priority?: number;
   projectId?: string;
   pillarId?: string;
@@ -19,7 +17,7 @@ export interface FilterCriteria {
   filterByProject: boolean;
   filterByPillar: boolean;
   filterByItem: boolean;
-  filteredTagsNames?: string[]; // Tagi do filtrowania wyników
+  filteredTagsNames?: string[];
   filteredPriority?: number | null;
   companyId?: number | null;
 }
@@ -31,7 +29,7 @@ export interface GlobalSearchResultDto {
   items: ItemDto[];
 }
 
-// 4. DTO pomocnicze (struktura obiektów z backendu)
+// 4. DTO pomocnicze
 export interface ProjectDto {
   id: number;
   name: string;
@@ -42,12 +40,10 @@ export interface PillarDto {
   id: number;
   name: string;
   tags?: TagDto[];
-  // Backend zwraca zagnieżdżony projekt
   project?: {
     id: number;
     name: string;
   };
-  // LUB płaskie ID (zależy od Twojego mappera), obsługujemy oba przypadki w komponencie
   projectId?: number;
 }
 
@@ -56,7 +52,6 @@ export interface ItemDto {
   name: string;
   tags?: TagDto[];
   priority?: number;
-  // Zagnieżdżony Filar i Projekt
   pillar?: {
     id: number;
     name: string;
@@ -65,7 +60,6 @@ export interface ItemDto {
       name: string;
     };
   };
-  // Płaskie ID (opcjonalnie)
   pillarId?: number;
   projectId?: number;
 }
@@ -79,9 +73,12 @@ export interface TagDto {
 export interface SearchResult {
   id: number;
   name: string;
-  type: "project" | "pillar" | "item";
+  // 👇 ZMIANA: Dodano "message", bo używasz go w SearchModal
+  type: "project" | "pillar" | "item" | "message";
   parentName?: string;
-  url: string; // Gotowy URL do przekierowania
+  url: string;
   projectId?: number;
   pillarId?: number;
+  // 👇 ZMIANA: Dodano itemId, może się przydać przy wiadomościach
+  itemId?: number;
 }

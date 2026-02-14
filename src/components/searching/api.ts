@@ -6,14 +6,15 @@ import type {
   SearchResult,
 } from "./types";
 
-// --- 1. Funkcja pomocnicza: Konwersja DTO z backendu na płaską listę (dla Modala) ---
+// --- 1. Funkcja pomocnicza: Konwersja DTO z backendu na płaską listę ---
 const transformToSearchResults = (
   data: GlobalSearchResultDto,
 ): SearchResult[] => {
   const results: SearchResult[] = [];
 
   // Projekty
-  data.projects.forEach((p) => {
+  // 👇 ZMIANA: Dodano ?. (optional chaining) dla bezpieczeństwa
+  data.projects?.forEach((p) => {
     results.push({
       id: p.id,
       name: p.name,
@@ -23,7 +24,7 @@ const transformToSearchResults = (
   });
 
   // Filary (Moduły)
-  data.pillars.forEach((p) => {
+  data.pillars?.forEach((p) => {
     results.push({
       id: p.id,
       name: p.name,
@@ -35,7 +36,7 @@ const transformToSearchResults = (
   });
 
   // Itemy (Wątki)
-  data.items.forEach((i) => {
+  data.items?.forEach((i) => {
     const projectId = i.pillar?.project?.id || i.projectId;
     const pillarId = i.pillar?.id || i.pillarId;
 
@@ -82,7 +83,6 @@ export const searchGlobalWithFilter = async (
     filterByPillar: filterParams.filterByPillar,
     filterByItem: filterParams.filterByItem,
 
-    // Serializacja tablicy tagów do stringa po przecinku
     filteredTagsNames: filterParams.filteredTagsNames?.join(","),
     filteredPriority: filterParams.filteredPriority,
 
@@ -100,7 +100,6 @@ export const searchGlobalWithFilter = async (
 };
 
 // --- 4. Funkcje kontekstowe (dla SearchModal) ---
-// To są te funkcje, których brakowało w błędzie!
 
 export const searchInProject = async (
   projectId: string,
@@ -108,7 +107,7 @@ export const searchInProject = async (
 ): Promise<SearchResult[]> => {
   const rawData = await searchGlobal({
     name: query,
-    projectId: projectId, // Backend filtruje po ID projektu
+    projectId: projectId,
   });
   return transformToSearchResults(rawData);
 };
@@ -119,20 +118,16 @@ export const searchInPillar = async (
 ): Promise<SearchResult[]> => {
   const rawData = await searchGlobal({
     name: query,
-    pillarId: pillarId, // Backend filtruje po ID filaru
+    pillarId: pillarId,
   });
   return transformToSearchResults(rawData);
 };
 
-// Wyszukiwanie wewnątrz Itemu (np. w komentarzach/historii)
-// Obecnie backend tego nie wspiera, więc zwracamy pustą listę,
-// ale funkcja musi istnieć, żeby Modal nie rzucał błędu.
 export const searchInItem = async (
   _itemId: string,
   _query: string,
 ): Promise<SearchResult[]> => {
-  console.warn(
-    "API: Wyszukiwanie wewnątrz itemu nie jest jeszcze zaimplementowane na backendzie.",
-  );
+  // Tutaj backend jeszcze nie obsługuje szukania w komentarzach
+  console.warn("API: Wyszukiwanie wewnątrz itemu nie zaimplementowane.");
   return [];
 };
