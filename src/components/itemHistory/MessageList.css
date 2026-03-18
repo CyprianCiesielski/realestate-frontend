@@ -249,3 +249,51 @@
         box-shadow: none;
     }
 }
+
+.selected-file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Rozpycha nazwę i ikonkę X na boki */
+  background-color: #eef2f5; /* Delikatne, szare tło dymku */
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin: 10px 15px;
+  width: fit-content;
+  gap: 15px; /* Odstęp między nazwą pliku a iksem */
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Odstęp między spinaczem a tekstem */
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.file-icon {
+  color: #6c757d;
+  font-size: 16px;
+}
+
+/* Wygląd czerwonego iksa */
+.remove-file-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none; /* Usuwa paskudną ramkę */
+  color: #dc3545; /* Czerwony kolor (bootstrapowy danger) */
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%; /* Okrągłe tło przy najechaniu */
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Efekt podświetlenia po najechaniu myszką */
+.remove-file-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1); /* Delikatne czerwone tło */
+  color: #bd2130; /* Nieco ciemniejszy czerwony */
+  transform: scale(1.1); /* Minimalne powiększenie ikony */
+}

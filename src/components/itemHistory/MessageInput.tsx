@@ -1,21 +1,16 @@
-import { useState, useEffect, useRef } from "react";
-import {
-  FaPaperPlane,
-  FaTimes,
-  FaPen,
-  FaPlus,
-  FaImage,
-  FaReply,
-} from "react-icons/fa";
-import type { ItemHistory } from "./types.ts";
+import React, { useRef, useState, useEffect } from "react";
+// Usunięto FaRegImage, FaRegSmile
+import { FaPlus, FaTimes, FaPaperclip } from "react-icons/fa";
+import { AiOutlineSend } from "react-icons/ai";
 import "./MessageInput.css";
+import { type ItemHistory } from "../itemHistory/types";
 
 interface MessageInputProps {
   onSendMessage: (text: string, file?: File) => void;
-  editingText?: string | null;
-  onCancelEdit?: () => void;
-  replyTo?: ItemHistory | null;
-  onCancelReply?: () => void;
+  editingText: string | null;
+  onCancelEdit: () => void;
+  replyTo: ItemHistory | null;
+  onCancelReply: () => void;
 }
 
 export function MessageInput({
@@ -30,62 +25,28 @@ export function MessageInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Synchronizacja dla Edycji i Odpowiedzi
   useEffect(() => {
-    if (typeof editingText === "string") {
+    if (editingText !== null) {
       setText(editingText);
-      // Przy wejściu w tryb edycji warto przeliczyć wysokość, aby tekst się zmieścił
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-        textareaRef.current.focus();
-      }
-    } else if (editingText === null && !replyTo) {
+      textareaRef.current?.focus();
+    } else {
       setText("");
-      // Reset wysokości przy wyjściu z trybu edycji
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "";
-      }
     }
+  }, [editingText]);
 
+  useEffect(() => {
     if (replyTo) {
       textareaRef.current?.focus();
     }
-  }, [editingText, replyTo]);
+  }, [replyTo]);
 
   const handleSubmit = () => {
     if (!text.trim() && !selectedFile) return;
-
     onSendMessage(text, selectedFile || undefined);
-
     setText("");
     setSelectedFile(null);
-
-    // Reset inputu pliku
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-
-    // ZMIANA: Resetujemy wysokość do pustego stringa (""),
-    // co sprawia, że textarea wraca do domyślnej wysokości z atrybutu rows={3}
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "";
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-    if (e.key === "Escape") {
-      if (editingText && onCancelEdit) onCancelEdit();
-      if (replyTo && onCancelReply) onCancelReply();
-      if (selectedFile) {
-        setSelectedFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      }
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "";
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -102,41 +63,36 @@ export function MessageInput({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <div
-      className={`input-container-wrapper ${editingText ? "editing-mode" : ""} ${replyTo ? "reply-mode" : ""}`}
+      className={`input-container-wrapper ${editingText !== null ? "editing-mode" : ""
+        } ${replyTo ? "reply-mode" : ""}`}
     >
-      {/* 1. PASEK EDYCJI */}
-      {editingText && (
-        <div className="editing-info-bar">
-          <div className="editing-label">
-            <FaPen size={12} /> <span>Edytujesz wiadomość</span>
-          </div>
-          <button className="cancel-edit-btn" onClick={onCancelEdit}>
-            <FaTimes />
+      {editingText !== null && (
+        <div className="action-bar editing-bar">
+          Editing message...
+          <button className="cancel-btn" onClick={onCancelEdit}>
+            Cancel
           </button>
         </div>
       )}
 
-      {/* 2. PASEK ODPOWIEDZI */}
-      {replyTo && !editingText && (
-        <div className="reply-info-bar">
-          <div className="reply-label">
-            <FaReply size={12} style={{ transform: "scaleX(-1)" }} />
-            <div className="reply-details">
-              <span className="reply-to-user">
-                Odpowiadasz użytkownikowi <strong>{replyTo.author}</strong>
-              </span>
-              <span className="reply-to-text">{replyTo.description}</span>
-            </div>
-          </div>
-          <button className="cancel-reply-btn" onClick={onCancelReply}>
-            <FaTimes />
+      {replyTo && (
+        <div className="action-bar reply-bar">
+          Replying to <strong>{replyTo.author}</strong>
+          <button className="cancel-btn" onClick={onCancelReply}>
+            Cancel
           </button>
         </div>
       )}
 
-      {/* 3. GŁÓWNY PASEK INPUTA */}
       <div className="input-container">
         <div className="input-actions">
           <input
@@ -148,51 +104,21 @@ export function MessageInput({
           <button
             className="icon-btn"
             onClick={() => fileInputRef.current?.click()}
-            title="Dodaj plik"
+            title="Upload file"
           >
-            <FaPlus />
-          </button>
-          <button className="icon-btn">
-            <FaImage />
+            <FaPlus size={22} />
           </button>
         </div>
 
-        <div
-          className="input-wrapper"
-          style={{ display: "flex", flexDirection: "column" }}
-        >
+        <div className="input-wrapper">
           {selectedFile && (
-            <div
-              className="selected-file-preview"
-              style={{
-                fontSize: "12px",
-                color: "#666",
-                padding: "4px 8px",
-                background: "#f0f0f0",
-                borderRadius: "4px",
-                marginBottom: "4px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <span>📎 {selectedFile.name}</span>
-              <button
-                onClick={() => {
-                  setSelectedFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                }}
-                style={{
-                  cursor: "pointer",
-                  border: "none",
-                  background: "transparent",
-                  color: "#999",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                title="Usuń plik"
-              >
-                <FaTimes size={10} />
+            <div className="selected-file-preview">
+              <div className="file-info">
+                <FaPaperclip className="file-icon" />
+                <span className="file-name">{selectedFile.name}</span>
+              </div>
+              <button onClick={() => setSelectedFile(null)} className="remove-file-btn" title="Usuń załącznik">
+                <FaTimes />
               </button>
             </div>
           )}
@@ -203,7 +129,7 @@ export function MessageInput({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder={editingText ? "Zmień treść..." : "Napisz wiadomość..."}
-            rows={3} // ZMIANA: Domyślnie 3 linijki
+            rows={2} // ZMIANA: Domyślnie 3 linijki
           />
         </div>
 
@@ -211,13 +137,8 @@ export function MessageInput({
           className="send-btn"
           onClick={handleSubmit}
           disabled={!text.trim() && !selectedFile}
-          title={editingText ? "Zapisz" : "Wyślij"}
         >
-          {editingText ? (
-            <span className="save-text">Zapisz</span>
-          ) : (
-            <FaPaperPlane />
-          )}
+          <AiOutlineSend />
         </button>
       </div>
     </div>
