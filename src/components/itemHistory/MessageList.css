@@ -2,7 +2,7 @@
 .message-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 6px; /* Messenger ma bardzo małe odstępy między wiadomościami */
     padding: 1rem;
     width: 100%;
     box-sizing: border-box;
@@ -13,6 +13,7 @@
     display: flex;
     flex-direction: column;
     max-width: 100%;
+    margin-bottom: 2px;
 }
 
 /* LEWA STRONA (Inni) */
@@ -27,50 +28,54 @@
 
 /* --- DANE META (Autor, Data) --- */
 .message-meta {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #65676b;
-    margin-bottom: 0.25rem;
+    margin-top: 8px; /* Większy odstęp przed nowym blokiem wiadomości */
+    margin-bottom: 2px;
     padding: 0 0.5rem;
 }
 
 /* --- DYMEK CZATU --- */
 .chat-bubble {
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 18px;
     position: relative;
-    max-width: 80%;
+    max-width: 75%;
     width: fit-content;
     white-space: pre-wrap;
     word-break: break-word;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
     transition: transform 0.1s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Styl dla INNYCH (Szary) */
 .message-wrapper.others .chat-bubble {
     background-color: #e4e6eb;
     color: #050505;
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 4px; /* Messengerowy dzióbek */
 }
 
 /* Styl dla TWOICH (Niebieski) */
 .message-wrapper.mine .chat-bubble {
     background-color: #0084ff;
     color: white;
-    border-bottom-right-radius: 4px;
+    border-bottom-right-radius: 4px; /* Messengerowy dzióbek */
 }
 
-/* --- 5. PRZYPIĘTA WIADOMOŚĆ - Czysty, głęboki kolor bez "brudu" --- */
+/* --- PRZYPIĘTA WIADOMOŚĆ --- */
 .chat-bubble.pinned-bubble {
-    background-color: #0056b3; /* Solidny, ciemniejszy niebieski */
-    border: 1px solid rgba(255, 215, 0, 0.3); /* Bardzo delikatna złota obwódka zamiast poświaty */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Naturalny cień zamiast świecenia */
+    background-color: #0056b3;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* --- TREŚĆ --- */
+/* --- TREŚĆ TEKSTOWA --- */
 .content {
     margin: 0;
     line-height: 1.4;
+    font-size: 0.95rem;
 }
 
 .search-highlight {
@@ -79,77 +84,81 @@
     border-radius: 2px;
 }
 
-/* --- 7. PINEZKA (BADGE) --- */
-.pin-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: linear-gradient(135deg, #ffd700, #ffaa00);
-    color: #333;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
+/* --- ZAŁĄCZNIKI (Messenger Style Tile) --- */
+.file-attachment-wrapper {
+    margin-top: 6px;
+    display: flex;
+    width: 100%;
+}
+
+.messenger-file-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    z-index: 1;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes popIn {
-    from { transform: scale(0); }
-    to { transform: scale(1); }
-}
-
-/* --- ZAŁĄCZNIKI --- */
-.attachment-link {
-    display: inline-block;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
     text-decoration: none;
-    padding: 4px 8px;
-    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    max-width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.mine .attachment-link {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-.others .attachment-link {
+/* Kolory załącznika dla INNYCH */
+.others .messenger-file-link {
     background-color: rgba(0, 0, 0, 0.05);
     color: #0084ff;
+}
+
+.others .messenger-file-link:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Kolory załącznika dla CIEBIE */
+.mine .messenger-file-link {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.mine .messenger-file-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.file-name-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* --- REAKCJE --- */
 .reactions-container {
     position: absolute;
-    bottom: -14px;
+    bottom: -12px;
     background: white;
     border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 2px 6px;
+    padding: 1px 5px;
     display: flex;
-    gap: 4px;
+    gap: 3px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 3;
 }
 
 .mine .reactions-container {
-    left: 8px; /* Twoje reakcje po lewej stronie dymka */
+    left: 8px;
 }
 
 .others .reactions-container {
-    right: 8px; /* Reakcje innych po prawej stronie dymka */
+    right: 8px;
 }
 
 .reaction-pill {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 0.8rem;
+    gap: 2px;
+    font-size: 0.75rem;
     cursor: pointer;
 }
 
@@ -158,142 +167,86 @@
     color: #0084ff;
 }
 
-/* --- PUSTY STAN --- */
-.empty-message {
-    text-align: center;
-    color: #8e8e8e;
-    margin-top: 2rem;
-    font-style: italic;
-}
-
-/* --- PODGLĄD ODPOWIEDZI W DYMKU --- */
+/* --- PODGLĄD ODPOWIEDZI --- */
 .reply-preview {
-    background-color: rgba(0, 0, 0, 0.05); /* Lekkie przyciemnienie */
+    background-color: rgba(0, 0, 0, 0.05);
     border-left: 3px solid #0084ff;
     padding: 4px 8px;
     border-radius: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     cursor: pointer;
     font-size: 0.8rem;
-    transition: background-color 0.2s;
 }
 
-/* Kolory dla Twoich wiadomości (niebieskie tło dymka) */
 .mine .reply-preview {
     background-color: rgba(255, 255, 255, 0.15);
     border-left-color: #ffffff;
     color: white;
 }
 
-.mine .reply-preview:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-}
-
 .reply-author {
     font-weight: 700;
-    font-size: 0.75rem;
-    margin-bottom: 2px;
-}
-
-.reply-content {
-    opacity: 0.85;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Styl dla wiadomości, która jest celem skoku */
-.flash-highlight {
-    z-index: 10; /* Wyżej niż inne, żeby powiększenie nie wchodziło pod inne dymki */
-    position: relative;
-}
-
-.flash-highlight .chat-bubble {
-    animation: target-pulse 2s ease-out;
-    /* Dodajemy płynne przejście powrotne po zakończeniu animacji */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.edited-info {
-    display: block; /* Lub 'inline-block' jeśli wolisz obok tekstu */
     font-size: 0.7rem;
-    color: #a0a0a0; /* Jasnoszary kolor */
+    margin-bottom: 1px;
+}
+
+/* --- INFO O EDYCJI --- */
+.edited-info {
+    font-size: 0.65rem;
+    opacity: 0.7;
     font-style: italic;
-    margin-top: 2px;
-    text-align: right; /* Wyrównanie do prawej, popularne w komunikatorach */
-    user-select: none; /* Żeby nie zaznaczało się przy kopiowaniu tekstu */
+    margin-top: 4px;
+    text-align: right;
 }
 
-/* Opcjonalnie: Jeśli wiadomość jest "moja", kolor może być jaśniejszy,
-   jeśli dymek ma ciemne tło */
-.message-wrapper.mine .edited-info {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-@keyframes target-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: none;
-    }
-    20% {
-        transform: scale(1.05); /* Powiększenie o 5% */
-        background-color: rgba(255, 215, 0, 0.2); /* Delikatny złoty blask */
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 0 10px 20px rgba(0,0,0,0.1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-        background-color: transparent;
-        box-shadow: none;
-    }
-}
-
+/* --- UI WYBORU PLIKU (Input Area) --- */
 .selected-file-preview {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Rozpycha nazwę i ikonkę X na boki */
-  background-color: #eef2f5; /* Delikatne, szare tło dymku */
-  padding: 8px 12px;
-  border-radius: 12px;
-  margin: 10px 15px;
-  width: fit-content;
-  gap: 15px; /* Odstęp między nazwą pliku a iksem */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin: 8px 15px;
+    width: fit-content;
+    gap: 12px;
+    border: 1px solid #e4e6eb;
 }
 
 .file-info {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Odstęp między spinaczem a tekstem */
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #050505;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
-.file-icon {
-  color: #6c757d;
-  font-size: 16px;
-}
-
-/* Wygląd czerwonego iksa */
 .remove-file-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none; /* Usuwa paskudną ramkę */
-  color: #dc3545; /* Czerwony kolor (bootstrapowy danger) */
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%; /* Okrągłe tło przy najechaniu */
-  transition: background-color 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
 }
 
-/* Efekt podświetlenia po najechaniu myszką */
 .remove-file-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1); /* Delikatne czerwone tło */
-  color: #bd2130; /* Nieco ciemniejszy czerwony */
-  transform: scale(1.1); /* Minimalne powiększenie ikony */
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* --- ANIMACJA SKOKU --- */
+.flash-highlight .chat-bubble {
+    animation: target-pulse 2s ease-out;
+}
+
+@keyframes target-pulse {
+    0% { transform: scale(1); }
+    20% { transform: scale(1.03); background-color: rgba(255, 215, 0, 0.2); }
+    100% { transform: scale(1); }
 }

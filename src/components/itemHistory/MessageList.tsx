@@ -148,15 +148,11 @@ export function MessageList({
               {/* Pinezka */}
               {entry.isPinned && <FaThumbtack className="pin-badge" />}
 
-              {/* Sekcja Odpowiedzi (Reply) */}
+              {/* Sekcja Odpowiedzi */}
               {entry.replyTo && (
                 <div
                   className="reply-preview"
-                  /* Upewnij się, że scrollToMessage jest dostępne w zasięgu tego komponentu */
-                  onClick={(e) => {
-                    e.stopPropagation(); // Zapobiega otwarciu menu kontekstowego przy kliknięciu w podgląd
-                    onAction.goToMessage(entry.replyTo!.id);
-                  }}
+                  onClick={() => onAction.goToMessage(entry.replyTo!.id)}
                 >
                   <div className="reply-author">
                     <FaReply
@@ -166,10 +162,7 @@ export function MessageList({
                         transform: "scaleX(-1)",
                       }}
                     />
-                    {entry.replyTo.author?.trim().toLowerCase() ===
-                    currentUserFullName?.toLowerCase()
-                      ? "Ty"
-                      : entry.replyTo.author}
+                    {entry.replyTo.author}
                   </div>
                   <div className="reply-content-text">
                     {entry.replyTo.description}
@@ -177,32 +170,40 @@ export function MessageList({
                 </div>
               )}
 
-              <p className="content">
-                <HighlightedText
-                  text={entry.description}
-                  highlight={searchQuery}
-                />
-              </p>
-
-              {entry.edited && (
-                <span
-                  className="edited-info"
-                  title="Ta wiadomość była edytowana"
+              {/* 1. TWOJA WIADOMOŚĆ (Zwykły tekst) */}
+              {entry.description && (
+                <p
+                  className="content"
+                  style={{ marginBottom: entry.googleFileId ? "8px" : "0" }}
                 >
-                  Edytowano
-                </span>
+                  <HighlightedText
+                    text={entry.description}
+                    highlight={searchQuery}
+                  />
+                </p>
               )}
 
+              {/* 2. ZAŁĄCZNIK (Osobny link z nazwą pliku poniżej tekstu) */}
               {entry.googleFileId && (
-                <a
-                  href={entry.webViewLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="attachment-link"
-                >
-                  📎 Załącznik
-                </a>
+                <div className="file-attachment-wrapper">
+                  <a
+                    href={entry.webViewLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="messenger-file-link"
+                  >
+                    <span className="file-icon">📎</span>
+                    <span className="file-name-text">
+                      <HighlightedText
+                        text={entry.fileName || "Załącznik"}
+                        highlight={searchQuery}
+                      />
+                    </span>
+                  </a>
+                </div>
               )}
+
+              {entry.edited && <span className="edited-info">Edytowano</span>}
 
               {/* Reakcje */}
               {entry.reactions && entry.reactions.length > 0 && (
@@ -212,11 +213,7 @@ export function MessageList({
                       <div
                         key={emoji}
                         className="reaction-pill"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAction.addReaction(entry.id, emoji);
-                        }}
-                        title={`Reakcje: ${data.users.join(", ")}`}
+                        onClick={() => onAction.addReaction(entry.id, emoji)}
                       >
                         <span>{emoji}</span>
                         {data.count > 1 && (

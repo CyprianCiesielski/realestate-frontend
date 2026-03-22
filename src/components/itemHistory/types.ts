@@ -13,6 +13,7 @@ export interface ItemHistory {
   description: string;
   isPinned: boolean;
   edited: boolean;
+  fileName?: string;
 
   reactions: MessageReaction[];
   replyTo?: ItemHistory;

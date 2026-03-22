@@ -305,10 +305,29 @@ export function PillarDetails() {
               <div className="filter-dropdown-menu right-aligned">
                 <div className="filter-section">
                   <div className="filter-section-title">STATUS</div>
-                  {uniqueStatuses.length === 0 ? (
-                    <div className="filter-empty-text">Brak statusów</div>
-                  ) : (
-                    uniqueStatuses.map((status) => (
+                  {/* Dodajemy te dwa checkboxy na sztywno, żeby zawsze były dostępne */}
+                  <label className="filter-checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes("active")}
+                      onChange={() => toggleStatus("active")}
+                    />
+                    <span>Aktywne</span>
+                  </label>
+
+                  <label className="filter-checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes("archived")}
+                      onChange={() => toggleStatus("archived")}
+                    />
+                    <span style={{ color: "#d9534f" }}>Zarchiwizowane</span>
+                  </label>
+
+                  {/* Opcjonalnie: reszta statusów, jeśli masz jakieś dynamiczne (np. finished) */}
+                  {uniqueStatuses
+                    .filter((s) => s !== "active" && s !== "archived")
+                    .map((status) => (
                       <label key={status} className="filter-checkbox-item">
                         <input
                           type="checkbox"
@@ -319,8 +338,7 @@ export function PillarDetails() {
                           {status}
                         </span>
                       </label>
-                    ))
-                  )}
+                    ))}
                 </div>
 
                 <div className="dropdown-divider" />

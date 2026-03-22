@@ -30,7 +30,14 @@ export function PillarColumn({
 
   const visibleItems =
     pillar.items?.filter((item) => {
-      if (selectedStatuses.length === 0) return true;
+      // Jeśli nie wybrano żadnego statusu w filtrze...
+      if (selectedStatuses.length === 0) {
+        // ...pokazuj wszystko, co NIE jest zarchiwizowane
+        return item.state !== "archived";
+      }
+
+      // Jeśli filtry są zaznaczone, pokazuj tylko te elementy,
+      // których stan znajduje się w tablicy selectedStatuses
       return selectedStatuses.includes(item.state || "active");
     }) || [];
 
