@@ -140,30 +140,8 @@ export function CreateProjectModal({
             />
           </div>
 
-          <div
-            className="form-group"
-            style={{ position: "relative", zIndex: 101 }}
-          >
-            <label>Tagi</label>
-            <TagSelector
-              selectedTags={selectedTags}
-              onChange={setSelectedTags}
-              allTags={allAvailableTags}
-            />
-          </div>
-
           <div className="form-group">
-            <label>Osoba odpowiedzialna</label>
-            <input
-              name="personResponsible"
-              value={formData.personResponsible}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* SELECT FIRMY */}
-          <div className="form-group">
-            <label>Firma Odpowiedzialna</label>
+            <label>Firma Odpowiedzialna *</label>
             <select
               name="company"
               value={formData.company?.name || ""}
@@ -192,6 +170,27 @@ export function CreateProjectModal({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
+            <label>Tagi</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+              allTags={allAvailableTags}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Osoba odpowiedzialna</label>
+            <input
+              name="personResponsible"
+              value={formData.personResponsible}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">

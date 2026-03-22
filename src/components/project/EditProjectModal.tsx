@@ -117,30 +117,9 @@ export function EditProjectModal({
             />
           </div>
 
-          <div
-            className="form-group"
-            style={{ position: "relative", zIndex: 101 }}
-          >
-            <label>Tagi</label>
-            <TagSelector
-              selectedTags={selectedTags}
-              onChange={setSelectedTags}
-              allTags={allAvailableTags}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Osoba odpowiedzialna</label>
-            <input
-              name="personResponsible"
-              value={formData.personResponsible}
-              onChange={handleChange}
-            />
-          </div>
-
           {/* SELECT FIRMY - NAPRAWIONY */}
           <div className="form-group">
-            <label>Firma Odpowiedzialna</label>
+            <label>Firma Odpowiedzialna *</label>
             <select
               name="company"
               // Wyświetlamy nazwę z obiektu w stanie
@@ -171,6 +150,27 @@ export function EditProjectModal({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div
+            className="form-group"
+            style={{ position: "relative", zIndex: 101 }}
+          >
+            <label>Tagi</label>
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+              allTags={allAvailableTags}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Osoba odpowiedzialna</label>
+            <input
+              name="personResponsible"
+              value={formData.personResponsible}
+              onChange={handleChange}
+            />
           </div>
 
           {/* Reszta bez zmian */}

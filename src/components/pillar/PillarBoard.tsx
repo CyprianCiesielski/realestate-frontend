@@ -4,9 +4,10 @@ import { PillarColumn } from "./PillarColumn.tsx";
 
 interface PillarBoardProps {
   pillars: Pillar[];
-  projectId: string; // 👈 NOWOŚĆ
+  projectId: string;
   projectName: string;
-  onPillarUpdated: (updatedPillar: Pillar) => void; // 👈 NOWOŚĆ
+  onPillarUpdated: (updatedPillar: Pillar) => void;
+  selectedStatuses: string[];
 }
 
 export function PillarBoard({
@@ -14,19 +15,20 @@ export function PillarBoard({
   projectId,
   projectName,
   onPillarUpdated,
+  selectedStatuses,
 }: PillarBoardProps) {
   const sortedPillars = [...pillars].sort((a, b) => a.id - b.id);
 
   return (
     <div className="board-container">
       {sortedPillars.map((pillar) => (
-        // 2. Używamy nowego komponentu
         <PillarColumn
           key={pillar.id}
           pillar={pillar}
-          projectId={projectId} // Przekazujemy ID projektu
+          projectId={projectId}
           projectName={projectName}
-          onPillarUpdated={onPillarUpdated} // Przekazujemy funkcję aktualizującą
+          onPillarUpdated={onPillarUpdated}
+          selectedStatuses={selectedStatuses}
         />
       ))}
     </div>

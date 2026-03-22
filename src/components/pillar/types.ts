@@ -14,4 +14,5 @@ export interface Pillar {
 
   items: Item[];
   tags: Tag[];
+  driveFolderLink?: string;
 }

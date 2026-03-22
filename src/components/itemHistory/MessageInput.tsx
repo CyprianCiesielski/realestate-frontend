@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-// Usunięto FaRegImage, FaRegSmile
 import { FaPlus, FaTimes, FaPaperclip } from "react-icons/fa";
 import { AiOutlineSend } from "react-icons/ai";
 import "./MessageInput.css";
@@ -25,6 +24,7 @@ export function MessageInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 1. Inicjalizacja tekstu przy edycji
   useEffect(() => {
     if (editingText !== null) {
       setText(editingText);
@@ -34,27 +34,35 @@ export function MessageInput({
     }
   }, [editingText]);
 
+  // 2. Focus przy odpowiedzi
   useEffect(() => {
     if (replyTo) {
       textareaRef.current?.focus();
     }
   }, [replyTo]);
 
+  // 👇 NOWY KROK: Automatyczne dostosowanie wysokości przy KAŻDEJ zmianie tekstu
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset do auto pozwala na zmniejszanie pola po usunięciu tekstu
+      textareaRef.current.style.height = "auto";
+      // Ustawienie nowej wysokości na podstawie realnej zawartości
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [text]); // Zależność [text] sprawia, że działa to też przy wczytaniu edycji
+
   const handleSubmit = () => {
     if (!text.trim() && !selectedFile) return;
     onSendMessage(text, selectedFile || undefined);
     setText("");
     setSelectedFile(null);
-    if (textareaRef.current) textareaRef.current.style.height = "";
+    // Usunięto ręczne resetowanie wysokości, bo useEffect(..., [text]) zrobi to automatycznie za nas
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
-    // Reset do auto, aby poprawnie obliczyć scrollHeight (zmniejszanie)
-    e.target.style.height = "auto";
-    // Ustawienie nowej wysokości na podstawie zawartości
-    e.target.style.height = `${e.target.scrollHeight}px`;
+    // Usunięto ręczną zmianę wysokości stąd - logika jest teraz w useEffect
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,14 +80,15 @@ export function MessageInput({
 
   return (
     <div
-      className={`input-container-wrapper ${editingText !== null ? "editing-mode" : ""
-        } ${replyTo ? "reply-mode" : ""}`}
+      className={`input-container-wrapper ${
+        editingText !== null ? "editing-mode" : ""
+      } ${replyTo ? "reply-mode" : ""}`}
     >
       {editingText !== null && (
         <div className="action-bar editing-bar">
-          Editing message...
+          Edytujesz wiadomość
           <button className="cancel-btn" onClick={onCancelEdit}>
-            Cancel
+            Anuluj
           </button>
         </div>
       )}
@@ -117,7 +126,11 @@ export function MessageInput({
                 <FaPaperclip className="file-icon" />
                 <span className="file-name">{selectedFile.name}</span>
               </div>
-              <button onClick={() => setSelectedFile(null)} className="remove-file-btn" title="Usuń załącznik">
+              <button
+                onClick={() => setSelectedFile(null)}
+                className="remove-file-btn"
+                title="Usuń załącznik"
+              >
                 <FaTimes />
               </button>
             </div>
@@ -129,7 +142,7 @@ export function MessageInput({
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             placeholder={editingText ? "Zmień treść..." : "Napisz wiadomość..."}
-            rows={2} // ZMIANA: Domyślnie 3 linijki
+            rows={2}
           />
         </div>
 

@@ -9,10 +9,21 @@ import type { Pillar } from "./types";
 import { getPillarById, archivePillar } from "./api";
 import { EditPillarModal } from "./EditPillarModal";
 import "../project/ProjectDetails.css";
-// Dodajemy ikonę FaFilter
-import { FaPlus, FaCog, FaSearch, FaFilter } from "react-icons/fa";
+import {
+  FaPlus,
+  FaCog,
+  FaSearch,
+  FaFilter,
+  FaFolderOpen,
+  FaThumbtack,
+} from "react-icons/fa";
+import { PinnedMessagesModal } from "../itemHistory/PinnedMessagesModal.tsx";
+import { getPillarPinnedHistory } from "../itemHistory/api";
+import type { ItemHistory } from "../itemHistory/types";
 import type { Item } from "../item/types.ts";
 import { CreateItemModal } from "../item/CreateItemModal.tsx";
+import { EditItemModal } from "../item/EditItemModal.tsx"; // Import edycji
+import { archiveItem } from "../item/api"; // Import api
 import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
 import type { Project } from "../project/types.ts";
 import { ScopedSearchModal } from "../searching/SearchModal.tsx";
@@ -32,20 +43,40 @@ export function PillarDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Stany dla modali
+  const [pinnedMessages, setPinnedMessages] = useState<ItemHistory[]>([]);
+  const [isPinnedListOpen, setIsPinnedListOpen] = useState(false);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
+  const [isEditItemModalOpen, setIsEditItemModalOpen] = useState(false); // Stan modalu edycji
+  const [itemToEdit, setItemToEdit] = useState<Item | null>(null); // Wybrany item
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  // --- STANY DLA FILTRÓW ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]); // Filtrujemy po nazwach tagów
-  const [selectedPriorities, setSelectedPriorities] = useState<number[]>([]); // Priorytet to number
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedPriorities, setSelectedPriorities] = useState<number[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
 
   const { isAdmin } = useAuth();
 
-  // 1. Pobieranie danych
+  useEffect(() => {
+    if (projectId && pillarId) {
+      getPillarPinnedHistory(projectId, pillarId)
+        .then(setPinnedMessages)
+        .catch(console.error);
+    }
+  }, [projectId, pillarId]);
+
+  const handleGoToMessage = (msgId: number, msg: ItemHistory) => {
+    setIsPinnedListOpen(false);
+    if (msg.itemId) {
+      navigate(
+        `/projects/${projectId}/pillars/${pillarId}/items/${msg.itemId}?scrollTo=${msgId}`,
+      );
+    }
+  };
+
   useEffect(() => {
     if (projectId && pillarId) {
       setIsLoading(true);
@@ -64,7 +95,6 @@ export function PillarDetails() {
     }
   }, [projectId, pillarId]);
 
-  // 2. Zamykanie dropdownu filtra po kliknięciu poza
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -78,53 +108,53 @@ export function PillarDetails() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- LOGIKA FILTROWANIA ---
-
-  // A. Obliczamy dostępne opcje filtrów na podstawie zadań w filarze
-  const { uniqueTags, uniquePriorities } = useMemo(() => {
+  const { uniqueTags, uniquePriorities, uniqueStatuses } = useMemo(() => {
     if (!pillar || !pillar.items)
-      return { uniqueTags: [], uniquePriorities: [] };
+      return { uniqueTags: [], uniquePriorities: [], uniqueStatuses: [] };
 
     const tagsSet = new Set<string>();
     const prioSet = new Set<number>();
+    const statusSet = new Set<string>();
 
     pillar.items.forEach((item) => {
-      // Tagi
       if (item.tags) {
         item.tags.forEach((t) => tagsSet.add(t.name));
       }
-      // Priorytety (number)
       if (item.priority !== undefined && item.priority !== null) {
         prioSet.add(item.priority);
+      }
+      if (item.state) {
+        statusSet.add(item.state);
       }
     });
 
     return {
       uniqueTags: Array.from(tagsSet).sort(),
       uniquePriorities: Array.from(prioSet).sort((a, b) => a - b),
+      uniqueStatuses: Array.from(statusSet).sort(),
     };
   }, [pillar]);
 
-  // B. Filtrujemy listę zadań
   const filteredItems = useMemo(() => {
     if (!pillar || !pillar.items) return [];
 
     return pillar.items.filter((item) => {
-      // Filtr Tagów (jeśli pusty -> true, w przeciwnym razie musi zawierać jeden z wybranych)
       const matchesTag =
         selectedTags.length === 0 ||
         item.tags.some((t) => selectedTags.includes(t.name));
 
-      // Filtr Priorytetów
       const matchesPriority =
         selectedPriorities.length === 0 ||
         selectedPriorities.includes(item.priority);
 
-      return matchesTag && matchesPriority;
-    });
-  }, [pillar, selectedTags, selectedPriorities]);
+      const matchesStatus =
+        selectedStatuses.length === 0 ||
+        selectedStatuses.includes(item.state || "active");
 
-  // Handler toggleowania tagów
+      return matchesTag && matchesPriority && matchesStatus;
+    });
+  }, [pillar, selectedTags, selectedPriorities, selectedStatuses]);
+
   const toggleTag = (tagName: string) => {
     setSelectedTags((prev) =>
       prev.includes(tagName)
@@ -133,14 +163,19 @@ export function PillarDetails() {
     );
   };
 
-  // Handler toggleowania priorytetów
   const togglePriority = (prio: number) => {
     setSelectedPriorities((prev) =>
       prev.includes(prio) ? prev.filter((p) => p !== prio) : [...prev, prio],
     );
   };
 
-  // --- OBSŁUGA POZOSTAŁYCH AKCJI ---
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
 
   const handleArchive = async () => {
     if (!pillar || !projectId) return;
@@ -157,6 +192,40 @@ export function PillarDetails() {
     } catch (err) {
       console.error(err);
       alert("Błąd archiwizacji.");
+    }
+  };
+
+  // Logika edycji itemu
+  const handleEditItemClick = (e: React.MouseEvent, item: Item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setItemToEdit(item);
+    setIsEditItemModalOpen(true);
+  };
+
+  const handleItemUpdateSuccess = (updatedItem: Item) => {
+    setPillar((prev) => {
+      if (!prev) return null;
+      const updatedItems = (prev.items || []).map((i) =>
+        i.id === updatedItem.id ? updatedItem : i,
+      );
+      return { ...prev, items: updatedItems };
+    });
+    setIsEditItemModalOpen(false);
+  };
+
+  const handleArchiveItem = async (itemId: number) => {
+    if (!projectId || !pillarId) return;
+    try {
+      await archiveItem(projectId, pillarId, itemId);
+      setPillar((prev) => {
+        if (!prev) return null;
+        return { ...prev, items: prev.items.filter((i) => i.id !== itemId) };
+      });
+      setIsEditItemModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Błąd archiwizacji wątku.");
     }
   };
 
@@ -179,11 +248,12 @@ export function PillarDetails() {
   if (!pillar) return <div className="not-found">Nie znaleziono filaru.</div>;
 
   const hasActiveFilters =
-    selectedTags.length > 0 || selectedPriorities.length > 0;
+    selectedTags.length > 0 ||
+    selectedPriorities.length > 0 ||
+    selectedStatuses.length > 0;
 
   return (
     <div className="project-details-container">
-      {/* NAGŁÓWEK */}
       <header className="project-header">
         <div className="header-left">
           <Breadcrumbs />
@@ -191,6 +261,24 @@ export function PillarDetails() {
         </div>
 
         <div className="header-right">
+          {pillar.driveFolderLink && (
+            <a
+              href={pillar.driveFolderLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="search-btn"
+              title="Otwórz folder filara na dysku Google"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              <FaFolderOpen />
+            </a>
+          )}
           <button
             className="search-btn"
             onClick={() => setIsSearchModalOpen(true)}
@@ -199,7 +287,6 @@ export function PillarDetails() {
             <FaSearch />
           </button>
 
-          {/* --- PRZYCISK FILTROWANIA --- */}
           <div
             className="filter-wrapper"
             ref={filterRef}
@@ -216,9 +303,30 @@ export function PillarDetails() {
 
             {isFilterOpen && (
               <div className="filter-dropdown-menu right-aligned">
-                {/* 1. SEKCJA TAGÓW */}
                 <div className="filter-section">
-                  <div className="filter-section-title">Tagi</div>
+                  <div className="filter-section-title">STATUS</div>
+                  {uniqueStatuses.length === 0 ? (
+                    <div className="filter-empty-text">Brak statusów</div>
+                  ) : (
+                    uniqueStatuses.map((status) => (
+                      <label key={status} className="filter-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedStatuses.includes(status)}
+                          onChange={() => toggleStatus(status)}
+                        />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {status}
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
+
+                <div className="dropdown-divider" />
+
+                <div className="filter-section">
+                  <div className="filter-section-title">TAGI</div>
                   {uniqueTags.length === 0 ? (
                     <div className="filter-empty-text">Brak tagów</div>
                   ) : (
@@ -237,9 +345,8 @@ export function PillarDetails() {
 
                 <div className="dropdown-divider" />
 
-                {/* 2. SEKCJA PRIORYTETÓW */}
                 <div className="filter-section">
-                  <div className="filter-section-title">Priorytety</div>
+                  <div className="filter-section-title">PRIORYTETY</div>
                   {uniquePriorities.length === 0 ? (
                     <div className="filter-empty-text">Brak priorytetów</div>
                   ) : (
@@ -256,13 +363,15 @@ export function PillarDetails() {
                   )}
                 </div>
 
-                {/* PRZYCISK CZYSZCZENIA */}
+                <div className="dropdown-divider" />
+
                 {hasActiveFilters && (
                   <button
                     className="filter-clear-all"
                     onClick={() => {
                       setSelectedTags([]);
                       setSelectedPriorities([]);
+                      setSelectedStatuses([]);
                     }}
                   >
                     Wyczyść filtry
@@ -271,6 +380,18 @@ export function PillarDetails() {
               </div>
             )}
           </div>
+
+          <button
+            className="search-btn"
+            onClick={() => setIsPinnedListOpen(true)}
+            style={{ position: "relative" }}
+            title="Przypięte wiadomości"
+          >
+            <FaThumbtack />
+            {pinnedMessages.length > 0 && (
+              <span className="badge-count">{pinnedMessages.length}</span>
+            )}
+          </button>
 
           {isAdmin && (
             <button
@@ -284,14 +405,12 @@ export function PillarDetails() {
         </div>
       </header>
 
-      {/* INFO GRID */}
       <div className="project-info-grid">
         <InfoItem label="Firma odpowiedzialna" value={pillar.company?.name} />
         <InfoItem label="Data startu" value={pillar.startDate} />
         <InfoItem label="Deadline" value={pillar.deadline} />
       </div>
 
-      {/* SEKCJA ZADAŃ (ITEMS) */}
       <div className="items-section-header">
         <button
           className="add-pillar-btn"
@@ -300,7 +419,6 @@ export function PillarDetails() {
           Dodaj Wątek <FaPlus />
         </button>
 
-        {/* Info o filtrowaniu */}
         {hasActiveFilters && (
           <span
             style={{ marginLeft: "auto", fontSize: "0.85rem", color: "#666" }}
@@ -316,20 +434,16 @@ export function PillarDetails() {
             {filteredItems.map((item) => (
               <Link
                 key={item.id}
-                to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`}
+                to={`/projects/${projectId}/pillars/${pillarId}/items/${item.id}`} // FIX: Link naprawiony
                 className="task-tile-link"
                 state={{
-                  projectName: project.name,
+                  projectName: project?.name,
                   pillarName: pillar.name,
                 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
               >
-                <div className="task-tile">
+                <div className="task-tile" style={{ position: "relative" }}>
                   <div className="task-tile-title">
                     {item.name}
-                    {/* Opcjonalnie: Pokaż priorytet na liście */}
                     {item.priority > 0 && (
                       <span
                         style={{
@@ -342,6 +456,22 @@ export function PillarDetails() {
                       </span>
                     )}
                   </div>
+                  {/* Zębatka edycji wątku */}
+                  <button
+                    onClick={(e) => handleEditItemClick(e, item)}
+                    style={{
+                      position: "absolute",
+                      right: "15px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#999",
+                    }}
+                  >
+                    <FaCog size={22} />
+                  </button>
                 </div>
               </Link>
             ))}
@@ -355,13 +485,24 @@ export function PillarDetails() {
         )}
       </div>
 
-      {/* MODALE */}
       {isCreateItemModalOpen && projectId && (
         <CreateItemModal
           projectId={projectId}
           pillarId={String(pillar.id)}
           onClose={() => setIsCreateItemModalOpen(false)}
           onSuccess={handleItemCreationSuccess}
+        />
+      )}
+
+      {/* Modal edycji itemu */}
+      {isEditItemModalOpen && itemToEdit && projectId && (
+        <EditItemModal
+          project_id={projectId}
+          pillar_id={String(pillar.id)}
+          item={itemToEdit}
+          onClose={() => setIsEditItemModalOpen(false)}
+          onSuccess={handleItemUpdateSuccess}
+          onArchive={() => handleArchiveItem(itemToEdit.id)}
         />
       )}
 
@@ -381,6 +522,14 @@ export function PillarDetails() {
           onClose={() => setIsSearchModalOpen(false)}
           contextType={"pillar"}
           contextId={pillarId}
+        />
+      )}
+
+      {isPinnedListOpen && (
+        <PinnedMessagesModal
+          pinnedMessages={pinnedMessages}
+          onClose={() => setIsPinnedListOpen(false)}
+          onGoToMessage={handleGoToMessage}
         />
       )}
     </div>

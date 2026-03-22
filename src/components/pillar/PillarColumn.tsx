@@ -5,14 +5,15 @@ import type { Pillar } from "./types";
 import { archivePillar } from "./api";
 import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import type { Item } from "../item/types.ts";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.tsx"; // Do celów archiwizacji
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 interface PillarColumnProps {
   pillar: Pillar;
-  projectId: string; // 👈 Musimy go dostać od ProjectDetails
+  projectId: string;
   projectName: string;
   onPillarUpdated: (updatedPillar: Pillar) => void;
+  selectedStatuses: string[];
 }
 
 export function PillarColumn({
@@ -20,26 +21,34 @@ export function PillarColumn({
   projectId,
   projectName,
   onPillarUpdated,
+  selectedStatuses,
 }: PillarColumnProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
-
   const { isAdmin } = useAuth();
-
   const navigate = useNavigate();
 
-  // Funkcja nawigacji
-  const handleCardClick = () => {
+  const visibleItems =
+    pillar.items?.filter((item) => {
+      if (selectedStatuses.length === 0) return true;
+      return selectedStatuses.includes(item.state || "active");
+    }) || [];
+
+  const handlePillarClick = () => {
     navigate(`/projects/${projectId}/pillars/${pillar.id}`, {
-      state: {
-        projectName: projectName,
-        pillarName: pillar.name,
-      },
+      state: { projectName, pillarName: pillar.name },
     });
   };
 
-  // Logika archiwizacji (wywoływana z Modala)
-  const handleArchive = async () => {
+  const handleItemClick = (e: React.MouseEvent, itemId: number) => {
+    e.stopPropagation();
+    navigate(`/projects/${projectId}/pillars/${pillar.id}/items/${itemId}`, {
+      state: { projectName, pillarName: pillar.name },
+    });
+  };
+
+  // Logika archiwizacji filaru
+  const handleArchivePillar = async () => {
     if (
       !window.confirm(
         `Czy na pewno chcesz zarchiwizować filar "${pillar.name}"?`,
@@ -47,46 +56,32 @@ export function PillarColumn({
     )
       return;
     try {
-      // 1. Wywołujemy DEDYKOWANĄ funkcję, która ma adres PUT .../archive
       await archivePillar(projectId, pillar.id);
-
-      // 2. Musimy zaktualizować filar lokalnie, żeby zniknął z widoku
-      // Najprościej: robimy update, który ustawia stan na "archived" i wysyłamy do rodzica
-
-      const archivedPillarLocalUpdate = { ...pillar, state: "archived" };
-
-      // Powiadamiamy rodzica o zmianie statusu
-      onPillarUpdated(archivedPillarLocalUpdate);
-
-      setIsEditModalOpen(false); // Zamykamy modal
-    } catch (error) {
+      onPillarUpdated({ ...pillar, state: "archived" });
+      setIsEditModalOpen(false);
+    } catch {
       alert("Błąd podczas archiwizacji filaru.");
     }
   };
 
   const handleItemCreationSuccess = (newItem: Item) => {
-    const updatedItems = [...pillar.items, newItem];
-    const updatedPillar = { ...pillar, items: updatedItems };
-    onPillarUpdated(updatedPillar);
-
+    const updatedItems = [...(pillar.items || []), newItem];
+    onPillarUpdated({ ...pillar, items: updatedItems });
     setIsCreateItemModalOpen(false);
   };
 
   return (
     <div
-      key={pillar.id}
       className="pillar-column"
-      onClick={() => handleCardClick()}
+      onClick={handlePillarClick}
       style={{ cursor: "pointer", position: "relative" }}
     >
-      {/* --- NOWY KONTENER NA PRZYCISKI --- */}
       <div className="pillar-actions">
         <button
           className="add-item-btn"
           onClick={(e) => {
-            setIsCreateItemModalOpen(true);
-            e.preventDefault();
             e.stopPropagation();
+            setIsCreateItemModalOpen(true);
           }}
         >
           <FaPlus />
@@ -96,9 +91,8 @@ export function PillarColumn({
           <button
             className="settings-pillar-btn"
             onClick={(e) => {
-              setIsEditModalOpen(true);
-              e.preventDefault();
               e.stopPropagation();
+              setIsEditModalOpen(true);
             }}
           >
             <FaCog />
@@ -106,45 +100,38 @@ export function PillarColumn({
         )}
       </div>
 
-      {/* Nagłówek kolumny */}
       <div className="pillar-header">
         <h3>{pillar.name}</h3>
       </div>
 
-      {/* Lista zadań (Items) */}
       <div className="pillar-items">
-        {(pillar.items || []).length === 0 ? (
-          <div className="empty-state">No tasks</div>
+        {visibleItems.length === 0 ? (
+          <div className="empty-state">Brak zadań</div>
         ) : (
-          (pillar.items || []).map((item) => (
-            <Link
+          visibleItems.map((item) => (
+            <div
               key={item.id}
-              to={`/projects/${projectId}/pillars/${pillar.id}/items/${item.id}`} // Budujemy URL
-              className="item-card-link" // Klasa do usunięcia podkreślenia (CSS niżej)
-              state={{
-                projectName: projectName, // Przekazujemy dalej nazwę projektu
-                pillarName: pillar.name, // I dodajemy nazwę filaru
-              }}
-              onClick={(e) => {
-                e.stopPropagation(); // To sprawia, że kliknięcie nie leci do rodzica (Filaru)
-              }}
+              className="item-card"
+              onClick={(e) => handleItemClick(e, item.id)}
+              style={{ position: "relative", cursor: "pointer" }}
             >
-              <div className="item-card">
-                <div className="item-title">{item.name}</div>
+              <div className="item-title">
+                <span style={{ wordBreak: "break-word", paddingRight: "20px" }}>
+                  {item.name}
+                </span>
               </div>
-            </Link>
+            </div>
           ))
         )}
       </div>
 
-      {/* MODAL EDYCJI */}
       {isEditModalOpen && (
         <EditPillarModal
           project_id={projectId}
           pillar={pillar}
           onClose={() => setIsEditModalOpen(false)}
-          onArchive={handleArchive}
-          onSuccess={onPillarUpdated} // Przekazujemy zaktualizowany filar do góry
+          onArchive={handleArchivePillar}
+          onSuccess={onPillarUpdated}
         />
       )}
 
@@ -153,7 +140,7 @@ export function PillarColumn({
           projectId={projectId}
           pillarId={String(pillar.id)}
           onClose={() => setIsCreateItemModalOpen(false)}
-          onSuccess={handleItemCreationSuccess} // Przekazujemy zaktualizowany filar do góry
+          onSuccess={handleItemCreationSuccess}
         />
       )}
     </div>

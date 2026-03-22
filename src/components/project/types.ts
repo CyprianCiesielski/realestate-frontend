@@ -15,4 +15,5 @@ export interface Project {
 
   pillars: Pillar[];
   tags: Tag[];
+  driveFolderLink?: string;
 }

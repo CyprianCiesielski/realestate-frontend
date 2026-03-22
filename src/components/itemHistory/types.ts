@@ -16,4 +16,7 @@ export interface ItemHistory {
 
   reactions: MessageReaction[];
   replyTo?: ItemHistory;
+
+  itemId?: number;
+  pillarId?: number;
 }

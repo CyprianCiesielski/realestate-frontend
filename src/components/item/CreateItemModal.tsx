@@ -38,7 +38,7 @@ export function CreateItemModal({
   }, []);
 
   // 2. NOWY STAN: ID folderu Google Drive
-  const [customDriveFolderId, setCustomDriveFolderId] = useState("");
+  const [customDriveFolderId] = useState("");
 
   // 3. STAN FORMULARZA
   const [formData, setFormData] = useState<ItemFormData>({
@@ -166,35 +166,6 @@ export function CreateItemModal({
               <option value={4}>4</option>
               <option value={5}>5</option>
             </select>
-          </div>
-
-          {/* NOWA SEKCJA: Integracja z Google Drive */}
-          <div
-            className="form-group"
-            style={{
-              marginTop: "15px",
-              paddingTop: "15px",
-              borderTop: "1px solid #eee",
-            }}
-          >
-            <label>Podepnij folder Google Drive (Opcjonalne)</label>
-            <input
-              type="text"
-              value={customDriveFolderId}
-              onChange={(e) => setCustomDriveFolderId(e.target.value)}
-              placeholder="Wklej ID folderu (np. 1AbCdEfGhIjKlMn...)"
-              style={{ fontSize: "0.9em", fontFamily: "monospace" }}
-            />
-            <small
-              style={{
-                display: "block",
-                marginTop: "4px",
-                color: "#666",
-                fontSize: "0.8em",
-              }}
-            >
-              Zostaw puste, aby system utworzył nowy folder automatycznie.
-            </small>
           </div>
 
           <div className="modal-actions">

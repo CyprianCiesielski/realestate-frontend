@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { Item } from "./types";
 import { archiveItem, getItemById } from "./api";
 import {
@@ -35,6 +35,7 @@ export function ItemDetails() {
     itemId: string;
   }>();
 
+  const location = useLocation();
   const navigate = useNavigate();
   const [item, setItem] = useState<Item | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +65,20 @@ export function ItemDetails() {
         console.error("Nie udało się pobrać profilu użytkownika:", err),
       );
   }, []);
+
+  useEffect(() => {
+    if (item && item.historyEntries && item.historyEntries.length > 0) {
+      const searchParams = new URLSearchParams(location.search);
+      const scrollToId = searchParams.get("scrollTo");
+
+      if (scrollToId) {
+        // Opóźnienie upewnia się, że DOM zdążył się wyrenderować (zwłaszcza ukryte divy)
+        setTimeout(() => {
+          scrollToMessage(Number(scrollToId));
+        }, 500);
+      }
+    }
+  }, [item, location.search]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -110,7 +125,7 @@ export function ItemDetails() {
 
         setTimeout(() => {
           element.classList.remove("flash-highlight");
-        }, 2100);
+        }, 1200);
       }
     }, 100);
   };
@@ -409,7 +424,7 @@ export function ItemDetails() {
         <PinnedMessagesModal
           pinnedMessages={pinnedMessages}
           onClose={() => setIsPinnedListOpen(false)}
-          onGoToMessage={scrollToMessage}
+          onGoToMessage={(id) => scrollToMessage(id)}
         />
       )}
 

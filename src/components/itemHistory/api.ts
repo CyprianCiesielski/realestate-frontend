@@ -110,3 +110,22 @@ export const uploadFileToItemHistory = async (
   );
   return response.data;
 };
+
+export const getProjectPinnedHistory = async (
+  projectId: string,
+): Promise<ItemHistory[]> => {
+  const response = await apiClient.get<ItemHistory[]>(
+    `/projects/${projectId}/pinned-history`,
+  );
+  return response.data;
+};
+
+export const getPillarPinnedHistory = async (
+  projectId: string,
+  pillarId: string,
+): Promise<ItemHistory[]> => {
+  const response = await apiClient.get<ItemHistory[]>(
+    `/projects/${projectId}/pillars/${pillarId}/pinned-history`,
+  );
+  return response.data;
+};

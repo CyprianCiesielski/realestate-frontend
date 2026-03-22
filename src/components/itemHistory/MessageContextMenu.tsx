@@ -187,7 +187,7 @@ export function MessageContextMenu({
                 onClose();
               }}
             >
-              <span>Edit</span>
+              <span>Edytuj</span>
               <FaPen />
             </button>
           )}
@@ -198,7 +198,7 @@ export function MessageContextMenu({
               onClose();
             }}
           >
-            <span>Reply</span>
+            <span>Odpowiedz</span>
             <FaReply />
           </button>
           <button
@@ -207,7 +207,7 @@ export function MessageContextMenu({
               onClose();
             }}
           >
-            <span>Copy</span>
+            <span>Kopiuj</span>
             <FaRegCopy />
           </button>
 
@@ -217,7 +217,7 @@ export function MessageContextMenu({
               onClose();
             }}
           >
-            <span>{isPinned ? "Unpin" : "Pin"}</span>
+            <span>{isPinned ? "Odepnij" : "Przypnij"}</span>
             <FaThumbtack
               style={{ transform: isPinned ? "none" : "rotate(45deg)" }}
             />
@@ -232,7 +232,7 @@ export function MessageContextMenu({
                   onClose();
                 }}
               >
-                <span>Delete</span>
+                <span>Usuń</span>
                 <FaTrashAlt />
               </button>
             </>

@@ -5,7 +5,7 @@ import type { ItemHistory } from "./types";
 interface PinnedMessagesModalProps {
   pinnedMessages: ItemHistory[];
   onClose: () => void;
-  onGoToMessage: (id: number) => void;
+  onGoToMessage: (id: number, msg: ItemHistory) => void;
 }
 
 export function PinnedMessagesModal({
@@ -37,7 +37,7 @@ export function PinnedMessagesModal({
                 key={msg.id}
                 className="pinned-item"
                 onClick={() => {
-                  onGoToMessage(msg.id);
+                  onGoToMessage(msg.id, msg);
                   onClose();
                 }}
               >
