@@ -9,6 +9,7 @@ export const Register = () => {
     firstname: "",
     lastname: "",
     email: "",
+    googleDriveEmail: "",
     password: ""
   });
   
@@ -114,6 +115,19 @@ export const Register = () => {
               value={formData.email}
               onChange={handleChange}
               required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email do Dysku Google (wymagane jeśli pierwszy nie jest powiązany z google)</label>
+            <input
+              className="login-input"
+              type="email"
+              name="googleDriveEmail"
+              placeholder="np. jan@gmail.com (jeśli inny niż login)"
+              value={formData.googleDriveEmail}
+              onChange={handleChange}
+              // To pole nie ma 'required'
             />
           </div>
 

@@ -19,6 +19,7 @@ export function EditProfileModal({
     firstName: "",
     lastName: "",
     email: "",
+    googleDriveEmail: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,7 @@ export function EditProfileModal({
         firstName: currentUser.firstName || "",
         lastName: currentUser.lastName || "",
         email: currentUser.email || "",
+        googleDriveEmail: currentUser.googleDriveEmail || "",
       });
     }
   }, [currentUser]);
@@ -97,6 +99,18 @@ export function EditProfileModal({
                 setFormData({ ...formData, email: e.target.value })
               }
               required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email do Dysku Google</label>
+            <input
+              type="email"
+              value={formData.googleDriveEmail}
+              onChange={(e) =>
+                setFormData({ ...formData, googleDriveEmail: e.target.value })
+              }
+              placeholder="Adres powiązany z kontem Google"
             />
           </div>
 

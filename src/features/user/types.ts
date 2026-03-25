@@ -9,6 +9,7 @@ export interface UserProjectAccess {
 export interface UserDetailData {
     id: number;
     email: string;
+    googleDriveEmail?: string;
     firstName: string;
     lastName: string;
     companies: string[];
