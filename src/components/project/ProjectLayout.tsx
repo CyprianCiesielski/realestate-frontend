@@ -9,13 +9,12 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaFilter,
-  FaSortAmountDown, // Ikonka sortowania
-  FaCheck, // Ikonka wyboru
+  FaSortAmountDown,
+  FaCheck,
 } from "react-icons/fa";
 import "./ProjectLayout.css";
 import { useRefresh } from "../../context/RefreshContext";
 
-// Definicja typów sortowania
 type SortOption = "dateDesc" | "dateAsc" | "alphaAsc" | "alphaDesc";
 
 export function ProjectsLayout() {
@@ -26,17 +25,18 @@ export function ProjectsLayout() {
   const [selectedCompanyNames, setSelectedCompanyNames] = useState<string[]>(
     [],
   );
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]); // <--- NOWY STAN DLA STATUSÓW
 
-  // Stan sortowania (domyślnie: najnowsze na górze)
+  // Stan sortowania
   const [sortOption, setSortOption] = useState<SortOption>("dateDesc");
 
-  // Stany UI (otwieranie pasków/menu)
+  // Stany UI
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false); // <--- Nowy stan dla menu sortowania
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
   const filterRef = useRef<HTMLDivElement>(null);
-  const sortRef = useRef<HTMLDivElement>(null); // <--- Ref dla menu sortowania
+  const sortRef = useRef<HTMLDivElement>(null);
 
   const { refreshTrigger } = useRefresh();
 
@@ -56,14 +56,12 @@ export function ProjectsLayout() {
   // 2. Zamykanie dropdownów po kliknięciu poza
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // Zamykanie filtra
       if (
         filterRef.current &&
         !filterRef.current.contains(event.target as Node)
       ) {
         setIsFilterOpen(false);
       }
-      // Zamykanie sortowania
       if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
         setIsSortOpen(false);
       }
@@ -74,9 +72,9 @@ export function ProjectsLayout() {
 
   // 3. LOGIKA: FILTROWANIE + SORTOWANIE
   const processedProjects = useMemo(() => {
-    // A. Filtrowanie
     let result = allProjects;
 
+    // A. Filtrowanie po firmie
     if (selectedCompanyNames.length > 0) {
       result = result.filter((project) => {
         const companyName = project.company?.name;
@@ -84,36 +82,47 @@ export function ProjectsLayout() {
       });
     }
 
-    // B. Sortowanie (na przefiltrowanej liście)
-    // UWAGA: Zakładam, że masz pole `createdAt` lub `id` (jeśli id rośnie z czasem)
+    // B. Filtrowanie po statusie (LOGIKA ANALOGICZNA DO WĄTKÓW)
+    result = result.filter((project) => {
+      // Jeśli nic nie wybrano w filtrze statusu, pokazujemy wszystko co NIE JEST zarchiwizowane
+      if (selectedStatuses.length === 0) {
+        return project.state !== "archived";
+      }
+      // Jeśli wybrano statusy, sprawdzamy czy projekt je posiada
+      return selectedStatuses.includes(project.state || "active");
+    });
+
+    // C. Sortowanie
     return [...result].sort((a, b) => {
       switch (sortOption) {
-        case "dateDesc": // Najnowsze (po ID lub dacie)
-          // Jeśli masz pole createdAt:
-          // return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          return b.id - a.id; // Fallback: wyższe ID = nowszy
-
-        case "dateAsc": // Najstarsze
-          // return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case "dateDesc":
+          return b.id - a.id;
+        case "dateAsc":
           return a.id - b.id;
-
-        case "alphaAsc": // A-Z
+        case "alphaAsc":
           return a.name.localeCompare(b.name);
-
-        case "alphaDesc": // Z-A
+        case "alphaDesc":
           return b.name.localeCompare(a.name);
-
         default:
           return 0;
       }
     });
-  }, [allProjects, selectedCompanyNames, sortOption]); // Dodano sortOption do zależności
+  }, [allProjects, selectedCompanyNames, selectedStatuses, sortOption]); // <--- DODANO selectedStatuses
 
-  const handleFilterChange = (companyName: string) => {
+  // Funkcje do przełączania filtrów
+  const handleCompanyToggle = (companyName: string) => {
     setSelectedCompanyNames((prev) =>
       prev.includes(companyName)
         ? prev.filter((name) => name !== companyName)
         : [...prev, companyName],
+    );
+  };
+
+  const handleStatusToggle = (status: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
     );
   };
 
@@ -131,7 +140,6 @@ export function ProjectsLayout() {
         </button>
 
         <div className="sidebar-content-wrapper">
-          {/* NAGŁÓWEK Z AKCJAMI */}
           <div className="sidebar-header-row">
             <h3>Projekty ({processedProjects.length})</h3>
 
@@ -202,18 +210,41 @@ export function ProjectsLayout() {
               {/* --- 2. FILTROWANIE --- */}
               <div className="action-wrapper" ref={filterRef}>
                 <button
-                  className={`icon-btn ${isFilterOpen || selectedCompanyNames.length > 0 ? "active" : ""}`}
+                  className={`icon-btn ${isFilterOpen || selectedCompanyNames.length > 0 || selectedStatuses.length > 0 ? "active" : ""}`}
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  title="Filtruj wg firmy"
+                  title="Filtruj"
                 >
                   <FaFilter size={14} />
-                  {selectedCompanyNames.length > 0 && (
+                  {(selectedCompanyNames.length > 0 ||
+                    selectedStatuses.length > 0) && (
                     <span className="dot-indicator" />
                   )}
                 </button>
 
                 {isFilterOpen && (
                   <div className="dropdown-menu filter-menu">
+                    {/* NOWA SEKCJA: STATUS */}
+                    <div className="dropdown-title">Status:</div>
+                    <label className="checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedStatuses.includes("active")}
+                        onChange={() => handleStatusToggle("active")}
+                      />
+                      <span>Aktywne</span>
+                    </label>
+                    <label className="checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedStatuses.includes("archived")}
+                        onChange={() => handleStatusToggle("archived")}
+                      />
+                      <span style={{ color: "#d9534f" }}>Zarchiwizowane</span>
+                    </label>
+
+                    <div className="dropdown-divider" />
+
+                    {/* SEKCJA: FIRMA */}
                     <div className="dropdown-title">Filtruj wg firmy:</div>
                     {allCompanies.length === 0 ? (
                       <div className="dropdown-empty">Brak firm</div>
@@ -225,17 +256,21 @@ export function ProjectsLayout() {
                             checked={selectedCompanyNames.includes(
                               company.name,
                             )}
-                            onChange={() => handleFilterChange(company.name)}
+                            onChange={() => handleCompanyToggle(company.name)}
                           />
                           <span>{company.name}</span>
                         </label>
                       ))
                     )}
 
-                    {selectedCompanyNames.length > 0 && (
+                    {(selectedCompanyNames.length > 0 ||
+                      selectedStatuses.length > 0) && (
                       <button
                         className="clear-btn"
-                        onClick={() => setSelectedCompanyNames([])}
+                        onClick={() => {
+                          setSelectedCompanyNames([]);
+                          setSelectedStatuses([]);
+                        }}
                       >
                         Wyczyść filtry
                       </button>

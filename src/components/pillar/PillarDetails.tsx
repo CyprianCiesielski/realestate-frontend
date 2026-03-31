@@ -139,19 +139,10 @@ export function PillarDetails() {
     if (!pillar || !pillar.items) return [];
 
     return pillar.items.filter((item) => {
-      const matchesTag =
-        selectedTags.length === 0 ||
-        item.tags.some((t) => selectedTags.includes(t.name));
-
-      const matchesPriority =
-        selectedPriorities.length === 0 ||
-        selectedPriorities.includes(item.priority);
-
-      const matchesStatus =
-        selectedStatuses.length === 0 ||
-        selectedStatuses.includes(item.state || "active");
-
-      return matchesTag && matchesPriority && matchesStatus;
+      if (selectedStatuses.length === 0) {
+        return item.state !== "archived";
+      }
+      return selectedStatuses.includes(item.state || "active");
     });
   }, [pillar, selectedTags, selectedPriorities, selectedStatuses]);
 

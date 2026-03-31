@@ -143,20 +143,6 @@ export function EditPillarModal({
             </select>
           </div>
 
-          <div className="form-group">
-            <label>Status</label>
-            <select
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              style={{ padding: 10, borderRadius: 4, border: "1px solid #ccc" }}
-            >
-              <option value="active">Aktywny</option>
-              <option value="finished">Zakończony</option>
-              <option value="archived">Zarchiwizowany</option>
-            </select>
-          </div>
-
           <div
             className="modal-actions"
             style={{ justifyContent: "space-between" }}

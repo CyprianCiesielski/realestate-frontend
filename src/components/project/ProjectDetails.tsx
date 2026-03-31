@@ -114,15 +114,35 @@ export function ProjectDetails() {
     }
   };
 
+  const filteredPillars = useMemo(() => {
+    if (!project || !project.pillars) return [];
+
+    return project.pillars.filter((pillar) => {
+      const pState = pillar.state || "active";
+
+      if (pState === "active") {
+        return true;
+      }
+
+      if (pState === "archived") {
+        return selectedStatuses.includes("archived");
+      }
+
+      if (selectedStatuses.length === 0) {
+        return true;
+      }
+      return selectedStatuses.includes(pState);
+    });
+  }, [project, selectedStatuses]);
+
   const handlePillarUpdate = (updatedPillar: Pillar) => {
     setProject((prev) => {
       if (!prev) return null;
-      const newPillars =
-        updatedPillar.state === "archived"
-          ? prev.pillars.filter((p) => p.id !== updatedPillar.id)
-          : prev.pillars.map((p) =>
-              p.id === updatedPillar.id ? updatedPillar : p,
-            );
+
+      const newPillars = prev.pillars.map((p) =>
+        p.id === updatedPillar.id ? updatedPillar : p,
+      );
+
       return { ...prev, pillars: newPillars };
     });
   };
@@ -185,10 +205,29 @@ export function ProjectDetails() {
               <div className="filter-dropdown-menu right-aligned">
                 <div className="filter-section">
                   <div className="filter-section-title">STATUS</div>
-                  {uniqueStatuses.length === 0 ? (
-                    <div className="filter-empty-text">Brak statusów</div>
-                  ) : (
-                    uniqueStatuses.map((status) => (
+                  {/* Dodajemy te dwa checkboxy na sztywno, żeby zawsze były dostępne */}
+                  <label className="filter-checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes("active")}
+                      onChange={() => toggleStatus("active")}
+                    />
+                    <span>Aktywne</span>
+                  </label>
+
+                  <label className="filter-checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.includes("archived")}
+                      onChange={() => toggleStatus("archived")}
+                    />
+                    <span style={{ color: "#d9534f" }}>Zarchiwizowane</span>
+                  </label>
+
+                  {/* Opcjonalnie: reszta statusów, jeśli masz jakieś dynamiczne (np. finished) */}
+                  {uniqueStatuses
+                    .filter((s) => s !== "active" && s !== "archived")
+                    .map((status) => (
                       <label key={status} className="filter-checkbox-item">
                         <input
                           type="checkbox"
@@ -199,8 +238,7 @@ export function ProjectDetails() {
                           {status}
                         </span>
                       </label>
-                    ))
-                  )}
+                    ))}
                 </div>
                 <div className="dropdown-divider" />
                 {hasActiveFilters && (
@@ -250,7 +288,7 @@ export function ProjectDetails() {
 
       <section className="board-section">
         <PillarBoard
-          pillars={project.pillars || []}
+          pillars={filteredPillars}
           projectId={projectId!}
           projectName={project.name}
           onPillarUpdated={handlePillarUpdate}

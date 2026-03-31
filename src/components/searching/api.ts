@@ -87,6 +87,7 @@ export const searchGlobalWithFilter = async (
     filteredPriority: filterParams.filteredPriority,
 
     companyId: filterParams.companyId,
+    filteredStates: filterParams.filteredStates?.join(","),
   };
 
   const response = await apiClient.get<GlobalSearchResultDto>(
