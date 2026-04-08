@@ -7,7 +7,6 @@ import { getAllCompanies } from "../company/api";
 import type { Tag } from "../tag/types";
 
 import "./SearchPage.css";
-// 👇 Dodano ikony do obsługi listy i zaznaczenia
 import { FaFilter, FaChevronDown, FaChevronUp, FaCheck } from "react-icons/fa";
 
 export function SearchPage() {
@@ -32,10 +31,12 @@ export function SearchPage() {
   const [priorityInput, setPriorityInput] = useState<string>("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
-  // 👇 NOWE: Stan do wysuwania listy tagów (domyślnie zamknięta)
+  // 👇 NOWE: Stan dla statusów
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
   const [isTagsOpen, setIsTagsOpen] = useState(true);
 
-  // 1. Pobieranie danych
+  // 1. Pobieranie danych słownikowych
   useEffect(() => {
     const fetchDictionaries = async () => {
       try {
@@ -63,7 +64,12 @@ export function SearchPage() {
         ? parseInt(selectedCompanyId, 10)
         : undefined;
 
-      const searchCriteria = { name: queryName };
+      // 👇 Przekazujemy stany do kryteriów wyszukiwania
+      const searchCriteria = {
+        name: queryName,
+        states: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+      };
+
       const filterCriteria = {
         filterByProject: filterProject,
         filterByPillar: filterPillar,
@@ -71,6 +77,7 @@ export function SearchPage() {
         filteredTagsNames: selectedTags,
         filteredPriority: priority,
         companyId: company,
+        filteredStates: selectedStatuses,
       };
 
       const data = await searchGlobalWithFilter(searchCriteria, filterCriteria);
@@ -99,6 +106,15 @@ export function SearchPage() {
       prev.includes(tagName)
         ? prev.filter((t) => t !== tagName)
         : [...prev, tagName],
+    );
+  };
+
+  // 👇 Toggle Statusu
+  const toggleStatus = (status: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
     );
   };
 
@@ -152,6 +168,31 @@ export function SearchPage() {
 
           <div className="separator" />
 
+          {/* 👇 NOWE: Status */}
+          <div className="filter-group">
+            <label className="filter-label">Status:</label>
+            <div className="checkbox-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={selectedStatuses.includes("active")}
+                  onChange={() => toggleStatus("active")}
+                />{" "}
+                Aktywne
+              </label>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={selectedStatuses.includes("archived")}
+                  onChange={() => toggleStatus("archived")}
+                />{" "}
+                <span style={{ color: "#d9534f" }}>Zarchiwizowane</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="separator" />
+
           {/* Firma */}
           <div className="filter-group">
             <label className="filter-label">Firma:</label>
@@ -171,9 +212,8 @@ export function SearchPage() {
 
           <div className="separator" />
 
-          {/* 👇 MODYFIKACJA SEKCJI TAGÓW */}
+          {/* Sekcja Tagów */}
           <div className="filter-group">
-            {/* Nagłówek klikalny */}
             <div
               className="filter-dropdown-header"
               onClick={() => setIsTagsOpen(!isTagsOpen)}
@@ -194,7 +234,6 @@ export function SearchPage() {
               )}
             </div>
 
-            {/* Kontener wysuwany z animacją */}
             <div className={`tags-collapsible ${isTagsOpen ? "open" : ""}`}>
               <div className="tags-chip-container">
                 {availableTags.length === 0 ? (
@@ -202,7 +241,6 @@ export function SearchPage() {
                 ) : (
                   availableTags.map((tag) => {
                     const isSelected = selectedTags.includes(tag.name);
-                    // Pobieramy kolor z bazy lub dajemy domyślny
                     const tagColor = tag.color || "#6b778c";
 
                     return (
@@ -210,15 +248,10 @@ export function SearchPage() {
                         key={tag.id}
                         className={`tag-chip ${isSelected ? "selected" : ""}`}
                         onClick={() => handleTagToggle(tag.name)}
-                        // Przekazujemy kolor do CSS jako zmienną
                         style={{ "--tag-color": tagColor } as any}
                       >
-                        {/* Kolorowa kropka (gdy nieaktywny) */}
                         <span className="tag-dot"></span>
-
                         <span className="tag-name">{tag.name}</span>
-
-                        {/* Ikona 'check' (gdy aktywny) */}
                         {isSelected && <FaCheck className="tag-check-icon" />}
                       </div>
                     );
@@ -227,7 +260,6 @@ export function SearchPage() {
               </div>
             </div>
           </div>
-          {/* 👆 KONIEC MODYFIKACJI SEKCJI TAGÓW */}
 
           <div className="separator" />
 

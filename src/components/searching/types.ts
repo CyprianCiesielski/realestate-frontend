@@ -5,6 +5,7 @@ export interface SearchCriteria {
   priority?: number;
   projectId?: string;
   pillarId?: string;
+  states?: string[];
 }
 
 export interface CompanyDto {
@@ -20,6 +21,7 @@ export interface FilterCriteria {
   filteredTagsNames?: string[];
   filteredPriority?: number | null;
   companyId?: number | null;
+  filteredStates?: string[];
 }
 
 // 3. Główny DTO wyniku z API
