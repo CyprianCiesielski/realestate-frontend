@@ -44,3 +44,10 @@ export const getPillarById = async (
   );
   return response.data;
 };
+
+export const unarchivePillar = async (
+  projectId: string | number,
+  pillarId: number,
+): Promise<void> => {
+  await apiClient.put(`/projects/${projectId}/pillars/${pillarId}/unarchive`);
+};

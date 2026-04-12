@@ -144,6 +144,34 @@ export function MessageList({
                 e.preventDefault();
                 setContextMenu({ x: e.pageX, y: e.pageY, messageId: entry.id });
               }}
+              onClick={(e) => {
+                // Skaczemy do kontekstu rozmowy TYLKO podczas aktywnego wyszukiwania
+                if (searchQuery && searchQuery.trim().length > 0) {
+                  const target = e.target as HTMLElement;
+                  // Zabezpieczenie: jeśli użytkownik kliknie w załącznik, link, reakcję
+                  // albo podgląd odpowiedzi - pozwalamy wykonać się ich domyślnej akcji
+                  if (
+                    target.closest("a") ||
+                    target.closest(".reaction-pill") ||
+                    target.closest(".reply-preview")
+                  ) {
+                    return;
+                  }
+                  // Wyczyść lupkę i leć do wiadomości!
+                  onAction.goToMessage(entry.id);
+                }
+              }}
+              // Wizualna podpowiedź, że wiadomość można kliknąć
+              style={
+                searchQuery && searchQuery.trim().length > 0
+                  ? { cursor: "pointer" }
+                  : {}
+              }
+              title={
+                searchQuery && searchQuery.trim().length > 0
+                  ? "Kliknij, aby zobaczyć wiadomość w pełnym kontekście rozmowy"
+                  : undefined
+              }
             >
               {/* Pinezka */}
               {entry.isPinned && <FaThumbtack className="pin-badge" />}

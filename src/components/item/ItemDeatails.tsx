@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { Item } from "./types";
-import { archiveItem, getItemById } from "./api";
+import { archiveItem, getItemById, unarchiveItem } from "./api";
 import {
   addHistoryEntry,
   addReaction,
@@ -54,9 +54,10 @@ export function ItemDetails() {
 
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const editingMessageText =
-    item?.historyEntries?.find((e) => e.id === editingMessageId)?.description ||
-    null;
+  const editingMessageText = editingMessageId
+    ? (item?.historyEntries?.find((e) => e.id === editingMessageId)
+        ?.description ?? "")
+    : null;
 
   useEffect(() => {
     fetchMyProfile()
@@ -173,6 +174,16 @@ export function ItemDetails() {
       await archiveItemHistory(projectId, pillarId, itemId, historyId);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleUnarchive = async () => {
+    if (!item || !projectId || !pillarId) return;
+    try {
+      await unarchiveItem(projectId, pillarId, item.id);
+      window.location.reload();
+    } catch {
+      alert("Błąd odarchiwizacji wątku.");
     }
   };
 
@@ -438,6 +449,7 @@ export function ItemDetails() {
             handleArchive();
             setIsEditModalOpen(false);
           }}
+          onUnarchive={handleUnarchive}
           onSuccess={(updatedItem) => {
             setItem((prev) => (prev ? { ...prev, ...updatedItem } : null));
             setIsEditModalOpen(false);

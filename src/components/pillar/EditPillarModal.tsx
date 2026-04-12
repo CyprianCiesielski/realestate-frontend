@@ -13,6 +13,7 @@ interface EditPillarModalProps {
   onClose: () => void;
   onSuccess: (updatedPillar: Pillar) => void;
   onArchive: () => void;
+  onUnarchive: () => void;
 }
 
 // Typ pomocniczy
@@ -26,6 +27,7 @@ export function EditPillarModal({
   onClose,
   onSuccess,
   onArchive,
+  onUnarchive,
 }: EditPillarModalProps) {
   // 1. TAGI
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
@@ -147,9 +149,40 @@ export function EditPillarModal({
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            <button type="button" className="btn-delete" onClick={onArchive}>
-              Archiwizuj Moduł
-            </button>
+            {pillar.state === "archived" ? (
+              <button
+                type="button"
+                className="btn-save"
+                style={{ backgroundColor: "#28a745" }}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz odarchiwizować ten moduł?",
+                    )
+                  ) {
+                    if (onUnarchive) onUnarchive();
+                  }
+                }}
+              >
+                Odarchiwizuj Moduł
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-delete"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz zarchiwizować ten moduł?",
+                    )
+                  ) {
+                    onArchive();
+                  }
+                }}
+              >
+                Archiwizuj Moduł
+              </button>
+            )}
 
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">

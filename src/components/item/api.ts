@@ -49,3 +49,13 @@ export const archiveItem = async (
     `/projects/${projectId}/pillars/${pillarId}/items/${itemId}/archive`,
   );
 };
+
+export const unarchiveItem = async (
+  projectId: string | number,
+  pillarId: string | number,
+  itemId: number,
+): Promise<void> => {
+  await apiClient.put(
+    `/projects/${projectId}/pillars/${pillarId}/items/${itemId}/unarchive`,
+  );
+};

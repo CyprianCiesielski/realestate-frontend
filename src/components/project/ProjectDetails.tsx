@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Project } from "./types";
-import { getProjectById, archiveProject } from "./api";
+import { getProjectById, archiveProject, unarchiveProject } from "./api";
 import { EditProjectModal } from "./EditProjectModal";
 import { PillarBoard } from "../pillar/PillarBoard";
 import "./ProjectDetails.css";
@@ -145,6 +145,17 @@ export function ProjectDetails() {
 
       return { ...prev, pillars: newPillars };
     });
+  };
+
+  const handleUnarchive = async () => {
+    if (!project || !project.id) return;
+    try {
+      await unarchiveProject(project.id); // użyj funkcji z api.ts
+
+      window.location.reload();
+    } catch {
+      alert("Błąd odarchiwizacji.");
+    }
   };
 
   if (isLoading) return <div className="loading">Ładowanie...</div>;
@@ -320,6 +331,7 @@ export function ProjectDetails() {
           project={project}
           onClose={() => setIsEditModalOpen(false)}
           onArchive={handleArchive}
+          onUnarchive={handleUnarchive}
           onSuccess={(upd) =>
             setProject((prev) => (prev ? { ...prev, ...upd } : null))
           }

@@ -14,6 +14,7 @@ interface EditItemModalProps {
   onClose: () => void;
   onSuccess: (updatedItem: Item) => void;
   onArchive: () => void;
+  onUnarchive?: () => void;
 }
 
 // Typ pomocniczy
@@ -28,6 +29,7 @@ export function EditItemModal({
   onClose,
   onSuccess,
   onArchive,
+  onUnarchive,
 }: EditItemModalProps) {
   // 1. TAGI
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
@@ -174,19 +176,40 @@ export function EditItemModal({
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            <button
-              type="button"
-              className="btn-delete"
-              onClick={() => {
-                if (
-                  window.confirm("Czy na pewno chcesz zarchiwizować ten wątek?")
-                ) {
-                  onArchive();
-                }
-              }}
-            >
-              Archiwizuj Wątek
-            </button>
+            {item.state === "archived" ? (
+              <button
+                type="button"
+                className="btn-save"
+                style={{ backgroundColor: "#28a745" }}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz odarchiwizować ten wątek?",
+                    )
+                  ) {
+                    if (onUnarchive) onUnarchive();
+                  }
+                }}
+              >
+                Odarchiwizuj Wątek
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-delete"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz zarchiwizować ten wątek?",
+                    )
+                  ) {
+                    onArchive();
+                  }
+                }}
+              >
+                Archiwizuj Wątek
+              </button>
+            )}
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">
                 Anuluj

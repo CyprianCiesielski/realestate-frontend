@@ -33,3 +33,7 @@ export const updateProject = async (
 export const archiveProject = async (id: number): Promise<void> => {
   await apiClient.put(`/projects/${id}/archive`);
 };
+
+export const unarchiveProject = async (id: number): Promise<void> => {
+  await apiClient.put(`/projects/${id}/unarchive`);
+};

@@ -14,6 +14,7 @@ interface EditProjectModalProps {
   onClose: () => void;
   onSuccess: (updatedProject: Project) => void;
   onArchive: () => void;
+  onUnarchive?: () => void;
 }
 
 // Interfejs lokalny dla stanu formularza
@@ -26,6 +27,7 @@ export function EditProjectModal({
   onClose,
   onSuccess,
   onArchive,
+  onUnarchive,
 }: EditProjectModalProps) {
   const { triggerRefresh } = useRefresh();
 
@@ -227,21 +229,41 @@ export function EditProjectModal({
             className="modal-actions"
             style={{ justifyContent: "space-between" }}
           >
-            <button
-              type="button"
-              className="btn-delete"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Czy na pewno chcesz zarchiwizować ten projekt?",
-                  )
-                ) {
-                  onArchive();
-                }
-              }}
-            >
-              Archiwizuj Projekt
-            </button>
+            {project.state === "archived" ? (
+              // PRZYCISK: ODARCHIWIZUJ
+              <button
+                type="button"
+                className="btn-save"
+                style={{ backgroundColor: "#28a745" }}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz odarchiwizować ten projekt?",
+                    )
+                  ) {
+                    if (onUnarchive) onUnarchive();
+                  }
+                }}
+              >
+                Odarchiwizuj Projekt
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-delete"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Czy na pewno chcesz zarchiwizować ten projekt?",
+                    )
+                  ) {
+                    onArchive();
+                  }
+                }}
+              >
+                Archiwizuj Projekt
+              </button>
+            )}
 
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={onClose} className="btn-cancel">

@@ -6,7 +6,7 @@ import {
   useOutletContext,
 } from "react-router-dom";
 import type { Pillar } from "./types";
-import { getPillarById, archivePillar } from "./api";
+import { getPillarById, archivePillar, unarchivePillar } from "./api";
 import { EditPillarModal } from "./EditPillarModal";
 import "../project/ProjectDetails.css";
 import {
@@ -232,6 +232,16 @@ export function PillarDetails() {
       return { ...prev, items: updatedItems };
     });
     setIsCreateItemModalOpen(false);
+  };
+
+  const handleUnarchive = async () => {
+    if (!pillar || !pillar.id || !projectId) return;
+    try {
+      await unarchivePillar(projectId, pillar.id);
+      window.location.reload();
+    } catch {
+      alert("Błąd odarchiwizacji modułu.");
+    }
   };
 
   if (isLoading) return <div className="loading">Ładowanie danych...</div>;
@@ -522,6 +532,7 @@ export function PillarDetails() {
           onClose={() => setIsEditModalOpen(false)}
           onArchive={handleArchive}
           onSuccess={handlePillarUpdateSuccess}
+          onUnarchive={handleUnarchive}
         />
       )}
 
