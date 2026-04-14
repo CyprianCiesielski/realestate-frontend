@@ -18,6 +18,7 @@ export const CompanySidebar = ({ isOpen, onClose }: CompanySidebarProps) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Stan do edycji
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -45,9 +46,12 @@ export const CompanySidebar = ({ isOpen, onClose }: CompanySidebarProps) => {
     }
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
+const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCompanyName.trim()) return;
+    
+    if (!newCompanyName.trim() || isAdding) return;
+
+    setIsAdding(true);
 
     try {
       const newCompany = await createCompany({ name: newCompanyName });
@@ -56,6 +60,8 @@ export const CompanySidebar = ({ isOpen, onClose }: CompanySidebarProps) => {
     } catch (error) {
       console.error("Błąd dodawania firmy:", error);
       alert("Nie udało się dodać firmy.");
+    } finally {
+      setIsAdding(false); 
     }
   };
 
