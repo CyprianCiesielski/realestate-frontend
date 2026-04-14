@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaCog, FaPlus } from "react-icons/fa";
 import { EditPillarModal } from "./EditPillarModal";
 import type { Pillar } from "./types";
-import { archivePillar } from "./api";
+import { archivePillar, unarchivePillar } from "./api";
 import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import type { Item } from "../item/types.ts";
 import { useNavigate } from "react-router-dom";
@@ -68,6 +68,21 @@ export function PillarColumn({
       setIsEditModalOpen(false);
     } catch {
       alert("Błąd podczas archiwizacji filaru.");
+    }
+  };
+
+  const handleUnarchivePillar = async () => {
+    try {
+      await unarchivePillar(projectId, pillar.id);
+      
+      onPillarUpdated({ ...pillar, state: "active"});
+      
+      setIsEditModalOpen(false);
+      
+      alert(`Filar "${pillar.name}" został przywrócony.`);
+    } catch (error) {
+      console.error(error);
+      alert("Błąd podczas przywracania filaru.");
     }
   };
 
@@ -139,6 +154,7 @@ export function PillarColumn({
           onClose={() => setIsEditModalOpen(false)}
           onArchive={handleArchivePillar}
           onSuccess={onPillarUpdated}
+          onUnarchive={handleUnarchivePillar}
         />
       )}
 
