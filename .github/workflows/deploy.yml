@@ -1,0 +1,29 @@
+name: Deploy RealEstate App Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_P_K }}
+          script: |
+            cd ~/realestate_app/realestate-frontend
+            
+            git pull origin main
+            
+            docker compose up -d --build frontend
+            
+            docker image prune -f
