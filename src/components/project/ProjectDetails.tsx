@@ -20,6 +20,7 @@ import { useAuth } from "../../context/AuthContext.tsx";
 import { PinnedMessagesModal } from "../itemHistory/PinnedMessagesModal.tsx";
 import { getProjectPinnedHistory } from "../itemHistory/api";
 import type { ItemHistory } from "../itemHistory/types";
+import { useRefresh } from "../../context/RefreshContext.tsx";
 
 export function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -40,6 +41,8 @@ export function ProjectDetails() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  const { triggerRefresh } = useRefresh();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -108,6 +111,7 @@ export function ProjectDetails() {
     if (!project || !project.id) return;
     try {
       await archiveProject(project.id);
+      triggerRefresh();
       navigate("/projects");
     } catch {
       alert("Błąd archiwizacji.");

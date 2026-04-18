@@ -1,4 +1,10 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface RefreshContextType {
   refreshTrigger: number;
@@ -14,6 +20,14 @@ export function RefreshProvider({ children }: { children: ReactNode }) {
   const triggerRefresh = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      triggerRefresh();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <RefreshContext.Provider value={{ refreshTrigger, triggerRefresh }}>
