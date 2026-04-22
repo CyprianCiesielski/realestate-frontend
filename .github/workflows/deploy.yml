@@ -18,7 +18,9 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_P_K }}
+          key: |
+           ${{ secrets.SSH_P_K }}
+           ${{ secrets.SSH_P_K_2 }}
           script: |
             cd ~/realestate_app/realestate-frontend
             
