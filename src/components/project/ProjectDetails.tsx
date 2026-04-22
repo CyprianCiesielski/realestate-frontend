@@ -76,7 +76,10 @@ export function ProjectDetails() {
 
   useEffect(() => {
     if (projectId) {
-      setIsLoading(true);
+      if (!project) {
+        setIsLoading(true);
+      }
+
       getProjectById(projectId)
         .then((data) => {
           setProject(data);
@@ -86,7 +89,7 @@ export function ProjectDetails() {
           setIsLoading(false);
         });
     }
-  }, [projectId]);
+  }, [projectId, refreshTrigger]);
 
   const uniqueStatuses = useMemo(() => {
     if (!project || !project.pillars) return [];

@@ -213,7 +213,10 @@ export function ItemDetails() {
 
   useEffect(() => {
     if (itemId && projectId && pillarId) {
-      setIsLoading(true);
+      if (!item) {
+        setIsLoading(true);
+      }
+
       getItemById(projectId, pillarId, itemId)
         .then((data) => {
           setItem(data);

@@ -86,7 +86,9 @@ export function PillarDetails() {
 
   useEffect(() => {
     if (projectId && pillarId) {
-      setIsLoading(true);
+      if (!pillar) {
+        setIsLoading(true);
+      }
       setError(null);
 
       getPillarById(projectId, pillarId)
@@ -100,7 +102,7 @@ export function PillarDetails() {
           setIsLoading(false);
         });
     }
-  }, [projectId, pillarId]);
+  }, [projectId, pillarId, refreshTrigger]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
