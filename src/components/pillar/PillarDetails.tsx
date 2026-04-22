@@ -28,6 +28,7 @@ import { Breadcrumbs } from "../common/Breadcrumbs.tsx";
 import type { Project } from "../project/types.ts";
 import { ScopedSearchModal } from "../searching/SearchModal.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
+import { useRefresh } from "../../context/RefreshContext.tsx";
 
 export function PillarDetails() {
   const { projectId, pillarId } = useParams<{
@@ -60,13 +61,19 @@ export function PillarDetails() {
 
   const { isAdmin } = useAuth();
 
+  const { refreshTrigger } = useRefresh();
+
   useEffect(() => {
     if (projectId && pillarId) {
+      if (!pillar) {
+        setIsLoading(true);
+      }
+
       getPillarPinnedHistory(projectId, pillarId)
         .then(setPinnedMessages)
         .catch(console.error);
     }
-  }, [projectId, pillarId]);
+  }, [projectId, pillarId, refreshTrigger]);
 
   const handleGoToMessage = (msgId: number, msg: ItemHistory) => {
     setIsPinnedListOpen(false);

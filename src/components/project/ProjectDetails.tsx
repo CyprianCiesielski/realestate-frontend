@@ -42,7 +42,7 @@ export function ProjectDetails() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const { triggerRefresh } = useRefresh();
+  const { triggerRefresh, refreshTrigger } = useRefresh();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,7 +63,7 @@ export function ProjectDetails() {
         .then(setPinnedMessages)
         .catch(console.error);
     }
-  }, [projectId]);
+  }, [projectId, refreshTrigger]);
 
   const handleGoToMessage = (msgId: number, msg: ItemHistory) => {
     setIsPinnedListOpen(false);

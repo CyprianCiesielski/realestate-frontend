@@ -41,7 +41,7 @@ export function ItemDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { triggerRefresh } = useRefresh();
+  const { triggerRefresh, refreshTrigger } = useRefresh();
 
   const [currentUser, setCurrentUser] = useState<UserDetailData | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
@@ -224,7 +224,7 @@ export function ItemDetails() {
           setIsLoading(false);
         });
     }
-  }, [itemId, projectId, pillarId]);
+  }, [itemId, projectId, pillarId, , refreshTrigger]);
 
   // ZMODYFIKOWANA FUNKCJA WYSYŁANIA
   const handleSendMessage = async (text: string, file?: File) => {
