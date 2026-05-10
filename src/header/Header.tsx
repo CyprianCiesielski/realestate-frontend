@@ -72,9 +72,16 @@ export function Header() {
       <SearchBar />
 
       <div className="header-right">
-        <button className="icon-btn">
+        <a
+          href="https://calendar.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="icon-btn"
+          title="Otwórz Kalendarz Google"
+          style={{ textDecoration: "none" }}
+        >
           <FaCalendarAlt />
-        </button>
+        </a>
         <button className="icon-btn">
           <FaBell />
         </button>

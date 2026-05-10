@@ -338,7 +338,6 @@ export function ItemDetails() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "inherit",
                   textDecoration: "none",
                 }}
               >
