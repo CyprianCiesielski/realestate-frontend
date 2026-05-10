@@ -83,9 +83,10 @@ export function CreateItemModal({
       const newItem = await createItem(projectId, pillarId, payload);
       onSuccess(newItem);
       onClose();
-    } catch (err) {
-      console.error(err);
-      setError("Nie udało się utworzyć wątku.");
+    } catch (err: any) {
+      // <--- Dodaj : any
+      console.error("Create Item Error:", err);
+      setError(err.customMessage || "Nie udało się utworzyć wątku.");
     } finally {
       triggerRefresh();
       setIsSubmitting(false);

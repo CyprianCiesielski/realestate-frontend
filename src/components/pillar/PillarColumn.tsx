@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaCog, FaPlus } from "react-icons/fa";
 import { EditPillarModal } from "./EditPillarModal";
 import type { Pillar } from "./types";
@@ -7,6 +7,8 @@ import { CreateItemModal } from "../item/CreateItemModal.tsx";
 import type { Item } from "../item/types.ts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.tsx";
+import { fetchMyProfile } from "../../features/user/api.ts";
+import type { UserDetailData } from "../../features/user/types.ts";
 
 interface PillarColumnProps {
   pillar: Pillar;
@@ -27,6 +29,25 @@ export function PillarColumn({
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const [currentUser, setCurrentUser] = useState<UserDetailData | null>(null);
+
+  useEffect(() => {
+    fetchMyProfile().then(setCurrentUser).catch(console.error);
+  }, []);
+
+  const canCreate = useMemo(() => {
+    if (isAdmin) return true;
+    if (!currentUser || !currentUser.assignedProjects || !projectId)
+      return false;
+
+    const userProject = currentUser.assignedProjects.find(
+      (p) => p.projectId.toString() === projectId,
+    );
+
+    // Upewniamy się, że szukamy dokładnie uprawnienia CAN_CREATE z enuma w Javie
+    return userProject?.permissions?.includes("CAN_CREATE") ?? false;
+  }, [currentUser, isAdmin, projectId]);
 
   const visibleItems =
     pillar.items?.filter((item) => {
@@ -74,11 +95,11 @@ export function PillarColumn({
   const handleUnarchivePillar = async () => {
     try {
       await unarchivePillar(projectId, pillar.id);
-      
-      onPillarUpdated({ ...pillar, state: "active"});
-      
+
+      onPillarUpdated({ ...pillar, state: "active" });
+
       setIsEditModalOpen(false);
-      
+
       alert(`Filar "${pillar.name}" został przywrócony.`);
     } catch (error) {
       console.error(error);
@@ -99,15 +120,17 @@ export function PillarColumn({
       style={{ cursor: "pointer", position: "relative" }}
     >
       <div className="pillar-actions">
-        <button
-          className="add-item-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsCreateItemModalOpen(true);
-          }}
-        >
-          <FaPlus />
-        </button>
+        {canCreate && ( // <--- DODAJ WARUNEK TUTAJ
+          <button
+            className="add-item-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCreateItemModalOpen(true);
+            }}
+          >
+            <FaPlus />
+          </button>
+        )}
 
         {isAdmin && (
           <button

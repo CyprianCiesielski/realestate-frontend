@@ -116,8 +116,9 @@ export function ProjectDetails() {
       await archiveProject(project.id);
       triggerRefresh();
       navigate("/projects");
-    } catch {
-      alert("Błąd archiwizacji.");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -160,8 +161,9 @@ export function ProjectDetails() {
       await unarchiveProject(project.id); // użyj funkcji z api.ts
 
       window.location.reload();
-    } catch {
-      alert("Błąd odarchiwizacji.");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 

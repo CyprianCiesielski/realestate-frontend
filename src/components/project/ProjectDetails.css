@@ -156,7 +156,7 @@
     width: auto;
     padding: 0.75rem 1.5rem; /* 12px 24px -> rem */
 
-    background-color: #0052cc; /* Ujednolicone na główny niebieski */
+    background-color: #5aac44; /* Ujednolicone na główny niebieski */
     color: white;
 
     border: none;
@@ -171,7 +171,7 @@
 }
 
 .add-pillar-btn:hover {
-    background-color: #0065ff; /* Ujednolicone na jasny niebieski (hover) */
+    background-color: #3f7b2e; /* Ujednolicone na jasny niebieski (hover) */
     transform: scale(1.05);
 }
 

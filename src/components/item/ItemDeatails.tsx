@@ -137,8 +137,9 @@ export function ItemDetails() {
       await archiveItem(projectId, pillarId, item.id);
       triggerRefresh();
       navigate(`/projects/${projectId}`);
-    } catch (err) {
-      alert("Archive Error.");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -155,8 +156,9 @@ export function ItemDetails() {
     });
     try {
       await pinItemHistory(projectId, pillarId, itemId, historyId);
-    } catch (e) {
-      console.error(e);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -172,8 +174,9 @@ export function ItemDetails() {
     });
     try {
       await archiveItemHistory(projectId, pillarId, itemId, historyId);
-    } catch (e) {
-      console.error(e);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -182,8 +185,9 @@ export function ItemDetails() {
     try {
       await unarchiveItem(projectId, pillarId, item.id);
       window.location.reload();
-    } catch {
-      alert("Błąd odarchiwizacji wątku.");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -206,8 +210,9 @@ export function ItemDetails() {
           ),
         };
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -252,9 +257,9 @@ export function ItemDetails() {
           historyEntries: [...(prevItem!.historyEntries || []), newEntry],
         }));
         setReplyTo(null);
-      } catch (e) {
-        console.error("Błąd wysyłania pliku", e);
-        alert("Nie udało się wysłać pliku.");
+      } catch (err: any) {
+        console.error(err);
+        alert(err.customMessage || "Błąd operacji.");
       }
       return;
     }
@@ -279,8 +284,9 @@ export function ItemDetails() {
             e.id === editingMessageId ? updatedEntry : e,
           ),
         }));
-      } catch (e) {
-        alert("Błąd zapisu edycji.");
+      } catch (err: any) {
+        console.error(err);
+        alert(err.customMessage || "Błąd operacji.");
       }
     } else {
       // 3. Obsługa nowej wiadomości tekstowej
@@ -304,8 +310,9 @@ export function ItemDetails() {
           ...prevItem!,
           historyEntries: [...(prevItem!.historyEntries || []), newEntry],
         }));
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        alert(err.customMessage || "Błąd operacji.");
       }
     }
   };

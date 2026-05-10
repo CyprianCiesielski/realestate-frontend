@@ -29,8 +29,16 @@ import type { Project } from "../project/types.ts";
 import { ScopedSearchModal } from "../searching/SearchModal.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { useRefresh } from "../../context/RefreshContext.tsx";
+import { fetchMyProfile } from "../../features/user/api.ts";
+import type { UserDetailData } from "../../features/user/types.ts";
 
 export function PillarDetails() {
+  const [currentUser, setCurrentUser] = useState<UserDetailData | null>(null);
+
+  useEffect(() => {
+    fetchMyProfile().then(setCurrentUser).catch(console.error);
+  }, []);
+
   const { projectId, pillarId } = useParams<{
     projectId: string;
     pillarId: string;
@@ -62,6 +70,21 @@ export function PillarDetails() {
   const { isAdmin } = useAuth();
 
   const { refreshTrigger } = useRefresh();
+
+  const canCreate = useMemo(() => {
+    if (isAdmin) return true;
+
+    // Zmiana: currentUser.projects -> currentUser.assignedProjects
+    if (!currentUser || !currentUser.assignedProjects || !projectId)
+      return false;
+
+    // Zmiana: currentUser.projects -> currentUser.assignedProjects
+    const userProject = currentUser.assignedProjects.find(
+      (p) => p.projectId.toString() === projectId,
+    );
+
+    return userProject?.permissions?.includes("CREATE") ?? false;
+  }, [currentUser, isAdmin, projectId]);
 
   useEffect(() => {
     if (projectId && pillarId) {
@@ -189,9 +212,9 @@ export function PillarDetails() {
     try {
       await archivePillar(projectId, pillar.id);
       navigate(`/projects/${projectId}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Błąd archiwizacji.");
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -223,9 +246,9 @@ export function PillarDetails() {
         return { ...prev, items: prev.items.filter((i) => i.id !== itemId) };
       });
       setIsEditItemModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Błąd archiwizacji wątku.");
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -248,8 +271,8 @@ export function PillarDetails() {
     try {
       await unarchivePillar(projectId, pillar.id);
       window.location.reload();
-    } catch {
-      alert("Błąd odarchiwizacji modułu.");
+    } catch (err: any) {
+      alert(err.customMessage || "Błąd operacji.");
     }
   };
 
@@ -439,12 +462,14 @@ export function PillarDetails() {
       </div>
 
       <div className="items-section-header">
-        <button
-          className="add-pillar-btn"
-          onClick={() => setIsCreateItemModalOpen(true)}
-        >
-          Dodaj Wątek <FaPlus />
-        </button>
+        {canCreate && ( // <--- DODAJ WARUNEK
+          <button
+            className="add-pillar-btn"
+            onClick={() => setIsCreateItemModalOpen(true)}
+          >
+            Dodaj Wątek <FaPlus />
+          </button>
+        )}
 
         {hasActiveFilters && (
           <span

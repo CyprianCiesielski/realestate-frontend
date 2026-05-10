@@ -94,9 +94,10 @@ export function EditProjectModal({
       const updated = await updateProject(project.id, payload);
       onSuccess(updated);
       onClose();
-    } catch (err) {
-      console.error(err);
-      alert("Nie udało się zaktualizować projektu.");
+    } catch (err: any) {
+      // <--- Dodaj : any
+      console.error("Create Item Error:", err);
+      alert(err.customMessage || "Nie udało się utworzyć wątku.");
     } finally {
       triggerRefresh();
       setIsSubmitting(false);

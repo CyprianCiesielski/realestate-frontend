@@ -76,9 +76,10 @@ export function EditItemModal({
       const updated = await updateItem(project_id, pillar_id, item.id, payload);
       onSuccess(updated);
       onClose();
-    } catch (err) {
-      console.error(err);
-      alert("Nie udało się edytować wątku.");
+    } catch (err: any) {
+      // <--- Dodaj : any
+      console.error("Create Item Error:", err);
+      alert(err.customMessage || "Nie udało się utworzyć wątku.");
     } finally {
       setIsSubmitting(false);
     }

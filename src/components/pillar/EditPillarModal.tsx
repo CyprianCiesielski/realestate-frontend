@@ -65,8 +65,10 @@ export function EditPillarModal({
       const updated = await updatePillar(project_id, pillar.id, payload);
       onSuccess(updated);
       onClose();
-    } catch (err) {
-      alert("Nie udało się zaktualizować modułu.");
+    } catch (err: any) {
+      // <--- Dodaj : any
+      console.error("Create Item Error:", err);
+      alert(err.customMessage || "Nie udało się utworzyć wątku.");
     } finally {
       setIsSubmitting(false);
     }

@@ -114,9 +114,10 @@ export function CreateProjectModal({
       const newProject = await createProject(payload);
       onSuccess(newProject);
       onClose();
-    } catch (err) {
-      console.error(err);
-      setError("Nie udało się utworzyć projektu.");
+    } catch (err: any) {
+      // <--- Dodaj : any
+      console.error("Create Item Error:", err);
+      setError(err.customMessage || "Nie udało się utworzyć wątku.");
     } finally {
       triggerRefresh();
       setIsSubmitting(false);
