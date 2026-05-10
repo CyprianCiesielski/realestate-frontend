@@ -119,6 +119,35 @@ export function MessageList({
     activeMessageForMenu.author?.trim().toLowerCase() === currentUserFullName
   );
 
+  // Zapasowa funkcja do kopiowania wiadomości (działa na localhost oraz HTTP)
+  const handleCopyMessage = async (text: string) => {
+    // 1. Nowoczesne API (działa na HTTPS / localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch (err) {
+        console.error("Błąd API schowka", err);
+      }
+    }
+
+    // 2. Fallback dla HTTP (starsza, ale niezawodna metoda)
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "absolute";
+      textArea.style.left = "-999999px";
+      document.body.appendChild(textArea);
+
+      textArea.select();
+      document.execCommand("copy");
+      textArea.remove();
+    } catch (err) {
+      console.error("Fallback schowka zawiódł", err);
+      alert("Nie udało się skopiować tekstu.");
+    }
+  };
+
   return (
     <div className="message-list">
       {filteredHistory.map((entry) => {
@@ -276,7 +305,7 @@ export function MessageList({
             setContextMenu(null);
           }}
           onCopy={() => {
-            navigator.clipboard.writeText(activeMessageForMenu.description);
+            handleCopyMessage(activeMessageForMenu.description);
             setContextMenu(null);
           }}
           onPin={() => {
