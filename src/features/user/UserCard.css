@@ -1,12 +1,13 @@
 .user-card {
     background-color: #f4f5f7;
-    padding: 12px; /* Trochę więcej miejsca */
+    padding: 12px;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     transition: box-shadow 0.2s, transform 0.1s;
     display: flex;
     flex-direction: column;
     height: 100%; /* Żeby kafelki w rzędzie były równe */
+    cursor: pointer; /* Kursor rączki przy najechaniu */
 }
 
 .user-card:hover {
@@ -14,62 +15,38 @@
     transform: translateY(-2px);
 }
 
-/* Nagłówek: Nazwa + Zębatka */
-.user-card-header-row {
+/* --- Główne informacje: Imię nad mailem --- */
+.user-card-main-info {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 6px;
+    flex-direction: column;
+    gap: 4px; /* Mały odstęp między imieniem a mailem */
+    margin-bottom: 12px;
 }
 
-.user-name {
+.user-card-name {
     font-weight: 700;
     color: #172b4d;
-    font-size: 1rem;
+    font-size: 1.1rem;
     line-height: 1.2;
 }
 
-/* Przycisk zębatki */
-.edit-user-btn {
-    font-size: 1.1rem;
-    background: none;
-    border: none;
-    color: #6b778c;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, color 0.2s;
-
-    
-}
-
-.edit-user-btn:hover {
-    background-color: #ebecf0;
-    color: #172b4d;
-}
-
 .user-card-email {
-    font-size: 1rem;
-    color: #172b4d;
-    margin-bottom: 8px;
-    font-size: 1.1rem;
-    word-break: break-all; /* Żeby długi email nie rozwalił kafelka */
+    font-size: 0.85rem; /* E-mail jest teraz mniejszy */
+    color: #6b778c;     /* Szary kolor, żeby odróżnić go od imienia */
+    word-break: break-all;
 }
 
+/* --- Reszta (Rola, Stopka) --- */
 .user-card-role {
-    font-size: 1.1rem;
-    margin-bottom: auto; /* Wypycha footer na sam dół */
-    padding-bottom: 8px;
+    margin-bottom: auto; /* Wypycha footer na sam dół kafelka */
+    padding-bottom: 12px;
 }
 
 .role-badge-small {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     background-color: #dfe1e6;
     color: #42526e;
-    padding: 2px 5px;
+    padding: 3px 6px;
     border-radius: 3px;
     font-weight: 600;
 }
@@ -83,8 +60,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #f4f5f7;
-    padding-top: 8px;
+    border-top: 1px solid #ebecf0; /* Lekko ciemniejsza linia niż tło */
+    padding-top: 10px;
     margin-top: 4px;
 }
 
@@ -101,4 +78,10 @@
     font-size: 0.75rem;
     color: #97a0af;
     font-style: italic;
+}
+
+.user-card-id {
+    font-size: 0.75rem;
+    color: #a5adba;
+    font-weight: 600;
 }

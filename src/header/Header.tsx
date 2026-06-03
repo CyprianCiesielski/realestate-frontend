@@ -59,7 +59,7 @@ export function Header() {
           RealEstate<span style={{ fontWeight: "normal" }}>Tracker</span>
         </Link>
 
-        {isAdmin && (
+        {(isAdmin || currentUserData?.canCreateProjects) && (
           <button
             className="add-project-btn"
             onClick={() => setIsProjectModalOpen(true)}

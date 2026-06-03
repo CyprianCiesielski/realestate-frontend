@@ -15,7 +15,6 @@ interface CreateProjectModalProps {
   onSuccess: (newProject: Project) => void;
 }
 
-// Rozszerzamy DTO na potrzeby formularza, żeby company mogło być obiektem lub null
 interface ProjectFormData extends Omit<CreateProjectDto, "company"> {
   company: Company | null;
 }
@@ -26,55 +25,14 @@ export function CreateProjectModal({
 }: CreateProjectModalProps) {
   const { triggerRefresh } = useRefresh();
 
-  // 1. TAGI
   const [allAvailableTags, setAllAvailableTags] = useState<Tag[]>([]);
-  useEffect(() => {
-    getAllTags()
-      .then((data) => setAllAvailableTags(data))
-      .catch((err) => console.error("Błąd pobierania tagów:", err));
-  }, []);
-
   const [availableCompanies, setAvailableCompanies] = useState<Company[]>([]);
 
-  // 2. FIRMY
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const data = await getAllCompanies();
-
-        console.log("📦 DANE Z API FIRM:", data); // <--- Zobacz w konsoli co to jest!
-
-        let companiesList: Company[] = [];
-
-        // Przypadek 1: Backend zwraca czystą tablicę [ {id:1}, {id:2} ]
-        if (Array.isArray(data)) {
-          companiesList = data;
-        }
-        // Przypadek 2: Backend zwraca obiekt Page (Spring Data) { content: [...] }
-        // @ts-ignore - tymczasowe obejście typowania, jeśli types.ts nie przewiduje Page
-        else if (data && Array.isArray(data.content)) {
-          // @ts-ignore
-          companiesList = data.content;
-        }
-
-        setAvailableCompanies(
-          companiesList.filter((c) => c.state !== "archived"),
-        );
-      } catch (error) {
-        console.error("Nie udało się pobrać firm", error);
-        setAvailableCompanies([]); // Ustaw pusta listę w razie błędu
-      }
-    };
-
-    fetchCompanies();
-  }, []);
-
-  // 3. FORMULARZ
   const [formData, setFormData] = useState<ProjectFormData>({
     name: "",
     deadline: new Date().toISOString().split("T")[0],
     personResponsible: "",
-    company: null, // Tutaj trzymamy obiekt
+    company: null,
     state: "active",
     startDate: new Date().toISOString().split("T")[0],
     priority: 0,
@@ -83,6 +41,41 @@ export function CreateProjectModal({
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getAllTags()
+      .then((data) => setAllAvailableTags(data))
+      .catch((err) => console.error("Błąd pobierania tagów:", err));
+  }, []);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await getAllCompanies();
+        let companiesList: Company[] = [];
+
+        if (Array.isArray(data)) {
+          companiesList = data;
+        } else if (data && Array.isArray((data as any).content)) {
+          companiesList = (data as any).content;
+        }
+
+        const activeCompanies = companiesList.filter(
+          (c) => c.state !== "archived",
+        );
+        setAvailableCompanies(activeCompanies);
+
+        // UŁATWIENIE: Jeśli użytkownik widzi tylko 1 firmę, wybierz ją domyślnie!
+        if (activeCompanies.length === 1) {
+          setFormData((prev) => ({ ...prev, company: activeCompanies[0] }));
+        }
+      } catch (error) {
+        console.error("Nie udało się pobrać firm", error);
+        setAvailableCompanies([]);
+      }
+    };
+    fetchCompanies();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -96,28 +89,37 @@ export function CreateProjectModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // TWARDA WALIDACJA: Backend zablokuje, jeśli nie podamy firmy!
+    if (!formData.company || !formData.company.id) {
+      setError("Wybierz firmę odpowiedzialną za projekt z listy!");
+      return;
+    }
+
     if (isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // Przygotowanie payloadu dla backendu
       const payload = {
         ...formData,
-        // Jeśli backend w createProject oczekuje obiektu company, to jest ok.
-        // Jeśli oczekuje samego ID, trzeba by zrobić: company: { id: formData.company?.id }
         company: formData.company,
         tags: selectedTags.map((tag) => ({ id: tag.id })),
       };
 
-      // @ts-ignore - ignorujemy niezgodność typów DTO jeśli api.ts nie jest zaktualizowane
       const newProject = await createProject(payload);
       onSuccess(newProject);
       onClose();
     } catch (err: any) {
-      // <--- Dodaj : any
-      console.error("Create Item Error:", err);
-      setError(err.customMessage || "Nie udało się utworzyć wątku.");
+      console.error("Create Project Error:", err);
+      // Próba odczytania dokładnej wiadomości błędu rzuconej przez backend (np. "Identical project already exists!")
+      const backendMessage = err.response?.data?.message || err.response?.data;
+      setError(
+        err.customMessage ||
+          (typeof backendMessage === "string"
+            ? backendMessage
+            : "Nie udało się utworzyć projektu. Błąd zapisu."),
+      );
     } finally {
       triggerRefresh();
       setIsSubmitting(false);
@@ -128,7 +130,20 @@ export function CreateProjectModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Nowy Projekt</h2>
-        {error && <div className="error-msg">{error}</div>}
+        {error && (
+          <div
+            className="error-msg"
+            style={{
+              backgroundColor: "#ffebe6",
+              color: "#bf2600",
+              padding: "10px",
+              borderRadius: "4px",
+              marginBottom: "10px",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -157,6 +172,7 @@ export function CreateProjectModal({
                   company: selectedCompanyObj || null,
                 }));
               }}
+              required
               className="form-control"
               style={{
                 padding: "8px",
@@ -165,7 +181,9 @@ export function CreateProjectModal({
                 border: "1px solid #ccc",
               }}
             >
-              <option value="">-- Wybierz firmę --</option>
+              <option value="" disabled>
+                -- Wybierz firmę --
+              </option>
               {availableCompanies.map((company) => (
                 <option key={company.id} value={company.name}>
                   {company.name}

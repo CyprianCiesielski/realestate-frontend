@@ -1,13 +1,21 @@
 .user-details-container {
-    padding: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
+    padding: 1rem;
+    /* 1. Zmieniamy max-width na 100% żeby wypełniał kontener */
+    width: 100%;
+    max-width: none;
+    /* 2. Usuwamy centrowanie marginesami, bo nie jest już potrzebne */
+    margin: 0;
+    /* 3. Włączamy scrollowanie wewnątrz tego konkretnego kontenera */
+    height: calc(100vh - 5.75rem);
+    overflow-y: auto;
+    box-sizing: border-box; /* Ważne, żeby padding nie rozpychał kontenera poza 100% */
+
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     color: #172b4d;
 }
 
 .user-details-header {
-    margin-bottom: 2rem;
+    margin-bottom: 0rem;
 }
 
 .back-link {
@@ -97,7 +105,7 @@
 
 .projects-table-container {
     width: 100%;
-    /* KLUCZOWA ZMIANA: Brak overflow-x i overflow-y. 
+    /* KLUCZOWA ZMIANA: Brak overflow-x i overflow-y.
        Dzięki temu kontener nie odcina elementów wystających (dropdownu) */
     border: 1px solid #dfe1e6;
     border-radius: 4px;
@@ -108,7 +116,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    table-layout: fixed; 
+    table-layout: fixed;
     border: none;
 }
 
@@ -264,4 +272,87 @@
     border-radius: 4px;
     margin-bottom: 1rem;
     text-align: center;
+}
+
+/* --- NOWY LAYOUT 2-KOLUMNOWY --- */
+.user-details-content {
+    display: grid;
+    /* Możesz zwiększyć proporcję lewej do prawej np. na 3fr 1fr,
+       aby tabela projektów zajmowała więcej nowo odzyskanej przestrzeni */
+    grid-template-columns: 3fr 1fr;
+    gap: 3rem; /* Zwiększony odstęp z 2rem na 3rem */
+    align-items: start;
+}
+
+/* Karta z przypisywaniem firm po prawej stronie */
+.companies-section-card {
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    position: sticky; /* Karta "przyklei się" do góry, gdy będzcripts scrollować długą tabelę projektów */
+    top: 2rem;
+}
+
+.companies-section-card h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    color: #172b4d;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #dfe1e6;
+}
+
+.companies-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #172b4d;
+    cursor: pointer;
+}
+
+.checkbox-item input {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.save-companies-btn {
+    width: 100%;
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.save-companies-btn:hover:not(:disabled) {
+    background-color: #0065ff;
+}
+
+.save-companies-btn:disabled {
+    background-color: #b3d4ff;
+    cursor: not-allowed;
+}
+
+/* Responsywność na telefony/małe ekrany */
+@media (max-width: 900px) {
+    .user-details-content {
+        grid-template-columns: 1fr; /* Na wąskich ekranach jedno pod drugim */
+    }
 }

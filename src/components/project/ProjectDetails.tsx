@@ -22,12 +22,19 @@ import { getProjectPinnedHistory } from "../itemHistory/api";
 import type { ItemHistory } from "../itemHistory/types";
 import { useRefresh } from "../../context/RefreshContext.tsx";
 
+import { fetchMyProfile } from "../../features/user/api";
+import type { UserDetailData } from "../../features/user/types";
+
 export function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [currentUserData, setCurrentUserData] = useState<UserDetailData | null>(
+    null,
+  );
 
   const [pinnedMessages, setPinnedMessages] = useState<ItemHistory[]>([]);
   const [isPinnedListOpen, setIsPinnedListOpen] = useState(false);
@@ -43,6 +50,11 @@ export function ProjectDetails() {
   const filterRef = useRef<HTMLDivElement>(null);
 
   const { triggerRefresh, refreshTrigger } = useRefresh();
+
+  // Pobieranie pełnego profilu z flagami by zarządzać UI
+  useEffect(() => {
+    fetchMyProfile().then(setCurrentUserData).catch(console.error);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -76,9 +88,7 @@ export function ProjectDetails() {
 
   useEffect(() => {
     if (projectId) {
-      if (!project) {
-        setIsLoading(true);
-      }
+      if (!project) setIsLoading(true);
 
       getProjectById(projectId)
         .then((data) => {
@@ -122,44 +132,10 @@ export function ProjectDetails() {
     }
   };
 
-  const filteredPillars = useMemo(() => {
-    if (!project || !project.pillars) return [];
-
-    return project.pillars.filter((pillar) => {
-      const pState = pillar.state || "active";
-
-      if (pState === "active") {
-        return true;
-      }
-
-      if (pState === "archived") {
-        return selectedStatuses.includes("archived");
-      }
-
-      if (selectedStatuses.length === 0) {
-        return true;
-      }
-      return selectedStatuses.includes(pState);
-    });
-  }, [project, selectedStatuses]);
-
-  const handlePillarUpdate = (updatedPillar: Pillar) => {
-    setProject((prev) => {
-      if (!prev) return null;
-
-      const newPillars = prev.pillars.map((p) =>
-        p.id === updatedPillar.id ? updatedPillar : p,
-      );
-
-      return { ...prev, pillars: newPillars };
-    });
-  };
-
   const handleUnarchive = async () => {
     if (!project || !project.id) return;
     try {
-      await unarchiveProject(project.id); // użyj funkcji z api.ts
-
+      await unarchiveProject(project.id);
       window.location.reload();
     } catch (err: any) {
       console.error(err);
@@ -167,11 +143,46 @@ export function ProjectDetails() {
     }
   };
 
+  const filteredPillars = useMemo(() => {
+    if (!project || !project.pillars) return [];
+    return project.pillars.filter((pillar) => {
+      const pState = pillar.state || "active";
+      if (pState === "active") return true;
+      if (pState === "archived") return selectedStatuses.includes("archived");
+      if (selectedStatuses.length === 0) return true;
+      return selectedStatuses.includes(pState);
+    });
+  }, [project, selectedStatuses]);
+
+  const handlePillarUpdate = (updatedPillar: Pillar) => {
+    setProject((prev) => {
+      if (!prev) return null;
+      const newPillars = prev.pillars.map((p) =>
+        p.id === updatedPillar.id ? updatedPillar : p,
+      );
+      return { ...prev, pillars: newPillars };
+    });
+  };
+
   if (isLoading) return <div className="loading">Ładowanie...</div>;
   if (!project)
     return <div className="not-found">Nie znaleziono projektu.</div>;
 
   const hasActiveFilters = selectedStatuses.length > 0;
+
+  // 👇 SPRAWDZANIE UPRAWNIEŃ (Również tych nadrzędnych!)
+  const currentProjectAccess = currentUserData?.assignedProjects?.find(
+    (p) => String(p.projectId) === String(projectId),
+  );
+  const hasCanEditPermission =
+    currentProjectAccess?.permissions?.includes("CAN_EDIT") || false;
+  const canManageGlobally =
+    currentUserData?.canCreateProjects ||
+    currentUserData?.canDeleteProjects ||
+    false;
+
+  // Decyduje, czy zębatka i plusik się pokażą
+  const canEditOrManage = isAdmin || hasCanEditPermission || canManageGlobally;
 
   return (
     <div className="project-details-container">
@@ -181,7 +192,6 @@ export function ProjectDetails() {
         </div>
 
         <div className="header-right">
-          {/* PRZYWRÓCONY LINK DO DYSKU */}
           {project?.driveFolderLink && (
             <a
               href={project.driveFolderLink}
@@ -224,7 +234,6 @@ export function ProjectDetails() {
               <div className="filter-dropdown-menu right-aligned">
                 <div className="filter-section">
                   <div className="filter-section-title">STATUS</div>
-                  {/* Dodajemy te dwa checkboxy na sztywno, żeby zawsze były dostępne */}
                   <label className="filter-checkbox-item">
                     <input
                       type="checkbox"
@@ -233,7 +242,6 @@ export function ProjectDetails() {
                     />
                     <span>Aktywne</span>
                   </label>
-
                   <label className="filter-checkbox-item">
                     <input
                       type="checkbox"
@@ -242,8 +250,6 @@ export function ProjectDetails() {
                     />
                     <span style={{ color: "#d9534f" }}>Zarchiwizowane</span>
                   </label>
-
-                  {/* Opcjonalnie: reszta statusów, jeśli masz jakieś dynamiczne (np. finished) */}
                   {uniqueStatuses
                     .filter((s) => s !== "active" && s !== "archived")
                     .map((status) => (
@@ -283,7 +289,7 @@ export function ProjectDetails() {
             )}
           </button>
 
-          {isAdmin && (
+          {canEditOrManage && (
             <button
               className="settings-btn"
               onClick={() => setIsEditModalOpen(true)}
@@ -294,7 +300,6 @@ export function ProjectDetails() {
         </div>
       </header>
 
-      {/* PRZYWRÓCONY PEŁNY GRID INFORMACYJNY (Data startu, Osoba, Deadline) */}
       <div className="project-info-grid">
         <InfoItem label="Firma odpowiedzialna" value={project.company?.name} />
         <InfoItem
@@ -315,7 +320,7 @@ export function ProjectDetails() {
         />
       </section>
 
-      {isAdmin && (
+      {canEditOrManage && (
         <button className="add-pillar-btn" onClick={() => setIsModalOpen(true)}>
           Dodaj moduł <FaPlus />
         </button>
@@ -354,6 +359,7 @@ export function ProjectDetails() {
           contextId={projectId}
         />
       )}
+
       {isPinnedListOpen && (
         <PinnedMessagesModal
           pinnedMessages={pinnedMessages}
@@ -365,7 +371,6 @@ export function ProjectDetails() {
   );
 }
 
-// PRZYWRÓCONA FUNKCJA INFOITEM (Zachowuje styl i kolory)
 function InfoItem({ label, value }: { label: string; value?: string }) {
   return (
     <div className="info-box">

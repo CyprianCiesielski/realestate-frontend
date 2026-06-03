@@ -1,0 +1,231 @@
+.super-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(9, 30, 66, 0.54);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.super-modal-content {
+    background: white;
+    width: 95%;
+    max-width: 1050px;
+    height: 90vh; /* Zablokowanie wysokości - modal nie rośnie w nieskończoność */
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.super-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #dfe1e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.super-modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #172b4d;
+}
+
+/* Główne ciało podzielone na dwie kolumny */
+.super-modal-body {
+    padding: 24px;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    overflow: hidden; /* Blokujemy główny scroll, pozwalamy scrollować dzieciom */
+}
+
+.modal-column {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Konieczne do poprawnego działania flex: 1 w środku */
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-section.flex-fill {
+    flex: 1;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.form-section h3 {
+    font-size: 1rem;
+    color: #5e6c84;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+    flex-shrink: 0;
+}
+
+/* Pola wejściowe */
+.input-group {
+    margin-bottom: 12px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #172b4d;
+    margin-bottom: 6px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #0052cc;
+    outline: none;
+}
+
+/* SCROLLOWANE PANELE BOCZNE */
+.companies-scroll-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    padding: 8px;
+    background: #fafbfc;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.projects-scroll-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    padding: 12px;
+    background: #fafbfc;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-item-modal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s;
+    font-size: 0.95rem;
+    color: #172b4d;
+}
+
+.checkbox-item-modal:hover {
+    background: #ebecf0;
+}
+
+/* WYSZUKIWARKA PROJEKTÓW */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 2px solid #dfe1e6;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.search-bar-container:focus-within {
+    border-color: #0052cc;
+}
+
+.search-bar-container input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    margin-left: 8px;
+    font-size: 0.9rem;
+}
+
+/* PROJEKT I UPRAWNIENIA */
+.project-permission-row {
+    background: #fff;
+    border: 1px solid #dfe1e6;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.project-permission-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #172b4d;
+    font-size: 0.95rem;
+}
+
+.perm-checkbox-label {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #42526e;
+    background: #f4f5f7;
+    padding: 4px 8px;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    transition: background 0.1s;
+}
+
+.perm-checkbox-label:hover {
+    background: #ebecf0;
+}
+
+.empty-state-text {
+    text-align: center;
+    padding: 20px;
+    color: #6b778c;
+    font-style: italic;
+}
+
+.super-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #dfe1e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: #fafbfc;
+}
+
+@media (max-width: 900px) {
+    .super-modal-body {
+        grid-template-columns: 1fr;
+        overflow-y: auto; /* Na małych ekranach pozwalamy na główny scroll */
+    }
+    .modal-column {
+        overflow: visible;
+    }
+    .companies-scroll-list, .projects-scroll-list {
+        min-height: 250px;
+        flex: none;
+    }
+}
