@@ -93,7 +93,7 @@ export const EditUserModal = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h3 className="modal-title">Edytuj użytkownika</h3>
         <p style={{ marginBottom: "1rem", color: "#6b778c" }}>
-          {user.firstname} {user.lastname} ({user.email})
+          {user.firstName} {user.lastName} ({user.email})
         </p>
 
         {error && <div className="error-msg">{error}</div>}
