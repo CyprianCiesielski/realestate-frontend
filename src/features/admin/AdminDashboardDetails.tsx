@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { fetchUsers } from "./api";
+import { fetchUsers, triggerManualBackup, fetchBackupsList, restoreFromBackupFile } from "./api";
 import { type AdminViewUser } from "./types";
 import { UserCard } from "../user/UserCard";
-import { FaHashtag, FaUserPlus } from "react-icons/fa";
+import { FaHashtag, FaUserPlus, FaDatabase } from "react-icons/fa";
 import { MdDomainAdd } from "react-icons/md";
 import type { Tag } from "../../components/tag/types.ts";
 import {
@@ -99,6 +99,47 @@ export const AdminDashboardDetails = () => {
     }
   };
 
+  //backupy
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [backupsList, setBackupsList] = useState<{ id: string, name: string }[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Funkcja obsługująca załadowanie listy backupów
+  const handleOpenBackupModal = async () => {
+    setIsBackupModalOpen(true);
+    try {
+      const list = await fetchBackupsList();
+      setBackupsList(list);
+    } catch (e) { console.error("Błąd ładowania backupów", e); }
+  };
+
+  const handleManualBackup = async () => {
+    setIsProcessing(true);
+    try {
+      await triggerManualBackup();
+      alert("Backup utworzony i wysłany na Google Drive!");
+      const list = await fetchBackupsList(); // odśwież listę po zapisie
+      setBackupsList(list);
+    } catch (e) {
+      alert("Błąd podczas tworzenia backupu.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRestore = async (fileId: string) => {
+    if (!window.confirm("UWAGA! To nadpisze obecną bazę danych wybranym backupem. Jesteś absolutnie pewny?")) return;
+    setIsProcessing(true);
+    try {
+      await restoreFromBackupFile(fileId);
+      alert("Pomyślnie przywrócono bazę danych z backupu.");
+    } catch (e) {
+      alert("Błąd podczas przywracania bazy.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (loading)
     return <div style={{ padding: 20 }}>Ładowanie użytkowników...</div>;
 
@@ -153,6 +194,15 @@ export const AdminDashboardDetails = () => {
           >
             <FaHashtag />
           </button>
+
+          <button
+            className="hash-btn"
+            onClick={handleOpenBackupModal}
+            title="Zarządzaj kopiami zapasowymi"
+            style={{ transform: "none" }}
+          >
+            <FaDatabase />
+          </button>
         </div>
       </div>
 
@@ -196,6 +246,47 @@ export const AdminDashboardDetails = () => {
         isOpen={isCompanySidebarOpen}
         onClose={() => setIsCompanySidebarOpen(false)}
       />
+
+      {/* MODAL DO ZARZĄDZANIA BACKUPAMI */}
+      {isBackupModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', width: '400px', maxHeight: '80vh', overflowY: 'auto' }}>
+            <h2>Kopie zapasowe bazy danych</h2>
+
+            <button
+              onClick={handleManualBackup}
+              disabled={isProcessing}
+              style={{ width: '100%', padding: '10px', background: '#0052cc', color: 'white', border: 'none', borderRadius: '4px', cursor: isProcessing ? 'not-allowed' : 'pointer', marginBottom: '20px' }}
+            >
+              {isProcessing ? "Przetwarzanie..." : "Wykonaj teraz nową kopię"}
+            </button>
+
+            <h4>Wgraj z Dysku Google:</h4>
+            {backupsList.length === 0 ? <p>Brak dostępnych backupów na Dysku.</p> : (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {backupsList.map(b => (
+                  <li key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #ccc' }}>
+                    <span style={{ fontSize: '14px', wordBreak: 'break-all', paddingRight: '10px' }}>{b.name}</span>
+                    <button
+                      onClick={() => handleRestore(b.id)}
+                      disabled={isProcessing}
+                      style={{ padding: '5px 10px', background: '#de350b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      Przywróć
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <button onClick={() => setIsBackupModalOpen(false)} style={{ marginTop: '20px', width: '100%', padding: '10px', background: '#ebecf0', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>ZAMKNIJ</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

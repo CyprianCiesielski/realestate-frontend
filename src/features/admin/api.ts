@@ -32,3 +32,16 @@ export const updateUserDetailsByAdmin = async (userId: number, data: any) => {
   // Zauważ, że używamy PUT (lub PATCH) zgodnie z tym, co ustawiliśmy w Spring Boocie
   return apiClient.put(`/admin/users/${userId}`, data);
 };
+
+export const triggerManualBackup = async () => {
+  return apiClient.post("/admin/backup/create");
+};
+
+export const fetchBackupsList = async (): Promise<{id: string, name: string}[]> => {
+  const response = await apiClient.get("/admin/backup/list");
+  return response.data;
+};
+
+export const restoreFromBackupFile = async (fileId: string) => {
+  return apiClient.post(`/admin/backup/restore?fileId=${fileId}`);
+};
