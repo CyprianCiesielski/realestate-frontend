@@ -104,6 +104,18 @@ export const AdminDashboardDetails = () => {
   const [backupsList, setBackupsList] = useState<{ id: string, name: string }[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  //komunikaty
+  const [notification, setNotification] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const [restoreCandidate, setRestoreCandidate] = useState<string | null>(null);
+
+  const [confirmKeyword, setConfirmKeyword] = useState("");
+
+  const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ text, type });
+    setTimeout(() => setNotification(null), 5000); // znika po 5 sekundach
+  };
+
   // Funkcja obsługująca załadowanie listy backupów
   const handleOpenBackupModal = async () => {
     setIsBackupModalOpen(true);
@@ -117,24 +129,33 @@ export const AdminDashboardDetails = () => {
     setIsProcessing(true);
     try {
       await triggerManualBackup();
-      alert("Backup utworzony i wysłany na Google Drive!");
-      const list = await fetchBackupsList(); // odśwież listę po zapisie
+      showNotification("Utworzono nową kopię i zapisano na Google Drive!", "success");
+      const list = await fetchBackupsList();
       setBackupsList(list);
     } catch (e) {
-      alert("Błąd podczas tworzenia backupu.");
+      showNotification("Wystąpił błąd podczas tworzenia kopii.", "error");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleRestore = async (fileId: string) => {
-    if (!window.confirm("UWAGA! To nadpisze obecną bazę danych wybranym backupem. Jesteś absolutnie pewny?")) return;
+  // Zamiast od razu przywracać, przejscie do widoku potwierdzenia
+  const initiateRestore = (fileId: string) => {
+    setRestoreCandidate(fileId);
+    setConfirmKeyword(""); // resetujemy pole wpisywania
+  };
+
+  // Właściwe przywracanie, wywoływane dopiero po wpisaniu hasła
+  const executeRestore = async () => {
+    if (!restoreCandidate) return;
+
     setIsProcessing(true);
     try {
-      await restoreFromBackupFile(fileId);
-      alert("Pomyślnie przywrócono bazę danych z backupu.");
+      await restoreFromBackupFile(restoreCandidate);
+      showNotification("Baza danych została pomyślnie przywrócona!", "success");
+      setRestoreCandidate(null); // wracamy do listy po sukcesie
     } catch (e) {
-      alert("Błąd podczas przywracania bazy.");
+      showNotification("Błąd podczas przywracania bazy danych.", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -251,39 +272,100 @@ export const AdminDashboardDetails = () => {
       {isBackupModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', width: '400px', maxHeight: '80vh', overflowY: 'auto' }}>
-            <h2>Kopie zapasowe bazy danych</h2>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '450px', maxHeight: '85vh', overflowY: 'auto', position: 'relative' }}>
 
-            <button
-              onClick={handleManualBackup}
-              disabled={isProcessing}
-              style={{ width: '100%', padding: '10px', background: '#0052cc', color: 'white', border: 'none', borderRadius: '4px', cursor: isProcessing ? 'not-allowed' : 'pointer', marginBottom: '20px' }}
-            >
-              {isProcessing ? "Przetwarzanie..." : "Wykonaj teraz nową kopię"}
-            </button>
-
-            <h4>Wgraj z Dysku Google:</h4>
-            {backupsList.length === 0 ? <p>Brak dostępnych backupów na Dysku.</p> : (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {backupsList.map(b => (
-                  <li key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #ccc' }}>
-                    <span style={{ fontSize: '14px', wordBreak: 'break-all', paddingRight: '10px' }}>{b.name}</span>
-                    <button
-                      onClick={() => handleRestore(b.id)}
-                      disabled={isProcessing}
-                      style={{ padding: '5px 10px', background: '#de350b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Przywróć
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            {/* SEKCJA POWIADOMIEŃ */}
+            {notification && (
+              <div style={{
+                padding: '12px', marginBottom: '20px', borderRadius: '4px', textAlign: 'center', fontWeight: 'bold',
+                backgroundColor: notification.type === 'success' ? '#e3fcef' : '#ffebe6',
+                color: notification.type === 'success' ? '#006644' : '#bf2600',
+                border: `1px solid ${notification.type === 'success' ? '#36b37e' : '#ff5630'}`
+              }}>
+                {notification.text}
+              </div>
             )}
 
-            <button onClick={() => setIsBackupModalOpen(false)} style={{ marginTop: '20px', width: '100%', padding: '10px', background: '#ebecf0', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>ZAMKNIJ</button>
+            {/* WIDOK 1: STANDARDOWA LISTA I TWORZENIE BACKUPU */}
+            {!restoreCandidate ? (
+              <>
+                <h2 style={{ marginTop: 0, marginBottom: '20px', fontSize: '20px' }}>Kopie zapasowe bazy danych</h2>
+
+                <button
+                  onClick={handleManualBackup}
+                  disabled={isProcessing}
+                  style={{ width: '100%', padding: '12px', background: '#0052cc', color: 'white', border: 'none', borderRadius: '4px', cursor: isProcessing ? 'not-allowed' : 'pointer', fontWeight: 'bold', marginBottom: '24px' }}
+                >
+                  {isProcessing ? "Przetwarzanie..." : "Wykonaj teraz nową kopię"}
+                </button>
+
+                <h4 style={{ margin: '0 0 10px 0', color: '#5e6c84' }}>Wgraj z Dysku Google:</h4>
+
+                {backupsList.length === 0 ? <p style={{ color: '#5e6c84' }}>Brak dostępnych backupów na Dysku.</p> : (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    {backupsList.map(b => (
+                      <li key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #dfe1e6' }}>
+                        <span style={{ fontSize: '14px', wordBreak: 'break-all', paddingRight: '15px' }}>{b.name}</span>
+                        <button
+                          onClick={() => initiateRestore(b.id)}
+                          disabled={isProcessing}
+                          style={{ padding: '6px 12px', background: '#de350b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', flexShrink: 0 }}
+                        >
+                          Przywróć
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <button
+                  onClick={() => { setIsBackupModalOpen(false); setNotification(null); }}
+                  style={{ marginTop: '24px', width: '100%', padding: '10px', background: '#ebecf0', color: '#172b4d', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  Zamknij
+                </button>
+              </>
+            ) : (
+              /* WIDOK 2: POTWIERDZENIE PRZYWRÓCENIA (AKCEPTACJA RYZYKA) */
+              <>
+                <h2 style={{ marginTop: 0, color: '#de350b', borderBottom: '2px solid #de350b', paddingBottom: '10px' }}>⚠️ UWAGA: Operacja krytyczna!</h2>
+                <p style={{ lineHeight: '1.5', color: '#172b4d' }}>
+                  Próbujesz przywrócić bazę danych z pliku kopii zapasowej. Ta operacja <strong>nieodwracalnie usunie i nadpisze</strong> wszystkie obecne dane w systemie.
+                </p>
+                <p style={{ lineHeight: '1.5', color: '#172b4d' }}>
+                  Aby potwierdzić, wpisz słowo <strong>POTWIERDZAM</strong> w poniższe pole:
+                </p>
+
+                <input
+                  type="text"
+                  value={confirmKeyword}
+                  onChange={(e) => setConfirmKeyword(e.target.value)}
+                  placeholder="Wpisz POTWIERDZAM"
+                  style={{ width: '100%', padding: '10px', boxSizing: 'border-box', border: '2px solid #dfe1e6', borderRadius: '4px', marginBottom: '20px', fontSize: '14px' }}
+                />
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => setRestoreCandidate(null)}
+                    disabled={isProcessing}
+                    style={{ flex: 1, padding: '10px', background: '#ebecf0', color: '#172b4d', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    Anuluj
+                  </button>
+                  <button
+                    onClick={executeRestore}
+                    disabled={isProcessing || confirmKeyword !== "POTWIERDZAM"}
+                    style={{ flex: 1, padding: '10px', background: confirmKeyword === "POTWIERDZAM" ? '#de350b' : '#ffbdad', color: 'white', border: 'none', borderRadius: '4px', cursor: confirmKeyword === "POTWIERDZAM" ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
+                  >
+                    {isProcessing ? "Odtwarzanie..." : "Zrozumiałem, przywróć!"}
+                  </button>
+                </div>
+              </>
+            )}
+
           </div>
         </div>
       )}
